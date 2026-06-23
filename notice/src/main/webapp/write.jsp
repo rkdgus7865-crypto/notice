@@ -72,7 +72,7 @@
 			 <table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
 				<thead>
 				  <tr>
-				  	<th conspan="2" style="background-color: #eeeeee; text-align: center;">게시판 글쓰기 양식</th>
+				  	<th colspan="2" style="background-color: #eeeeee; text-align: center;">게시판 글쓰기 양식</th>
 				  </tr>
 				</thead>
 				<tbody>

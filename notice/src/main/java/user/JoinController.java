@@ -1,15 +1,17 @@
 package user;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.servlet.annotation.*;
 import java.io.*;
 
 @WebServlet("/joinAction")
 public class JoinController extends HttpServlet {
+	
+	private static final long serialVersionUID = 1L;
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)// HTTP POST 요청(회원가입, 로그인 등)이 들어왔을 때 톰캣이 자동 호출하는 메서드
+            throws ServletException, IOException {							       // 서블릿 규약에 의해 doPost() 메서드명을 사용해야 하며 임의로 변경할 수 없음
 
         request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html; charset=UTF-8");
@@ -28,12 +30,20 @@ public class JoinController extends HttpServlet {
         String userName     = request.getParameter("userName");
         String userGender   = request.getParameter("userGender");
         String userEmail    = request.getParameter("userEmail");
-
+        String userAddress  = request.getParameter("userAddress");
+        String userPhone    = request.getParameter("userPhone");
+        String userDateOfBirth = request.getParameter("userDateOfBirth");
+        String userDateOfJoining = request.getParameter("userDateOfJoining");
+        
         // 빈값 체크
         if (userID == null || userPassword == null || userName == null
                 || userGender == null || userEmail == null
                 || userID.isEmpty() || userPassword.isEmpty()
-                || userName.isEmpty() || userGender.isEmpty() || userEmail.isEmpty()) {
+                || userName.isEmpty() || userGender.isEmpty() 
+                || userEmail.isEmpty()|| userAddress.isEmpty()
+                || userPhone.isEmpty() || userDateOfBirth.isEmpty() 
+                || userDateOfJoining.isEmpty()) 
+        {
 
             request.setAttribute("errorMsg", "입력이 안 된 사항이 있습니다.");
             request.getRequestDispatcher("join.jsp").forward(request, response);
@@ -47,6 +57,17 @@ public class JoinController extends HttpServlet {
         user.setUserName(userName);
         user.setUserGender(userGender);
         user.setUserEmail(userEmail);
+        user.setUserAddress(userAddress);      
+        user.setUserPhone(userPhone);           
+        user.setUserDateOfBirth(userDateOfBirth); 
+        user.setUserDateOfJoining(userDateOfJoining); 
+        
+        if (userName != null && userDateOfBirth != null) {
+            user.setUserGrade("VERIFIED");
+        } else {
+            user.setUserGrade("NORMAL");
+        }
+
 
         UserDAO userDAO = new UserDAO();
         int result = userDAO.join(user);
@@ -56,6 +77,7 @@ public class JoinController extends HttpServlet {
             request.getRequestDispatcher("join.jsp").forward(request, response);
         } else {
             session.setAttribute("userID", userID);
+            session.setAttribute("userGrade", user.getUserGrade());
             response.sendRedirect("main.jsp");
         }
     }
