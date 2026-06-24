@@ -3,7 +3,7 @@
 
     <servlet>
         <servlet-name>LoginController</servlet-name>
-        <servlet-class>user.LoginController</servlet-class>
+        <servlet-class>controller.LoginController</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>LoginController</servlet-name>
@@ -12,7 +12,7 @@
 
     <servlet>
         <servlet-name>JoinController</servlet-name>
-        <servlet-class>user.JoinController</servlet-class>
+        <servlet-class>controller.JoinController</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>JoinController</servlet-name>

@@ -1,7 +1,10 @@
-package user;
+package controller;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
+
+import dao.UserDAO;
+
 import javax.servlet.annotation.*;
 import java.io.*;
 

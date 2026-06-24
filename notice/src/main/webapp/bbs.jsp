@@ -73,17 +73,26 @@
 				<thead>
 					<tr>
 						<th style="background-color: #eeeeee; text-align: center;">번호</th>
+						<th style="background-color: #eeeeee; text-align: center;">글 유형</th>
 						<th style="background-color: #eeeeee; text-align: center;">제목</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일</th>
+						<th style="background-color: #eeeeee; text-align: center;">조회 수</th>
+						<th style="background-color: #eeeeee; text-align: center;">추천 수</th>
+						<th style="background-color: #eeeeee; text-align: center;">댓글 수</th>
+						
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
 						<td>1</td>
-						<td>안녕하세요</td>
+						<td>게임</td>
+						<td>안넝</td>
 						<td>유강현</td>
-						<td>2026-6-22</td>
+						<td>2026-6-22 </td>
+						<td>1</td>
+						<td>1</td>
+						<td>1</td>
 					</tr>
 				</tbody>
 			</table>

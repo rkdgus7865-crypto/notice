@@ -1,11 +1,15 @@
-package user;
+package controller;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
+
+import dao.UserDAO;
+import dto.User;
+
 import javax.servlet.annotation.*;
 import java.io.*;
 
-@WebServlet("/joinAction")
+@WebServlet("/joinAction") // joinAction 이라는 URL 요청이 오면 joinAction 컨트롤러에서 처리
 public class JoinController extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
@@ -24,7 +28,7 @@ public class JoinController extends HttpServlet {
             return;
         }
 
-        // 입력값 받기
+        // join.jsp -> 넘겨준 파라미터 입력값 받기
         String userID       = request.getParameter("userID");
         String userPassword = request.getParameter("userPassword");
         String userName     = request.getParameter("userName");
@@ -35,16 +39,12 @@ public class JoinController extends HttpServlet {
         String userDateOfBirth = request.getParameter("userDateOfBirth");
         String userDateOfJoining = request.getParameter("userDateOfJoining");
         
-        // 빈값 체크
-        if (userID == null || userPassword == null || userName == null
-                || userGender == null || userEmail == null
-                || userID.isEmpty() || userPassword.isEmpty()
-                || userName.isEmpty() || userGender.isEmpty() 
-                || userEmail.isEmpty()|| userAddress.isEmpty()
-                || userPhone.isEmpty() || userDateOfBirth.isEmpty() 
-                || userDateOfJoining.isEmpty()) 
+        // isBlank 호출 후 빈값 체크 isEmpty = "" 공백을 입력으로 처리 X isBlank = 공백도 빈값으로 처리 O
+        if (isBlank(userID)     || isBlank(userPassword)    || isBlank(userName)   || 
+        	isBlank(userGender) || isBlank(userEmail)       || isBlank(userAddress)|| 
+        	isBlank(userPhone)  || isBlank(userDateOfBirth) || isBlank(userDateOfJoining))
+        	
         {
-
             request.setAttribute("errorMsg", "입력이 안 된 사항이 있습니다.");
             request.getRequestDispatcher("join.jsp").forward(request, response);
             return;
@@ -62,12 +62,13 @@ public class JoinController extends HttpServlet {
         user.setUserDateOfBirth(userDateOfBirth); 
         user.setUserDateOfJoining(userDateOfJoining); 
         
-        if (userName != null && userDateOfBirth != null) {
+        String isVerified = request.getParameter("isVerified");
+        
+        if ("Y".equals(isVerified)) {
             user.setUserGrade("VERIFIED");
         } else {
             user.setUserGrade("NORMAL");
         }
-
 
         UserDAO userDAO = new UserDAO();
         int result = userDAO.join(user);
@@ -81,4 +82,9 @@ public class JoinController extends HttpServlet {
             response.sendRedirect("main.jsp");
         }
     }
+    
+    private boolean isBlank(String userInfo) { // 회원가입 파라미터 매개변수로 받아와서 null,isBlank 체크
+        return userInfo == null || userInfo.isBlank();
+    }
+    
 }
