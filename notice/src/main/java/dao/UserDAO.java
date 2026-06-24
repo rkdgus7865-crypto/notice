@@ -25,26 +25,13 @@ public class UserDAO {
 
 	// 자원 해제 메서드
 	private void close() {
-		try {
-			if (rs != null)
-				rs.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		try {
-			if (pstmt != null)
-				pstmt.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		try {
-			if (conn != null)
-				conn.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	    try {
+	        if (rs != null) rs.close();
+	        if (pstmt != null) pstmt.close();
+	        if (conn != null) conn.close();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
 	}
 
 	// 로그인

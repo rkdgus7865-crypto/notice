@@ -40,9 +40,9 @@ public class JoinController extends HttpServlet {
         String userDateOfJoining = request.getParameter("userDateOfJoining");
         
         // isBlank 호출 후 빈값 체크 isEmpty = "" 공백을 입력으로 처리 X isBlank = 공백도 빈값으로 처리 O
-        if (isBlank(userID)     || isBlank(userPassword)    || isBlank(userName)   || 
-        	isBlank(userGender) || isBlank(userEmail)       || isBlank(userAddress)|| 
-        	isBlank(userPhone)  || isBlank(userDateOfBirth) || isBlank(userDateOfJoining))
+        if ( userID.isBlank()  || userPassword.isBlank()    || userName.isBlank()   || 
+        	userGender.isBlank() || userEmail.isBlank()     || userAddress.isBlank() || 
+        	userPhone.isBlank()  || userDateOfBirth.isBlank() || userDateOfJoining.isBlank())
         	
         {
             request.setAttribute("errorMsg", "입력이 안 된 사항이 있습니다.");
@@ -82,9 +82,4 @@ public class JoinController extends HttpServlet {
             response.sendRedirect("main.jsp");
         }
     }
-    
-    private boolean isBlank(String userInfo) { // 회원가입 파라미터 매개변수로 받아와서 null,isBlank 체크
-        return userInfo == null || userInfo.isBlank();
-    }
-    
 }
