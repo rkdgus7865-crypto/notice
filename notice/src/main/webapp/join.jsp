@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/noticeboard/css/bootstrap.css">
+    <link rel="stylesheet" href="/notice/css/bootstrap.css">
     <title>게시판</title>
 </head>
 <body>
@@ -105,6 +105,6 @@
 		<div class="col-lg-4"></div>
 	</div>
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-	<script src="/noticeboard/js/bootstrap.js"></script>
+	<script src="/notice/js/bootstrap.js"></script>
 </body>
 </html>

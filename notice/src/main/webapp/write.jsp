@@ -5,7 +5,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="/noticeboard/css/bootstrap.css">
+<link rel="stylesheet" href="/notice/css/bootstrap.css">
 <title>게시판</title>
 </head>
 <body>
@@ -68,36 +68,26 @@
 
 	<div class="container">
 		<div class="row">
-			<table class="table table-striped"
-				style="text-align: center; border: 1px solid #dddddd">
+		<form method="post" action="writeAction.jsp">
+			<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
 				<thead>
 					<tr>
 						<th colspan="2" style="background-color: #eeeeee; text-align: center;">게시판 글쓰기 양식</th>
-						<th style="background-color: #eeeeee; text-align: center;">글 유형</th>
-						<th style="background-color: #eeeeee; text-align: center;">제목</th>
-						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
-						<th style="background-color: #eeeeee; text-align: center;">작성일</th>
-						<th style="background-color: #eeeeee; text-align: center;">조회 수</th>
-						<th style="background-color: #eeeeee; text-align: center;">추천 수</th>
-						<th style="background-color: #eeeeee; text-align: center;">댓글 수</th>
-						
 					</tr>
 				</thead>
-				<tbody>
-					<tr>
-						<td>1</td>
-						<td>게임</td>
-						<td>안넝</td>
-						<td>유강현</td>
-						<td>2026-6-22 </td>
-						<td>1</td>
-						<td>1</td>
-						<td>1</td>
-					</tr>
-				</tbody>
+				  <tbody>
+					  <tr>
+							<td><input type="text" class="form-control" placeholder="글 제목" name="bbsTitle" maxlength="50"></td>
+					  </tr>
+					  <tr>
+					  		<td><textarea class="form-control" placeholder="글 제목" name="bbsContent" maxlength="2048" style="height: 350px;"></textarea></td>
+					  </tr>
+				  </tbody>
 			</table>
+			<input type="submit" class="btn btn-primary pull-right" value="글쓰기">
+		</form>
 
-			<!-- 글쓰기 버튼 등급별 분기 -->
+		<%-- 	<!-- 글쓰기 버튼 등급별 분기 -->
 			<%
 			if (isVerified) {
 			%>
@@ -114,10 +104,10 @@
 				onclick="alert('실명인증 후 글쓰기가 가능합니다.'); return false;">글쓰기</a>
 			<%
 			}
-			%>
+			%> --%>
 		</div>
 	</div>
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-	<script src="/noticeboard/js/bootstrap.js"></script>
+	<script src="/notice/js/bootstrap.js"></script>
 </body>
 </html>

@@ -23,17 +23,6 @@ public class UserDAO {
 		return DriverManager.getConnection(dbURL, dbID, dbPassword); //MySQL에 접속
 	}
 
-	// 자원 해제 메서드
-	private void close() {
-	    try {
-	        if (rs != null) rs.close();
-	        if (pstmt != null) pstmt.close();
-	        if (conn != null) conn.close();
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-	}
-
 	// 로그인
 	public int login(String userID, String userPassword) {
 		String SQL = "SELECT userPassword FROM USER WHERE userID = ?";
@@ -59,28 +48,7 @@ public class UserDAO {
 		}
 		return -2; // 데이터베이스 오류
 	}
-
-	// 회원 등급 조회
-	public String getGrade(String userID) {
-		String SQL = "SELECT userGrade FROM USER WHERE userID = ?";
-		try {
-			conn = getConnection(); 
-			pstmt = conn.prepareStatement(SQL);
-			pstmt.setString(1, userID);
-			rs = pstmt.executeQuery();
-
-			if (rs.next()) {
-				return rs.getString("userGrade");
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			close();
-		}
-		return null;
-	}
-
+	
 	// 회원가입
 	public int join(User user) {
 		String SQL = "INSERT INTO USER " + "(userID, userPassword, userName, userGender, userEmail, "
@@ -109,4 +77,37 @@ public class UserDAO {
 		}
 		return -1; // 중복 아이디 또는 DB 오류
 	}
+
+	// 회원 등급 조회
+	public String getGrade(String userID) {
+		String SQL = "SELECT userGrade FROM USER WHERE userID = ?";
+		try {
+			conn = getConnection(); 
+			pstmt = conn.prepareStatement(SQL);
+			pstmt.setString(1, userID);
+			rs = pstmt.executeQuery();
+
+			if (rs.next()) {
+				return rs.getString("userGrade");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			close();
+		}
+		return null;
+	}
+
+	// 자원 해제 메서드
+	public void close() {
+	    try {
+	        if (rs != null) rs.close();
+	        if (pstmt != null) pstmt.close();
+	        if (conn != null) conn.close();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
+
 }
