@@ -68,7 +68,15 @@
 
 	<div class="container">
 		<div class="row">
-		<form method="post" action="writeAction.jsp">
+
+			<!-- WriteController 에서 전달한 errorMsg 를 받아서 alert 띄움 -->
+			<%
+			if (request.getAttribute("errorMsg") != null) {
+			%>
+			<script>alert('<%=request.getAttribute("errorMsg")%>')</script>
+			<%  }   %>
+
+			<form method="post" action="writeAction">
 			<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
 				<thead>
 					<tr>
@@ -80,7 +88,7 @@
 							<td><input type="text" class="form-control" placeholder="글 제목" name="bbsTitle" maxlength="50"></td>
 					  </tr>
 					  <tr>
-					  		<td><textarea class="form-control" placeholder="글 제목" name="bbsContent" maxlength="2048" style="height: 350px;"></textarea></td>
+					  		<td><textarea class="form-control" placeholder="글 내용" name="bbsContent" maxlength="2048" style="height: 350px;"></textarea></td>
 					  </tr>
 				  </tbody>
 			</table>

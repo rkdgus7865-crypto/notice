@@ -7,6 +7,11 @@ public class Bbs {
 	private String bbsDate;
 	private String bbsContent;
 	private int bbsAvailable;
+	private int inquiry;
+	private int recommendation;
+	private int Comments;
+	
+	
 	public int getBbsID() {
 		return bbsID;
 	}
@@ -42,6 +47,24 @@ public class Bbs {
 	}
 	public void setBbsAvailable(int bbsAvailable) {
 		this.bbsAvailable = bbsAvailable;
+	}
+	public int getInquiry() {
+		return inquiry;
+	}
+	public void setInquiry(int inquiry) {
+		this.inquiry = inquiry;
+	}
+	public int getRecommendation() {
+		return recommendation;
+	}
+	public void setRecommendation(int recommendation) {
+		this.recommendation = recommendation;
+	}
+	public int getComments() {
+		return Comments;
+	}
+	public void setComments(int comments) {
+		Comments = comments;
 	}
 	
 }

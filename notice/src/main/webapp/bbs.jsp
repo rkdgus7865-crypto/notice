@@ -1,5 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
+<%@ page import="java.io.PrintWriter" %>
+<%@ page import="dao.BbsDAO" %>
+<%@ page import="dto.Bbs" %>
+<%@ page import="java.util.ArrayList" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,6 +18,12 @@
 	String userGrade = (String) session.getAttribute("userGrade");/*로그인시 저장한 등급 가져옴 (NORMAL or VERIFIED) */
 	boolean isGuest = (userID == null);/*userID가 null이면 비회원 true */
 	boolean isVerified = "VERIFIED".equals(userGrade);/* userGrade가 VERIFIED면 인증회원 true */
+	
+	int pageNumber = 1;
+	if (request.getParameter("pageNumber") != null){
+		pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
+	}
+	
 	%>
 	<nav class="navbar navbar-default">
 		<div class="navbar-header">
@@ -73,7 +83,6 @@
 				<thead>
 					<tr>
 						<th style="background-color: #eeeeee; text-align: center;">번호</th>
-						<th style="background-color: #eeeeee; text-align: center;">글 유형</th>
 						<th style="background-color: #eeeeee; text-align: center;">제목</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일</th>
@@ -84,19 +93,37 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
-						<td>1</td>
-						<td>게임</td>
-						<td>안넝</td>
-						<td>유강현</td>
-						<td>2026-6-22 </td>
-						<td>1</td>
-						<td>1</td>
-						<td>1</td>
+				<% 
+					BbsDAO bbsDAO = new BbsDAO();
+					ArrayList<Bbs> list = bbsDAO.getList(pageNumber);
+					for(int i = 0; i < list.size(); i++) {
+				%>
+					<tr> 
+						 <td><%= list.get(i).getBbsID() %> </td> <%-- 게시글 번호 --%>
+						 <td><a href="view.jsp?bbsID=<%= list.get(i).getBbsID() %>"><%= list.get(i).getBbsTitle()%></a></td> <%-- 게시글 제목 클릭시 view.jsp 로 이동, bbsID를 URL 파라미터로 전달 --%>
+						 <td><%= list.get(i).getUserID() %> </td> <%-- 작성자 --%>
+						 <td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시 " + list.get(i).getBbsDate().substring(14, 16) + "분" %></td> <%-- 작성일 --%>
+						 <td><%=list.get(i).getInquiry()%></td>
+						 <td><%=list.get(i).getRecommendation()%></td>
+						 <td><%=list.get(i).getComments()%></td>
 					</tr>
+				<%
+					}
+				%>
 				</tbody>
 			</table>
-
+			
+		<%-- 	<%
+			 	if(pageNumber != 1){
+			%>
+				<a href="bbs.jsp?pageNumber=<%=pageNumber - 1 %>" class="btn btn-success btn-arraw-Left">이전</a>
+			<%
+			 	} if(bbsDAO.nextPage(pageNumber + 1)){
+			%>	
+				<a href="bbs.jsp?pageNumber=<%=pageNumber + 1 %>" class="btn btn-success btn-arraw-Left">다음</a>
+			<%
+			 	}
+			%>	 --%>
 			<!-- 글쓰기 버튼 등급별 분기 -->
 			<%
 			if (isVerified) {

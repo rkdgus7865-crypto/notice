@@ -2,10 +2,8 @@ package controller;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
-
 import dao.UserDAO;
 import dto.User;
-
 import javax.servlet.annotation.*;
 import java.io.*;
 
@@ -39,7 +37,6 @@ public class JoinController extends HttpServlet {
         String userDateOfBirth = request.getParameter("userDateOfBirth");
         String userDateOfJoining = request.getParameter("userDateOfJoining");
         
-        // isBlank 호출 후 빈값 체크 isEmpty = "" 공백을 입력으로 처리 X isBlank = 공백도 빈값으로 처리 O
         if ( userID.isBlank()  || userPassword.isBlank()    || userName.isBlank()   || 
         	userGender.isBlank() || userEmail.isBlank()     || userAddress.isBlank() || 
         	userPhone.isBlank()  || userDateOfBirth.isBlank() || userDateOfJoining.isBlank())

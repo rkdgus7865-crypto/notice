@@ -42,12 +42,13 @@
 		<div class="col-lg-4">
 			<div class="jumbotron" style="padding-top: 20px">
 
-			    <!-- ✅ 에러 메시지 추가 -->
-			    <% if (request.getAttribute("errorMsg") != null) { %>
-			        <script>alert('<%= request.getAttribute("errorMsg") %>')</script>
+			    <!-- loginController 에서 전달한 errorMsg 를 받아서 alert 띄움 -->
+			    <% 
+			    if (request.getAttribute("errorMsg") != null) { 
+			    %>
+			    <script>alert('<%= request.getAttribute("errorMsg") %>')</script>
 			    <% } %>
 
-			  	<!-- ✅ action을 loginAction.jsp → loginAction 으로 변경 -->
 			  	<form method="post" action="loginAction">
 			  		<h3 style="text-align: center;">로그인 </h3>
 			  		<div class="form-group">
