@@ -24,7 +24,11 @@
 		pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
 	}
 	
+	//  게시판 그룹명 상단 고정 
+	String groupName = request.getParameter("group");
+	if (groupName == null) groupName = "자유게시판";
 	%>
+	
 	<nav class="navbar navbar-default">
 		<div class="navbar-header">
 			<button type="button" class="navbar-toggle collapsed"
@@ -76,75 +80,140 @@
 		</div>
 	</nav>
 
-	<div class="container">
-		<div class="row">
-			<table class="table table-striped"
-				style="text-align: center; border: 1px solid #dddddd">
-				<thead>
-					<tr>
-						<th style="background-color: #eeeeee; text-align: center;">번호</th>
-						<th style="background-color: #eeeeee; text-align: center;">제목</th>
-						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
-						<th style="background-color: #eeeeee; text-align: center;">작성일</th>
-						<th style="background-color: #eeeeee; text-align: center;">조회 수</th>
-						<th style="background-color: #eeeeee; text-align: center;">추천 수</th>
-						<th style="background-color: #eeeeee; text-align: center;">댓글 수</th>
-						
+
+	<!--  게시판 그룹명 상단 고정 -->
+	<div
+		style="background-color: white; color: black; border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 18px; font-weight: bold; margin-top: 10px; margin-bottom: 10px;">
+		📋
+		<%=groupName%>
+	</div>
+
+		<div class="container"> <!-- 게시판 attribute(속성) --> 
+			<div class="row">
+				<table class="table table-striped"
+					style="text-align: center; border: 1px solid #dddddd">
+					<thead>
+						<tr>
+							<th style="background-color: #eeeeee; text-align: center;">번호</th>
+							<th style="background-color: #eeeeee; text-align: center;">제목</th>
+							<th style="background-color: #eeeeee; text-align: center;">작성자</th>
+							<th style="background-color: #eeeeee; text-align: center;">작성일</th>
+							<th style="background-color: #eeeeee; text-align: center;">조회수</th>
+							<th style="background-color: #eeeeee; text-align: center;">추천수</th>
+							<th style="background-color: #eeeeee; text-align: center;">댓글수</th>
+							<th style="background-color: #eeeeee; text-align: center;">공개여부</th>
+						</tr>
+					</thead>
+					<tbody>
+
+					<%
+						BbsDAO bbsDAO = new BbsDAO();
+						ArrayList<Bbs> list = bbsDAO.getList(pageNumber);
+
+						// 전체 페이지 수 계산
+						int totalCount = bbsDAO.getTotalCount();
+						int totalPages = (int) Math.ceil((double) totalCount / 20);
+
+						// 현재 페이지 그룹 계산 (1~10, 11~20 ...)
+						int startPage = ((pageNumber - 1) / 10) * 10 + 1;
+						int endPage = Math.min(startPage + 9, totalPages);
+
+						for (int i = 0; i < list.size(); i++) {
+							
+							String bbsDate = list.get(i).getBbsDate(); // 게시글의 작성일 가져옴
+							String today = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()); //오늘 날짜를 "yyyy-MM-dd" 형식으로 만들어줌
+							String displayDate; // 들어갈 값
+							if (bbsDate.startsWith(today)) { // 게시글 작성일이 오늘 날짜로 시작하는지
+								displayDate = bbsDate.substring(11, 13) + "시 " + bbsDate.substring(14, 16) + "분"; // 오늘 작성 글이면 시간과 분만 잘라서 표시
+							} else {
+								displayDate = bbsDate.substring(0, 10); // 오늘이 아니라면 날짜만 표시
+							}
+					%>
+					
+					<tr> <!-- 게시판 attribute(속성) 값  -->
+						<td><%=list.get(i).getBbsID()%></td>
+						<td><a href="view.jsp?bbsID=<%=list.get(i).getBbsID()%>&group=<%=groupName%>"> <%=list.get(i).getBbsTitle()%></a></td>
+						<td><%=list.get(i).getUserID()%></td>
+					
+						<td><%=displayDate%></td>
+						<td><%=list.get(i).getInquiry()%></td>
+						<td><%=list.get(i).getRecommendation()%></td>
+						<td><%=list.get(i).getComments()%></td>
+						<td><%=list.get(i).getIsPublic() == 1 ? "전체공개" : "회원공개"%></td>
 					</tr>
-				</thead>
-				<tbody>
-				<% 
-					BbsDAO bbsDAO = new BbsDAO();
-					ArrayList<Bbs> list = bbsDAO.getList(pageNumber);
-					for(int i = 0; i < list.size(); i++) {
-				%>
-					<tr> 
-						 <td><%= list.get(i).getBbsID() %> </td> <%-- 게시글 번호 --%>
-						 <td><a href="view.jsp?bbsID=<%= list.get(i).getBbsID() %>"><%= list.get(i).getBbsTitle()%></a></td> <%-- 게시글 제목 클릭시 view.jsp 로 이동, bbsID를 URL 파라미터로 전달 --%>
-						 <td><%= list.get(i).getUserID() %> </td> <%-- 작성자 --%>
-						 <td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시 " + list.get(i).getBbsDate().substring(14, 16) + "분" %></td> <%-- 작성일 --%>
-						 <td><%=list.get(i).getInquiry()%></td>
-						 <td><%=list.get(i).getRecommendation()%></td>
-						 <td><%=list.get(i).getComments()%></td>
-					</tr>
-				<%
+					<%
 					}
-				%>
+					%>
 				</tbody>
-			</table>
-			
-		<%-- 	<%
-			 	if(pageNumber != 1){
-			%>
-				<a href="bbs.jsp?pageNumber=<%=pageNumber - 1 %>" class="btn btn-success btn-arraw-Left">이전</a>
-			<%
-			 	} if(bbsDAO.nextPage(pageNumber + 1)){
-			%>	
-				<a href="bbs.jsp?pageNumber=<%=pageNumber + 1 %>" class="btn btn-success btn-arraw-Left">다음</a>
-			<%
-			 	}
-			%>	 --%>
-			<!-- 글쓰기 버튼 등급별 분기 -->
+				</table>
+				<!-- 페이징 -->
+			<div style="text-align: center; margin-top: 10px;">
+
+				<!-- 이전 화살표 -->
+				<%
+				if (startPage > 1) {
+				%>
+				<a
+					href="bbs.jsp?pageNumber=<%=startPage - 1%>&group=<%=groupName%>"
+					class="btn btn-default">◀</a>
+				<%
+				}
+				%>
+
+				<!-- 페이지 번호 -->
+				<%
+				for (int i = startPage; i <= endPage; i++) {
+				%>
+				<%
+				if (i == pageNumber) {
+				%>
+				<a href="bbs.jsp?pageNumber=<%=i%>&group=<%=groupName%>"
+					class="btn btn-primary"><%=i%></a>
+				<%
+				} else {
+				%>
+				<a href="bbs.jsp?pageNumber=<%=i%>&group=<%=groupName%>"
+					class="btn btn-default"><%=i%></a>
+				<%
+				}
+				%>
+				<%
+				}
+				%>
+				<!-- 다음 화살표 -->
+				<%
+				if (endPage < totalPages) {
+				%>
+				<a
+					href="bbs.jsp?pageNumber=<%=endPage + 1%>&group=<%=groupName%>"
+					class="btn btn-default">▶</a>
+				<%
+				}
+				%>
+
+			</div>
+
+				<!-- 글쓰기 버튼 등급별 분기 -->
 			<%
 			if (isVerified) {
 			%>
-			<a href="write.jsp" class="btn btn-primary pull-right">글쓰기</a>
-			<%
+				<a href="write.jsp" class="btn btn-primary pull-right">글쓰기</a>
+				<%
 			} else if (isGuest) {
 			%>
-			<a href="#" class="btn btn-default pull-right"
-				onclick="alert('로그인 후 이용 가능합니다.'); return false;">글쓰기</a>
-			<%
+				<a href="#" class="btn btn-default pull-right"
+					onclick="alert('로그인 후 이용 가능합니다.'); return false;">글쓰기</a>
+				<%
 			} else {
 			%>
-			<a href="#" class="btn btn-default pull-right"
-				onclick="alert('실명인증 후 글쓰기가 가능합니다.'); return false;">글쓰기</a>
-			<%
+				<a href="#" class="btn btn-default pull-right"
+					onclick="alert('실명인증 후 글쓰기가 가능합니다.'); return false;">글쓰기</a>
+				<%
 			}
 			%>
+			</div>
 		</div>
-	</div>
-	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-	<script src="/notice/js/bootstrap.js"></script>
+		<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+		<script src="/notice/js/bootstrap.js"></script>
 </body>
 </html>

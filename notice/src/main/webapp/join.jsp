@@ -37,6 +37,7 @@
 		   </ul>
 	   </div>
 	</nav>
+	
 	<div class="container">
 		<div class="col-lg-4"></div>
 		<div class="col-lg-4">

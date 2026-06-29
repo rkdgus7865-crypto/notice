@@ -28,7 +28,9 @@ public class WriteController extends HttpServlet {
         // write.jsp -> 넘겨준 파라미터 입력값 받기
         String bbsTitle   = request.getParameter("bbsTitle");
         String bbsContent = request.getParameter("bbsContent");
-
+        String bbsPublic   = request.getParameter("bbsPublic");
+        
+        int publicValue = (bbsPublic != null) ? 1 : 0; // 체크 O → 1 (전체공개), 체크 X → 0 (회원공개)
         // 빈값 체크
         if (bbsTitle.isBlank() || bbsContent.isBlank())
         {
@@ -39,7 +41,7 @@ public class WriteController extends HttpServlet {
 
         // 글쓰기 처리
         BbsDAO bbsDAO = new BbsDAO(); //BbsDAO 객체 생성 (DB 연결 준비)
-        int result = bbsDAO.write(bbsTitle, userID, bbsContent);
+        int result = bbsDAO.write(bbsTitle, userID, bbsContent, publicValue);
 
         if (result == -1) {
             request.setAttribute("errorMsg", "글쓰기에 실패했습니다.");

@@ -10,7 +10,7 @@ public class Bbs {
 	private int inquiry;
 	private int recommendation;
 	private int Comments;
-	
+	private int isPublic;
 	
 	public int getBbsID() {
 		return bbsID;
@@ -65,6 +65,12 @@ public class Bbs {
 	}
 	public void setComments(int comments) {
 		Comments = comments;
+	}
+	public int getIsPublic() {
+		return isPublic;
+	}
+	public void setIsPublic(int isPublic) {
+		this.isPublic = isPublic;
 	}
 	
 }
