@@ -13,7 +13,7 @@ public class BbsDAO {
 	private Connection getConnection() throws Exception {
 		String dbURL = "jdbc:mysql://localhost:3306/BBS";
 		String dbID = "root";
-		String dbPassword = "050700";
+		String dbPassword = "root";
 
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		return DriverManager.getConnection(dbURL, dbID, dbPassword); // MySQL에 접속
