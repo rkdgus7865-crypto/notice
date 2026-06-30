@@ -104,7 +104,7 @@
 				<div class="form-group" style="text-align: center;">
 					<label> <input type="checkbox" name="bbsPublic" value="1"> 비회원 열람 허용</label>
 				</div>
-				 
+				   
 			<input type="submit" class="btn btn-primary pull-right" value="글쓰기">
 		</form>
 
