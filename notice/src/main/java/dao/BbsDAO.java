@@ -60,8 +60,8 @@ public class BbsDAO {
 		return "";
 	}
 
-	public int write(String bbsTitle, String userID, String bbsContent, int bbsPublic) {
-		String SQL = "INSERT INTO BBS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	public int write(String bbsTitle, String userID, String bbsContent, int bbsPublic, String bbsgroupName) {
+		String SQL = "INSERT INTO BBS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		try {
@@ -79,6 +79,7 @@ public class BbsDAO {
 			pstmt.setInt(8, 0); 
 			pstmt.setInt(9, 0); 
 			pstmt.setInt(10, bbsPublic);
+			pstmt.setString(11, bbsgroupName);
 			return pstmt.executeUpdate();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -111,8 +112,8 @@ public class BbsDAO {
 	}
 	
 	
-	public ArrayList<Bbs> getList(int pageNumber){
-		String SQL = "SELECT * FROM BBS WHERE bbsID < ? AND bbsAvailable = 1 ORDER BY bbsID DESC LIMIT 20 ";
+	public ArrayList<Bbs> getList(int pageNumber, String groupName){
+		String SQL = "SELECT * FROM BBS WHERE bbsID < ? AND bbsAvailable = 1 AND groupName = ? ORDER BY bbsID DESC LIMIT 20";
 		ArrayList<Bbs> list = new ArrayList<Bbs>();
 		
 		Connection conn = null;
@@ -122,6 +123,7 @@ public class BbsDAO {
 			conn = getConnection();
 			pstmt = conn.prepareStatement(SQL);
 			pstmt.setInt(1, getNext() - (pageNumber - 1) * 20);
+			pstmt.setString(2, groupName);
 			rs = pstmt.executeQuery();
 			
 			while (rs.next()) {

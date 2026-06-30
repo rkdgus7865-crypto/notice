@@ -5,7 +5,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="/notice/css/bootstrap.css">
+<link rel="stylesheet" href="./css/bootstrap.css">
 <title>게시판</title>
 </head>
 <body>
@@ -14,7 +14,12 @@
 	String userGrade = (String) session.getAttribute("userGrade");/*로그인시 저장한 등급 가져옴 (NORMAL or VERIFIED) */
 	boolean isGuest = (userID == null);/*userID가 null이면 비회원 true */
 	boolean isVerified = "VERIFIED".equals(userGrade);/* userGrade가 VERIFIED면 인증회원 true */
+	
+	//  어느 게시판에서 왔는지 받기
+	String groupName = request.getParameter("group");
+	if (groupName == null) groupName = "자유게시판";
 	%>
+	
 	<nav class="navbar navbar-default">
 		<div class="navbar-header">
 			<button type="button" class="navbar-toggle collapsed"
@@ -77,7 +82,15 @@
 			<%  }   %>
 
 			<form method="post" action="writeAction">
-			<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
+
+				<!--  hidden 값 추가 -->
+				<input type="hidden" name="groupName" value="<%=groupName%>">
+
+				<!--  게시판 이름 표시 -->
+				<%-- <div style="text-align: center; font-weight: bold; margin-bottom: 10px;">📋<%=groupName%>글쓰기</div> --%>
+				<%@ include file="groupHeader.jsp" %>
+
+				<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
 				<thead>
 					<tr>
 						<th colspan="2" style="background-color: #eeeeee; text-align: center;">게시판 글쓰기 양식</th>

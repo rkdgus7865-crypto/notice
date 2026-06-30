@@ -16,7 +16,8 @@ public class LoginController extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) // HTTP POST 요청(회원가입, 로그인 등)이 들어왔을 때 톰캣이 자동 호출하는 메서드
 			throws ServletException, IOException {									// 서블릿 규약에 의해 doPost() 메서드명을 사용해야 하며 임의로 변경할 수 없음 
 
-		request.setCharacterEncoding("UTF-8");
+		request.setCharacterEncoding("UTF-8"); // 요청 데이터를 UTF-8(한글) 인코딩으로 처리
+		response.setContentType("text/html; charset=UTF-8"); // 응답 데이터를 HTML 형식, UTF-8(한글) 인코딩으로 브라우저에 전송
 
 		String userID = request.getParameter("userID");
 		String userPassword = request.getParameter("userPassword");

@@ -15,7 +15,8 @@ public class WriteController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        request.setCharacterEncoding("UTF-8");
+        request.setCharacterEncoding("UTF-8"); // 요청 데이터를 UTF-8(한글) 인코딩으로 처리
+        response.setContentType("text/html; charset=UTF-8"); // 응답 데이터를 HTML 형식, UTF-8(한글) 인코딩으로 브라우저에 전송
 
         // 로그인 안된 상태에서 게시판 글쓰기를 하면 login.jsp 이동
         HttpSession session = request.getSession(); // 서버가 사용자마다 고유한 저장공간 세션 가져옴
@@ -28,7 +29,8 @@ public class WriteController extends HttpServlet {
         // write.jsp -> 넘겨준 파라미터 입력값 받기
         String bbsTitle   = request.getParameter("bbsTitle");
         String bbsContent = request.getParameter("bbsContent");
-        String bbsPublic   = request.getParameter("bbsPublic");
+        String bbsPublic   = request.getParameter("bbsPublic"); // 회원 비회원 게시글 공개여부
+        String groupName  = request.getParameter("groupName"); // 게시판 종류
         
         int publicValue = (bbsPublic != null) ? 1 : 0; // 체크 O → 1 (전체공개), 체크 X → 0 (회원공개)
         // 빈값 체크
@@ -41,7 +43,7 @@ public class WriteController extends HttpServlet {
 
         // 글쓰기 처리
         BbsDAO bbsDAO = new BbsDAO(); //BbsDAO 객체 생성 (DB 연결 준비)
-        int result = bbsDAO.write(bbsTitle, userID, bbsContent, publicValue);
+        int result = bbsDAO.write(bbsTitle, userID, bbsContent, publicValue, groupName);
 
         if (result == -1) {
             request.setAttribute("errorMsg", "글쓰기에 실패했습니다.");

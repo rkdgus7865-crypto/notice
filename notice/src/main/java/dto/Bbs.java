@@ -11,7 +11,8 @@ public class Bbs {
 	private int recommendation;
 	private int Comments;
 	private int isPublic;
-	
+	private String groupName;
+
 	public int getBbsID() {
 		return bbsID;
 	}
@@ -72,5 +73,10 @@ public class Bbs {
 	public void setIsPublic(int isPublic) {
 		this.isPublic = isPublic;
 	}
-	
+	public String getGroupName() {
+		return groupName;
+	}
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
 }
