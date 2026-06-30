@@ -14,10 +14,6 @@
 	String userGrade = (String) session.getAttribute("userGrade");/*로그인시 저장한 등급 가져옴 (NORMAL or VERIFIED) */
 	boolean isGuest = (userID == null);/*userID가 null이면 비회원 true */
 	boolean isVerified = "VERIFIED".equals(userGrade);/* userGrade가 VERIFIED면 인증회원 true */
-	
-	//  어느 게시판에서 왔는지 받기
-	String groupName = request.getParameter("group");
-	if (groupName == null) groupName = "자유게시판";
 	%>
 	
 	<nav class="navbar navbar-default">
@@ -70,7 +66,9 @@
 			%>
 		</div>
 	</nav>
-
+	
+	<%@ include file="groupHeader.jsp" %> <!-- 게시글 상단 고정 groupHeader 내용 가져옴  -->
+	
 	<div class="container">
 		<div class="row">
 
@@ -80,16 +78,13 @@
 			%>
 			<script>alert('<%=request.getAttribute("errorMsg")%>')</script>
 			<%  }   %>
+			
+			
 
 			<form method="post" action="writeAction">
-
-				<!--  hidden 값 추가 -->
-				<input type="hidden" name="groupName" value="<%=groupName%>">
-
-				<!--  게시판 이름 표시 -->
-				<%-- <div style="text-align: center; font-weight: bold; margin-bottom: 10px;">📋<%=groupName%>글쓰기</div> --%>
-				<%@ include file="groupHeader.jsp" %>
-
+				
+				<input type="hidden" name="groupName" value="<%=groupName%>"> 	<!-- 어떤 게시판(그룹)에 글을 쓰는지 writeController로 전달하기 위한 hidden 값 -->
+				
 				<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
 				<thead>
 					<tr>
@@ -107,10 +102,9 @@
 			</table>
 			
 				<div class="form-group" style="text-align: center;">
-					<label> <input type="checkbox" name="bbsPublic" value="1"
-						checked> 비회원 열람 허용
-					</label>
+					<label> <input type="checkbox" name="bbsPublic" value="1"> 비회원 열람 허용</label>
 				</div>
+				
 			<input type="submit" class="btn btn-primary pull-right" value="글쓰기">
 		</form>
 

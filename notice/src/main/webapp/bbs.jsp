@@ -1,9 +1,9 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.io.PrintWriter" %>
 <%@ page import="dao.BbsDAO" %>
 <%@ page import="dto.Bbs" %>
 <%@ page import="java.util.ArrayList" %>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -23,10 +23,6 @@
 	if (request.getParameter("pageNumber") != null){
 		pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
 	}
-	
-	//  게시판 그룹명 상단 고정 
-	String groupName = request.getParameter("group");
-	if (groupName == null) groupName = "자유게시판";
 	%>
 	
 	<nav class="navbar navbar-default">
@@ -86,16 +82,9 @@
 			%>
 		</div>
 	</nav>
-
-
-	<!--  게시판 그룹명 상단 고정 -->
-	<%-- <div
-		style="background-color: white; color: black; border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 18px; font-weight: bold; margin-top: 10px; margin-bottom: 10px;">
-		📋
-		<%=groupName%>
-	</div> --%>
-	<%@ include file="groupHeader.jsp" %>
-
+	
+	<%@ include file="groupHeader.jsp" %> <!-- 게시글 상단 고정 groupHeader 내용 가져옴  -->
+	
 	<div class="container">
 		<!-- 게시판 attribute(속성) -->
 		<div class="row">
@@ -146,7 +135,6 @@
 							href="view.jsp?bbsID=<%=list.get(i).getBbsID()%>&group=<%=groupName%>">
 								<%=list.get(i).getBbsTitle()%></a></td>
 						<td><%=list.get(i).getUserID()%></td>
-
 						<td><%=displayDate%></td>
 						<td><%=list.get(i).getInquiry()%></td>
 						<td><%=list.get(i).getRecommendation()%></td>
