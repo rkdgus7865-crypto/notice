@@ -18,5 +18,15 @@
         <servlet-name>JoinController</servlet-name>
         <url-pattern>/joinAction</url-pattern>
     </servlet-mapping>
+    
+    <servlet>
+ 	   <servlet-name>BbsController</servlet-name>
+ 	   <servlet-class>controller.BbsController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+  		 <servlet-name>BbsController</servlet-name>
+  		 <url-pattern>/bbsList</url-pattern>
+	</servlet-mapping>
+    
 
 </web-app>

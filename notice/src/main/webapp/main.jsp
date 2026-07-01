@@ -39,9 +39,9 @@
 					aria-expanded="false"> 게시판<span class="caret"></span>
 				</a>
 					<ul class="dropdown-menu">
-						<li><a href="bbs.jsp?group=자유게시판">자유게시판</a></li>
-						<li><a href="bbs.jsp?group=공지게시판">공지게시판</a></li>
-						<li><a href="bbs.jsp?group=질문게시판">질문게시판</a></li>
+						<li><a href="bbsList?group=자유게시판">자유게시판</a></li>
+						<li><a href="bbsList?group=공지게시판">공지게시판</a></li>
+						<li><a href="bbsList?group=질문게시판">질문게시판</a></li>
 					</ul></li>
 			</ul>
 

@@ -8,12 +8,13 @@ import java.util.ArrayList;
 
 import dto.Bbs;
 
+
 public class BbsDAO {
 
 	private Connection getConnection() throws Exception {
 		String dbURL = "jdbc:mysql://localhost:3306/BBS";
 		String dbID = "root";
-		String dbPassword = "root";
+		String dbPassword = "050700";
 
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		return DriverManager.getConnection(dbURL, dbID, dbPassword); // MySQL에 접속
@@ -88,20 +89,24 @@ public class BbsDAO {
 		}
 		return -1;
 	}
+	 
+	/**
+	 * 게시판 그룹(groupName)에 해당하는 게시글의 전체 개수를 조회하는 메서드
+	 * 
+	 */
 	
-	
-	
-	public int getTotalCount() {
-	    String SQL = "SELECT COUNT(*) FROM BBS WHERE bbsAvailable = 1";
+	public int getTotalCount(String groupName) {
+	    String SQL = "SELECT COUNT(*) FROM BBS WHERE bbsAvailable = 1 AND groupName = ?"; // 삭제되지 않은(bbsAvailable = 1) 게시글 중 전달받은 게시판 그룹의 게시글 개수를 조회하는 SQL
 	    Connection conn = null;
 	    PreparedStatement pstmt = null;
 	    ResultSet rs = null;
 	    try {
 	        conn = getConnection();
 	        pstmt = conn.prepareStatement(SQL);
-	        rs = pstmt.executeQuery();
-	        if (rs.next()) {
-	            return rs.getInt(1);
+	        pstmt.setString(1, groupName);  // ? 자리에 전달받은 groupName 값 설정
+	        rs = pstmt.executeQuery();      // SQL 실행
+	        if (rs.next()) { // 조회 결과가 있으면 게시글 개수 반환
+	            return rs.getInt(1); // COUNT(*) 결과값
 	        }
 	    } catch (Exception e) {
 	        e.printStackTrace();
@@ -147,6 +152,7 @@ public class BbsDAO {
 		}
 		return list;
 	}
+
 	
 	private void close(Connection conn, PreparedStatement pstmt, ResultSet rs) {
 		try {
