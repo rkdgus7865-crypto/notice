@@ -76,7 +76,7 @@ public class BbsController extends HttpServlet {
             out.print(json.toString()); // 생성한 JSON 데이터를 클라이언트에 응답
 
         } else {
-        
+         
 
         // AJAX 요청이 아닌 경우 bbs.jsp 로 전달
         request.setAttribute("list", list);
