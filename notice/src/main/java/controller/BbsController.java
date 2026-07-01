@@ -47,16 +47,17 @@ public class BbsController extends HttpServlet {
             response.setContentType("application/json; charset=UTF-8");
             PrintWriter out = response.getWriter();
 
-            StringBuilder json = new StringBuilder();
+            StringBuilder json = new StringBuilder(); // JSON 문자열 생성
             json.append("{");
-            json.append("\"totalPages\":" + totalPages + ",");
+            
+            json.append("\"totalPages\":" + totalPages + ","); // 페이징 정보 추가
             json.append("\"startPage\":" + startPage + ",");
             json.append("\"endPage\":" + endPage + ",");
             json.append("\"pageNumber\":" + pageNumber + ",");
-            json.append("\"groupName\":\"" + groupName + "\",");
-            json.append("\"list\":[");
+            json.append("\"groupName\":\"" + groupName + "\","); // 게시판 그룹명 추가
+            json.append("\"list\":["); // 게시글 목록 시작 
 
-            for (int i = 0; i < list.size(); i++) {
+            for (int i = 0; i < list.size(); i++) { 
                 Bbs bbs = list.get(i);
                 json.append("{");
                 json.append("\"bbsID\":" + bbs.getBbsID() + ",");
@@ -68,16 +69,16 @@ public class BbsController extends HttpServlet {
                 json.append("\"comments\":" + bbs.getComments() + ",");
                 json.append("\"isPublic\":" + bbs.getIsPublic());
                 json.append("}");
-                if (i < list.size() - 1) json.append(",");
+                if (i < list.size() - 1) json.append(","); // 마지막 데이터가 아니면 콤마 추가
             }
 
             json.append("]}");
-            out.print(json.toString());
+            out.print(json.toString()); // 생성한 JSON 데이터를 클라이언트에 응답
 
         } else {
         
 
-        // bbs.jsp 로 전달
+        // AJAX 요청이 아닌 경우 bbs.jsp 로 전달
         request.setAttribute("list", list);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("startPage", startPage);
