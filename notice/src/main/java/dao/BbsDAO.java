@@ -152,6 +152,39 @@ public class BbsDAO {
 		}
 		return list;
 	}
+	
+	public Bbs getDetail(int bbsID) {
+	    String SQL = "SELECT * FROM BBS WHERE bbsID = ? AND bbsAvailable = 1";
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+	    try {
+	        conn = getConnection();
+	        pstmt = conn.prepareStatement(SQL);
+	        pstmt.setInt(1, bbsID);
+	        rs = pstmt.executeQuery();
+	        if (rs.next()) {
+	            Bbs bbs = new Bbs();
+	            bbs.setBbsID(rs.getInt("bbsID"));
+	            bbs.setBbsTitle(rs.getString("bbsTitle"));
+	            bbs.setUserID(rs.getString("userID"));
+	            bbs.setBbsDate(rs.getString("bbsDate"));
+	            bbs.setBbsContent(rs.getString("bbsContent"));
+	            bbs.setBbsAvailable(rs.getInt("bbsAvailable"));
+	            bbs.setInquiry(rs.getInt("inquiry"));
+	            bbs.setRecommendation(rs.getInt("recommendation"));
+	            bbs.setComments(rs.getInt("Comments"));
+	            bbs.setIsPublic(rs.getInt("bbsPublic"));
+	            return bbs;
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(conn, pstmt, rs);
+	    }
+	    return null;
+	}
+	
 
 	
 	private void close(Connection conn, PreparedStatement pstmt, ResultSet rs) {

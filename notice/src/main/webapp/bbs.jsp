@@ -117,7 +117,7 @@
                 %>
                     <tr>
                         <td><%= list.get(i).getBbsID() %></td>
-                        <td><a href="view.jsp?bbsID=<%= list.get(i).getBbsID() %>&group=<%= groupName %>"> <%= list.get(i).getBbsTitle() %> </a></td>
+                        <td><a href="viewDetail?bbsID=<%=list.get(i).getBbsID()%>&group=<%=groupName%>"> <%= list.get(i).getBbsTitle() %> </a></td> <!-- viewController 호출 -->
                         <td><%= list.get(i).getUserID() %></td>
                         <td><%= displayDate %></td>
                         <td><%= list.get(i).getInquiry() %></td>
@@ -195,7 +195,7 @@
 								var bbs = data.list[i];
 								tbody += "<tr>";
 								tbody += "<td>" + bbs.bbsID + "</td>";
-								tbody += "<td><a href='view.jsp?bbsID="
+								tbody += "<td><a href='viewDetail?bbsID=" // viewController 호출
 										+ bbs.bbsID + "&group=" + currentGroup
 										+ "'>" + bbs.bbsTitle + "</a></td>";
 								tbody += "<td>" + bbs.userID + "</td>";
