@@ -5,7 +5,7 @@ import javax.servlet.http.*;
 import dao.BbsDAO;
 import javax.servlet.annotation.*;
 import java.io.*;
-
+import java.net.URLEncoder;
 
 @WebServlet("/writeAction")
 public class WriteController extends HttpServlet {
@@ -43,13 +43,16 @@ public class WriteController extends HttpServlet {
 
         // 글쓰기 처리
         BbsDAO bbsDAO = new BbsDAO(); //BbsDAO 객체 생성 (DB 연결 준비)
-        int result = bbsDAO.write(bbsTitle, userID, bbsContent, publicValue, groupName);
+        System.out.println("groupName: " + groupName);
 
+        int result = bbsDAO.write(bbsTitle, userID, bbsContent, publicValue, groupName);
+        System.out.println("result: " + result);
         if (result == -1) {
             request.setAttribute("errorMsg", "글쓰기에 실패했습니다.");
             request.getRequestDispatcher("write.jsp").forward(request, response);
         } else {
-            response.sendRedirect("bbs.jsp");
+			/* response.sendRedirect("bbs.jsp"); */
+        	response.sendRedirect("bbsList?group=" + URLEncoder.encode(groupName, "UTF-8"));
         }
     }
 }
