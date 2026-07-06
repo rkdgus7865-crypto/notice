@@ -7,7 +7,7 @@ import java.io.*;
 import dao.BbsDAO;
 import dto.Bbs;
 
-@WebServlet("/viewDetail")
+@WebServlet("/viewDetail") // 게시글 상세 정보
 public class ViewController extends HttpServlet {
     private static final long serialVersionUID = 1L;
 

@@ -47,24 +47,22 @@
 	<!-- 게시글 상단 고정 groupHeader 내용 가져옴 -->
 	<%@ include file="groupHeader.jsp"%>
 
+
+	<!-- 머리글: 제목, 조회수, 작성일, 작성자 -->
 	<div class="container" style="margin-top: 20px;">
 
-		<!-- 머리글: 제목, 작성자, 작성일, 조회수 -->
 		<table class="table table-bordered">
 			<tr>
-				<th colspan="4" style="font-size: 18px; text-align: center;"><%=bbs.getBbsTitle()%></th>
+				<td style="width: 10%;"><b>제목</b></td>
+				<td style="width: 25%;"><%=bbs.getBbsTitle()%></td>
+				<td style="width: 10%;"><b>조회 수</b></td>
+				<td style="width: 25%;"><%=bbs.getInquiry()%></td>
 			</tr>
 			<tr>
-				<td><b>작성자</b></td>
-				<td><%=bbs.getUserID()%></td>
 				<td><b>작성일</b></td>
 				<td><%=bbs.getBbsDate()%></td>
-			</tr>
-			<tr>
-				<td><b>조회수</b></td>
-				<td><%=bbs.getInquiry()%></td>
-				<td><b>공개여부</b></td>
-				<td><%=bbs.getIsPublic() == 1 ? "전체공개" : "회원공개"%></td>
+				<td><b>작성자</b></td>
+				<td><%=bbs.getUserID()%></td>
 			</tr>
 		</table>
 

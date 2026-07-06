@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import dto.Bbs;
 
 
+
 public class BbsDAO {
 
 	private Connection getConnection() throws Exception {
@@ -153,6 +154,10 @@ public class BbsDAO {
 		return list;
 	}
 	
+	/**
+	 * 게시글 상세 조회 (수정 화면에 기존 데이터 보여줄 때 필요)
+	 */
+	
 	public Bbs getDetail(int bbsID) {
 	    String SQL = "SELECT * FROM BBS WHERE bbsID = ? AND bbsAvailable = 1";
 	    Connection conn = null;
@@ -185,8 +190,50 @@ public class BbsDAO {
 	    return null;
 	}
 	
-
+	/**
+	 * 게시글 수정
+	 */
 	
+	public int update(int bbsID, String bbsTitle, String bbsContent) {
+	    String SQL = "UPDATE BBS SET bbsTitle = ?, bbsContent = ? WHERE bbsID = ?";
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    try {
+	        conn = getConnection();
+	        pstmt = conn.prepareStatement(SQL);
+	        pstmt.setString(1, bbsTitle);
+	        pstmt.setString(2, bbsContent);
+	        pstmt.setInt(3, bbsID);
+	        return pstmt.executeUpdate();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(conn, pstmt, null);
+	    }
+	    return -1;
+	}
+	
+	/**
+	 * 게시글 삭제
+	 */
+	
+	public int delete(int bbsID) {
+	    String SQL = "UPDATE BBS SET bbsAvailable = 0 WHERE bbsID = ?";
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    try {
+	        conn = getConnection();
+	        pstmt = conn.prepareStatement(SQL);
+	        pstmt.setInt(1, bbsID);
+	        return pstmt.executeUpdate();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(conn, pstmt, null);
+	    }
+	    return -1;
+	}
+
 	private void close(Connection conn, PreparedStatement pstmt, ResultSet rs) {
 		try {
 			if (rs != null) rs.close();
