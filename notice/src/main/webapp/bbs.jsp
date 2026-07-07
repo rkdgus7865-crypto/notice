@@ -115,10 +115,16 @@
                         displayDate = bbsDate.substring(0, 10);
                     }
                 %>
-                    <tr>
-                        <td><%= list.get(i).getBbsID() %></td>
-                        <td><a href="viewDetail?bbsID=<%=list.get(i).getBbsID()%>&group=<%=groupName%>"> <%= list.get(i).getBbsTitle() %> </a></td> <!-- viewController 호출 -->
-                        <td><%= list.get(i).getUserID() %></td>
+                    <tr>  <!-- 게시글 목록 화면 출력  -->
+                        <td><%= list.get(i).getBbsID() %></td> <!-- 작성자 ID 출력  -->
+                        
+						<td> <!-- 게시판 목록 제목 클릭 시 ViewController(viewDetail) 호출, 추천수 10개 이상이면 제목을 굵게 표시 7-7 -->
+						<a href="viewDetail?bbsID=<%=list.get(i).getBbsID()%>&group=<%=groupName%>"
+							style="<%=list.get(i).getIsBold() ? "font-weight: bold; font-size:16px; color:black;" : "color:black;"%>">
+								<%=list.get(i).getBbsTitle()%>
+						</a></td> <!--  -->
+						
+						<td><%=list.get(i).getUserID()%></td>
                         <td><%= displayDate %></td>
                         <td><%= list.get(i).getInquiry() %></td>
                         <td><%= list.get(i).getRecommendation() %></td>
@@ -195,17 +201,18 @@
 								var bbs = data.list[i];
 								tbody += "<tr>";
 								tbody += "<td>" + bbs.bbsID + "</td>";
-								tbody += "<td><a href='viewDetail?bbsID=" // viewController 호출
-										+ bbs.bbsID + "&group=" + currentGroup
-										+ "'>" + bbs.bbsTitle + "</a></td>";
+										
+								// 비동기 방식으로 페이징 넘길때 추천수 10개 이상이면 제목 굶게 수정 7-7
+							    var style = bbs.isBold ? "font-weight: bold; font-size:16px; color:black;" : "color:black;";
+								tbody += "<td><a href='viewDetail?bbsID=" + bbs.bbsID + "&group=" + currentGroup 
+								 + "' style='" + style + "'>" + bbs.bbsTitle + "</a></td>";
+										
 								tbody += "<td>" + bbs.userID + "</td>";
 								tbody += "<td>" + bbs.bbsDate + "</td>";
 								tbody += "<td>" + bbs.inquiry + "</td>";
 								tbody += "<td>" + bbs.recommendation + "</td>";
 								tbody += "<td>" + bbs.comments + "</td>";
-								tbody += "<td>"
-										+ (bbs.isPublic == 1 ? "전체공개" : "회원공개")
-										+ "</td>";
+								tbody += "<td>" + (bbs.isPublic == 1 ? "전체공개" : "회원공개")+ "</td>";
 								tbody += "</tr>";
 							}
 							$("#bbsTableBody").html(tbody);

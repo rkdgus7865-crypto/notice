@@ -62,14 +62,16 @@ public class BbsDAO {
 		return "";
 	}
 
-	public int write(String bbsTitle, String userID, String bbsContent, int bbsPublic, String bbsgroupName) {
-		String SQL = "INSERT INTO BBS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	public int write(String bbsTitle, String userID, String bbsContent, int bbsPublic, String bbsgroupName ,String originalFileName, String savedFileName) {
+		String SQL = "INSERT INTO BBS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		Connection conn = null;
 		PreparedStatement pstmt = null;
+		
 		try {
 			int nextID = getNext();
 			String date = getDate();
 			conn = getConnection();
+			
 			pstmt = conn.prepareStatement(SQL);
 			pstmt.setInt(1, nextID);
 			pstmt.setString(2, bbsTitle);
@@ -82,6 +84,9 @@ public class BbsDAO {
 			pstmt.setInt(9, 0); 
 			pstmt.setInt(10, bbsPublic);
 			pstmt.setString(11, bbsgroupName);
+			pstmt.setString(12, originalFileName);
+	        pstmt.setString(13, savedFileName);
+	        
 			return pstmt.executeUpdate();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -144,6 +149,8 @@ public class BbsDAO {
 				bbs.setRecommendation(rs.getInt(8)); 
 				bbs.setComments(rs.getInt(9)); 
 				bbs.setIsPublic(rs.getInt(10));
+				bbs.setIsBold(bbs.getRecommendation() >= 10);   // 추천수 10개 이상이면 게시글 제목 굶게 7-7
+
 				list.add(bbs);
 			}
 		} catch (Exception e) {
@@ -180,6 +187,8 @@ public class BbsDAO {
 	            bbs.setRecommendation(rs.getInt("recommendation"));
 	            bbs.setComments(rs.getInt("Comments"));
 	            bbs.setIsPublic(rs.getInt("bbsPublic"));
+	            bbs.setOriginalFileName(rs.getString("originalFileName"));
+	            bbs.setSavedFileName(rs.getString("savedFileName"));
 	            return bbs;
 	        }
 	    } catch (Exception e) {
@@ -219,6 +228,27 @@ public class BbsDAO {
 	
 	public int delete(int bbsID) {
 	    String SQL = "UPDATE BBS SET bbsAvailable = 0 WHERE bbsID = ?";
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    try {
+	        conn = getConnection();
+	        pstmt = conn.prepareStatement(SQL);
+	        pstmt.setInt(1, bbsID);
+	        return pstmt.executeUpdate();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(conn, pstmt, null);
+	    }
+	    return -1;
+	}
+	
+	/**
+	 * 게시글 추천수 증가 7-7
+	 */
+	
+	public int recommend(int bbsID) {
+	    String SQL = "UPDATE BBS SET recommendation = recommendation + 1 WHERE bbsID = ?";
 	    Connection conn = null;
 	    PreparedStatement pstmt = null;
 	    try {

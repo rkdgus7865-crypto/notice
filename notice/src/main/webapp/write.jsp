@@ -90,7 +90,14 @@
 			
 			
 
-			<form method="post" action="writeAction">
+				<form method="post" action="writeAction"  enctype="multipart/form-data" > <!--게시판 글쓰기 파일첨부 추가 7-7   enctype="multipart/form-data"-->
+
+				<div class="form-group">
+					<label>첨부파일</label> <input type="file" name="uploadFile"
+						class="form-control">
+				</div>
+
+				<!-- <form method="post" action="bbsAction"> <input type="hidden" name="action" value="write">  컨트롤러 리펙토링 코드-->
 				
 				<input type="hidden" name="groupName" value="<%=groupName%>"> 	<!-- 어떤 게시판(그룹)에 글을 쓰는지 writeController로 전달하기 위한 hidden 값 -->
 				

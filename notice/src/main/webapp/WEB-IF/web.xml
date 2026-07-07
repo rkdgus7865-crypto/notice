@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="6.0">
 
-	<servlet>
+<!-- 	<servlet>
 		<servlet-name>LoginController</servlet-name>
 		<servlet-class>controller.LoginController</servlet-class>
 	</servlet>
@@ -54,6 +54,28 @@
 		<servlet-name>DeleteController</servlet-name>
 		<url-pattern>/deleteAction</url-pattern>
 	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>RecommendController</servlet-name>
+		<servlet-class>controller.RecommendController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RecommendController</servlet-name>
+		<url-pattern>/recommendAction</url-pattern>
+	</servlet-mapping>
+	
+	
+	
+	
+	
+	<servlet>
+    <servlet-name>BbsActionController</servlet-name>
+    <servlet-class>controller.BbsActionController</servlet-class>
+</servlet>
+<servlet-mapping>
+    <servlet-name>BbsActionController</servlet-name>
+    <url-pattern>/bbsAction</url-pattern>
+</servlet-mapping> -->
 
 
 </web-app>

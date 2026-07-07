@@ -47,7 +47,6 @@
 	<!-- 게시글 상단 고정 groupHeader 내용 가져옴 -->
 	<%@ include file="groupHeader.jsp"%>
 
-
 	<!-- 머리글: 제목, 조회수, 작성일, 작성자 -->
 	<div class="container" style="margin-top: 20px;">
 
@@ -72,11 +71,26 @@
 			<div style="flex: 1;">
 				<%=bbs.getBbsContent()%>
 			</div>
+
+			<!-- 첨부파일 -->
+			<%
+			if (bbs.getOriginalFileName() != null) {
+			%>
+			<div style="margin-top: 10px;">
+				<b>첨부파일:</b> 
+				<a href="fileDownload?fileName=<%=bbs.getSavedFileName()%>&originalName=<%=java.net.URLEncoder.encode(bbs.getOriginalFileName(), "UTF-8")%>">    <!-- 파일명을 클릭하면 FileDownloadController(fileDownload) 호출 -->
+				<%=bbs.getOriginalFileName()%>  <!-- 사용자에게 보여줄 원본 파일명 -->
+				</a>
+			</div>
+			<%
+			}
+			%>
+
 			<!-- 추천 -->
-			<div
-				style="text-align: center; margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
-				<span style="font-size: 16px;">추천수: <b><%=bbs.getRecommendation()%></b></span>&nbsp;
-				<a href="#" class="btn btn-success">추천</a>
+			<div style="text-align: center; margin-top: 20px;">
+				추천수: <b><%=bbs.getRecommendation()%></b>  
+				<a href="recommendAction?bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>"
+					class="btn btn-success">추천</a>
 			</div>
 		</div>
 
@@ -96,6 +110,8 @@
 		</div>
 
 	</div>
+	
+	
 
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="/notice/js/bootstrap.js"></script>
