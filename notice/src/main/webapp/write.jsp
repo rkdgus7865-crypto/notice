@@ -86,19 +86,13 @@
 			if (request.getAttribute("errorMsg") != null) {
 			%>
 			<script>alert('<%=request.getAttribute("errorMsg")%>')</script>
-			<%  }   %>
-			
-			
+			<% 
+			}   
+			%>
 
 				<form method="post" action="writeAction"  enctype="multipart/form-data" > <!--게시판 글쓰기 파일첨부 추가 7-7   enctype="multipart/form-data"-->
-
-				<div class="form-group">
-					<label>첨부파일</label> <input type="file" name="uploadFile"
-						class="form-control">
-				</div>
-
 				<!-- <form method="post" action="bbsAction"> <input type="hidden" name="action" value="write">  컨트롤러 리펙토링 코드-->
-				
+		
 				<input type="hidden" name="groupName" value="<%=groupName%>"> 	<!-- 어떤 게시판(그룹)에 글을 쓰는지 writeController로 전달하기 위한 hidden 값 -->
 				
 				<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
@@ -114,9 +108,15 @@
 					  <tr>
 					  		<td><textarea class="form-control" placeholder="글 내용" name="bbsContent" maxlength="2048" style="height: 350px;"></textarea></td>
 					  </tr>
+					  
 				  </tbody>
 			</table>
-			
+
+				<div class="form-group">
+					<label>첨부파일</label> <input type="file" name="uploadFile"
+						class="form-control">
+				</div>
+
 				<div class="form-group" style="text-align: center;">
 					<label> <input type="checkbox" name="bbsPublic" value="1"> 비회원 열람 허용</label>
 				</div>

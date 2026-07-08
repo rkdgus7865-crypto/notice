@@ -12,6 +12,9 @@ public class FileDownloadController extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		
+		request.setCharacterEncoding("UTF-8"); 
+		response.setContentType("text/html; charset=UTF-8");
 
 		String fileName = request.getParameter("fileName");
 		String originalName = request.getParameter("originalName");
@@ -25,6 +28,7 @@ public class FileDownloadController extends HttpServlet {
 		}
 
 		response.setContentType("application/octet-stream");
+		String encodedName = java.net.URLEncoder.encode(originalName, "UTF-8").replaceAll("\\+", "%20");
 		response.setHeader("Content-Disposition", "attachment; filename=\"" + originalName + "\"");
 		response.setContentLength((int) file.length());
 

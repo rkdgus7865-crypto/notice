@@ -1,5 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="dto.Bbs"%>
+<%@ page import="dto.Comment"%>
+<%@ page import="java.util.ArrayList"%>
+
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,9 +16,10 @@
 <body>
 	<%
 	String userID = (String) session.getAttribute("userID");
+	String userGrade = (String) session.getAttribute("userGrade");
 	boolean isGuest = (userID == null);
-
 	Bbs bbs = (Bbs) request.getAttribute("bbs");
+	ArrayList<Comment> commentList = (ArrayList<Comment>) request.getAttribute("commentList");
 	%>
 	<nav class="navbar navbar-default">
 		<div class="navbar-header">
@@ -108,8 +114,82 @@
 					%>
 			<a href="bbsList?group=<%=groupName%>" class="btn btn-default">목록</a>
 		</div>
-
 	</div>
+	
+	<!-- 댓글 영역 -->
+<div class="container" style="margin-top: 20px;">
+    <h4>댓글 (<%=commentList.size()%>)</h4>
+
+    <table class="table table-bordered">
+        <%
+        for (int i = 0; i < commentList.size(); i++) {
+            Comment comment = commentList.get(i);
+        %>
+        <tr id="commentRow<%=comment.getCommentID()%>">
+            <td style="width: 15%;"><%=comment.getUserID()%></td>
+            <td>
+                <!-- 평상시 보이는 내용 -->
+                <span id="viewMode<%=comment.getCommentID()%>">
+                    <%=comment.getCommentContent()%>
+                    <% if (comment.getCommentUpdateDate() != null) { %>
+                        <span style="color: gray; font-size: 12px;">(수정됨)</span>
+                    <% } %>
+                </span>
+
+                <!-- 수정 모드 (평소엔 숨김) -->
+                <form id="editForm<%=comment.getCommentID()%>" method="post" action="commentUpdate" style="display:none;">
+                    <input type="hidden" name="commentID" value="<%=comment.getCommentID()%>">
+                    <input type="hidden" name="bbsID" value="<%=bbs.getBbsID()%>">
+                    <input type="hidden" name="groupName" value="<%=groupName%>">
+                    <textarea name="commentContent" class="form-control" rows="2" maxlength="500"><%=comment.getCommentContent()%></textarea>
+                    <button type="submit" class="btn btn-xs btn-primary" style="margin-top:5px;">저장</button>
+                    <button type="button" class="btn btn-xs btn-default" style="margin-top:5px;"
+                            onclick="cancelEdit(<%=comment.getCommentID()%>)">취소</button>
+                </form>
+            </td>
+            <td style="width: 15%;"><%=comment.getCommentDate()%></td>
+            <td style="width: 15%;">
+                <% if (!isGuest && userID.equals(comment.getUserID())) { %>
+                    <a href="#" class="btn btn-xs btn-warning"
+                       onclick="showEdit(<%=comment.getCommentID()%>); return false;">수정</a>
+                    <a href="commentDelete?commentID=<%=comment.getCommentID()%>&bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>"
+                       class="btn btn-xs btn-danger"
+                       onclick="return confirm('댓글을 삭제하시겠습니까?')">삭제</a>
+                <% } %>
+            </td>
+        </tr>
+        <%
+        }
+        %>
+    </table>
+
+    <!-- 댓글 작성 폼 (실명인증 회원만) -->
+    <% if (!isGuest && "VERIFIED".equals(userGrade)) { %>
+    <form method="post" action="commentWrite">
+        <input type="hidden" name="bbsID" value="<%=bbs.getBbsID()%>">
+        <input type="hidden" name="groupName" value="<%=groupName%>">
+        <div class="form-group">
+            <textarea name="commentContent" class="form-control" rows="3" placeholder="댓글을 입력하세요" maxlength="500"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary pull-right">댓글 작성</button>
+    </form>
+    <% } else if (isGuest) { %>
+    <p style="color: gray;">로그인 후 댓글 작성이 가능합니다.</p>
+    <% } else { %>
+    <p style="color: gray;">실명인증 후 댓글 작성이 가능합니다.</p>
+    <% } %>
+</div>
+
+<script>
+function showEdit(commentID) {
+    document.getElementById('viewMode' + commentID).style.display = 'none';
+    document.getElementById('editForm' + commentID).style.display = 'block';
+}
+function cancelEdit(commentID) {
+    document.getElementById('viewMode' + commentID).style.display = 'inline';
+    document.getElementById('editForm' + commentID).style.display = 'none';
+}
+</script>
 	
 	
 

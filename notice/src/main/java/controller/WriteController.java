@@ -76,19 +76,18 @@ public class WriteController extends HttpServlet {
         	response.sendRedirect("bbsList?group=" + URLEncoder.encode(groupName, "UTF-8"));
         }
     }
-    
-    private String extractFileName(Part part) {
-        String contentDisp = part.getHeader("content-disposition");
-        String[] tokens = contentDisp.split(";");
-        for (String token : tokens) {
-            if (token.trim().startsWith("filename")) {
-                return token.substring(token.indexOf("=") + 2, token.length() - 1);
-             }
-          }
-         return null;
-       }
+
+	private String extractFileName(Part part) {
+		String contentDisp = part.getHeader("content-disposition");
+		String[] tokens = contentDisp.split(";");
+		for (String token : tokens) {
+			if (token.trim().startsWith("filename")) {
+				return token.substring(token.indexOf("=") + 2, token.length() - 1);
+			}
+		}
+		return null;
 	}
-    
+}
     
     /*
 	 * package controller;

@@ -3,9 +3,12 @@ package controller;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
+import java.util.ArrayList;
 import java.io.*;
 import dao.BbsDAO;
 import dto.Bbs;
+import dao.CommentDAO;
+import dto.Comment;
  
 @WebServlet("/viewDetail") // 사용자가 게시판에서 제목을 클릭하면 실행되는 Controller(게시글 상세 보기 컨트롤러)
 public class ViewController extends HttpServlet {
@@ -29,6 +32,17 @@ public class ViewController extends HttpServlet {
 
         request.setAttribute("bbs", bbs); // 조회한 게시글 정보를 JSP로 전달
         request.setAttribute("groupName", groupName);  // 게시판 그룹명을 JSP로 전달
+        
+        // 댓글 목록 조회
+        CommentDAO commentDAO = new CommentDAO();
+        ArrayList<Comment> commentList = commentDAO.getList(bbsID);
+        request.setAttribute("commentList", commentList);
+        
         request.getRequestDispatcher("view.jsp").forward(request, response);  // view.jsp로 이동하여 게시글 상세 내용 출력
+        
+        
+        
+        
+        
     }
 }
