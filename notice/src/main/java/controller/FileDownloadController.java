@@ -4,6 +4,7 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.*;
+import java.net.URLEncoder;
 
 @WebServlet("/fileDownload")
 public class FileDownloadController extends HttpServlet {
@@ -28,8 +29,13 @@ public class FileDownloadController extends HttpServlet {
 		}
 
 		response.setContentType("application/octet-stream");
-		String encodedName = java.net.URLEncoder.encode(originalName, "UTF-8").replaceAll("\\+", "%20");
-		response.setHeader("Content-Disposition", "attachment; filename=\"" + originalName + "\"");
+		
+		String encodedName = URLEncoder.encode(originalName, "UTF-8").replace("+", "%20");
+
+		response.setHeader(
+		    "Content-Disposition",
+		    "attachment; filename=\"" + encodedName + "\"; filename*=UTF-8''" + encodedName
+		);
 		response.setContentLength((int) file.length());
 
 		try (FileInputStream fis = new FileInputStream(file); OutputStream os = response.getOutputStream()) {

@@ -130,6 +130,59 @@ public class CommentDAO {
 		}
 		return 0;
 	}
+	
+	/**
+	 * 댓글 추천 중복 확인 7-9
+	 */
+	
+	public boolean hasRecommended(int commentID, String userID) {
+	    String SQL = "SELECT * FROM CommentRecommend WHERE commentID = ? AND userID = ?";
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+	    try {
+	        conn = getConnection();
+	        pstmt = conn.prepareStatement(SQL);
+	        pstmt.setInt(1, commentID);
+	        pstmt.setString(2, userID);
+	        rs = pstmt.executeQuery();
+	        return rs.next();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(conn, pstmt, rs);
+	    }
+	    return false;
+	}
+
+	/**
+	 * 댓글 추천 7-9
+	 */
+	
+	public int recommend(int commentID, String userID) {
+	    String insertSQL = "INSERT INTO CommentRecommend (commentID, userID) VALUES (?, ?)";
+	    String updateSQL = "UPDATE Comment SET recommendCount = recommendCount + 1 WHERE commentID = ?";
+	    Connection conn = null;
+	    PreparedStatement pstmt1 = null;
+	    PreparedStatement pstmt2 = null;
+	    try {
+	        conn = getConnection();
+	        pstmt1 = conn.prepareStatement(insertSQL);
+	        pstmt1.setInt(1, commentID);
+	        pstmt1.setString(2, userID);
+	        pstmt1.executeUpdate();
+
+	        pstmt2 = conn.prepareStatement(updateSQL);
+	        pstmt2.setInt(1, commentID);
+	        return pstmt2.executeUpdate();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return -1;
+	    } finally {
+	        close(null, pstmt1, null);   // PreparedStatement가 2개라서 한 번에 못 닫으니 두 번 나눠서 호출
+	        close(conn, pstmt2, null);   
+	    }
+	}
 
 	private void close(Connection conn, PreparedStatement pstmt, ResultSet rs) {
 		try {

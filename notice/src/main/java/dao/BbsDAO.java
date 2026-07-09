@@ -263,6 +263,50 @@ public class BbsDAO {
 	    }
 	    return -1;
 	}
+	
+	/**
+	 * 게시글 조회수 증가 7-9
+	 */
+	
+	public int Inquiry(int bbsID) {
+	    String SQL = "UPDATE BBS SET inquiry = inquiry + 1 WHERE bbsID = ?";
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    try {
+	        conn = getConnection();
+	        pstmt = conn.prepareStatement(SQL);
+	        pstmt.setInt(1, bbsID);
+	        return pstmt.executeUpdate();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return -1;
+	    } finally {
+	        close(conn, pstmt, null);
+	    }
+	}
+	
+	/**
+	 * 댓글수 증가 7-9
+	 */
+	
+	public int updateCommentCount(int bbsID, int count) {
+	    String SQL = "UPDATE BBS SET Comments = ? WHERE bbsID = ?";
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    try {
+	        conn = getConnection();
+	        pstmt = conn.prepareStatement(SQL);
+	        pstmt.setInt(1, count);
+	        pstmt.setInt(2, bbsID);
+	        return pstmt.executeUpdate();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return -1;
+	    } finally {
+	        close(conn, pstmt, null);
+	    }
+	}
+	
 
 	private void close(Connection conn, PreparedStatement pstmt, ResultSet rs) {
 		try {

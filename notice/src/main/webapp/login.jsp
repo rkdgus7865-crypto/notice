@@ -52,7 +52,7 @@
 		<div class="col-lg-4">
 			<div class="jumbotron" style="padding-top: 20px">
 
-				<!-- loginController 에서 전달한 errorMsg 를 받아서 alert 띄움 -->
+				<!-- loginController,ViewController 에서 전달한 errorMsg 를 받아서 alert 띄움 -->
 				<% 
 			    if (request.getAttribute("errorMsg") != null) { 
 			    %>

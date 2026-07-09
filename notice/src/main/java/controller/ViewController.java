@@ -28,7 +28,20 @@ public class ViewController extends HttpServlet {
         }
         
         BbsDAO bbsDAO = new BbsDAO();      // 게시글 조회를 위해 DAO 객체 생성
+        bbsDAO.Inquiry(bbsID);   //  추가: 조회수 증가 7-9
         Bbs bbs = bbsDAO.getDetail(bbsID); // 게시글 번호로 DB에서 게시글 상세 정보 조회
+        
+        // 회원공개 게시글인데 비회원이면 접근 차단
+        HttpSession session = request.getSession(); 
+        String userID = (String) session.getAttribute("userID");
+        boolean isGuest = (userID == null);
+        
+        // login.jsp 에서 alert 띄우는거 재사용
+        if (bbs.getIsPublic() == 0 && isGuest) {
+            request.setAttribute("errorMsg", "회원만 열람 가능한 게시글입니다.");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
+            return; 
+        }
 
         request.setAttribute("bbs", bbs); // 조회한 게시글 정보를 JSP로 전달
         request.setAttribute("groupName", groupName);  // 게시판 그룹명을 JSP로 전달
@@ -38,11 +51,28 @@ public class ViewController extends HttpServlet {
         ArrayList<Comment> commentList = commentDAO.getList(bbsID);
         request.setAttribute("commentList", commentList);
         
+        // 하단 게시글 목록 조회 (같은 그룹, 1페이지) 7-9
+        int bottomPageNumber = 1; // 하단 게시글 목록의 현재 페이지 defalt 1
+        
+        if (request.getParameter("bottomPage") != null) {
+            bottomPageNumber = Integer.parseInt(request.getParameter("bottomPage"));
+        }
+
+        ArrayList<Bbs> bbsList = bbsDAO.getList(bottomPageNumber, groupName);
+        int totalBottomCount = bbsDAO.getTotalCount(groupName); // 전체 게시글 개수 조회
+        int totalBottomPages = (int) Math.ceil((double) totalBottomCount / 20); // 전체 페이지 수 계산 (페이지당 20개
+        int bottomStartPage = ((bottomPageNumber - 1) / 10) * 10 + 1; // 페이지 번호 시작 계산 (1~10, 11~20 ...)
+        int bottomEndPage = Math.min(bottomStartPage + 9, totalBottomPages); // 페이지 번호 끝 계산
+
+        request.setAttribute("bbsList", bbsList); // 게시글 목록을 JSP로 전달
+        request.setAttribute("bottomPageNumber", bottomPageNumber); // 현재 페이지 번호 전달
+        request.setAttribute("totalBottomPages", totalBottomPages); // 전체 페이지 수 전달
+        request.setAttribute("bottomStartPage", bottomStartPage); // 페이지 번호 시작 전달
+        request.setAttribute("bottomEndPage", bottomEndPage); // 페이지 번호 끝 전달
+        
+        request.setAttribute("bbsList", bbsList); // Controller에서 조회한 게시글 목록(bbsList)을 view.jsp로 전달
+        
         request.getRequestDispatcher("view.jsp").forward(request, response);  // view.jsp로 이동하여 게시글 상세 내용 출력
-        
-        
-        
-        
         
     }
 }

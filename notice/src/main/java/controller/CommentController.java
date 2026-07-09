@@ -5,9 +5,11 @@ import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.*;
 import java.net.URLEncoder;
+
+import dao.BbsDAO;
 import dao.CommentDAO;
 
-@WebServlet(urlPatterns = {"/commentWrite", "/commentUpdate", "/commentDelete"})
+@WebServlet(urlPatterns = {"/commentWrite", "/commentUpdate", "/commentDelete", "/commentRecommend"}) // 댓글 관련 URL 요청을 하나의 CommentController에서 처리
 public class CommentController extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
@@ -29,6 +31,8 @@ public class CommentController extends HttpServlet {
 
         if (path.equals("/commentDelete")) {
             deleteComment(request, response);
+        } else if (path.equals("/commentRecommend")) {
+            recommendComment(request, response);
         }
     }
 
@@ -60,6 +64,12 @@ public class CommentController extends HttpServlet {
         CommentDAO commentDAO = new CommentDAO();
         commentDAO.write(bbsID, userID, commentContent, secretComment);
 
+        // 댓글수 갱신 7-9
+        BbsDAO bbsDAO = new BbsDAO();
+        int count = commentDAO.getCommentCount(bbsID);
+        bbsDAO.updateCommentCount(bbsID, count);
+        
+        // 게시글 상세보기 화면으로 이동
         response.sendRedirect("viewDetail?bbsID=" + bbsID + "&group="
             + URLEncoder.encode(groupName, "UTF-8"));
     }
@@ -104,6 +114,38 @@ public class CommentController extends HttpServlet {
 
         CommentDAO commentDAO = new CommentDAO();
         commentDAO.delete(commentID, userID);
+
+        // 댓글수 갱신 7-9
+        BbsDAO bbsDAO = new BbsDAO();
+        int count = commentDAO.getCommentCount(bbsID);
+        bbsDAO.updateCommentCount(bbsID, count);
+
+        response.sendRedirect("viewDetail?bbsID=" + bbsID + "&group="
+            + URLEncoder.encode(groupName, "UTF-8"));
+    }
+    
+    // 게시글 댓글 추천
+    private void recommendComment(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        HttpSession session = request.getSession();
+        String userID = (String) session.getAttribute("userID");
+        
+        // URL에서 댓글 번호, 게시글 번호, 게시판 그룹명 가져오기
+        int commentID = Integer.parseInt(request.getParameter("commentID"));
+        int bbsID = Integer.parseInt(request.getParameter("bbsID"));
+        String groupName = request.getParameter("group");
+
+        
+        if (userID == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        // 아직 추천하지 않은 경우에만 추천 처리
+        CommentDAO commentDAO = new CommentDAO();
+        if (!commentDAO.hasRecommended(commentID, userID)) {
+            commentDAO.recommend(commentID, userID);
+        }
 
         response.sendRedirect("viewDetail?bbsID=" + bbsID + "&group="
             + URLEncoder.encode(groupName, "UTF-8"));
