@@ -24,6 +24,7 @@
     int startPage       = (Integer) request.getAttribute("startPage");
     int endPage         = (Integer) request.getAttribute("endPage");
     int pageNumber      = (Integer) request.getAttribute("pageNumber");
+    int startNumber 	= (Integer) request.getAttribute("startNumber"); // 자유,공지,질문 게시판 목록 각각 번호가 독립
     %>
 
     <nav class="navbar navbar-default">
@@ -103,39 +104,32 @@
                         <th style="background-color: #eeeeee; text-align: center;">공개여부</th>
                     </tr>
                 </thead>
-                <tbody id ="bbsTableBody">
-                <% /* 컨트롤러 dao 에서 처리 하도록 수정  */
-                for (int i = 0; i < list.size(); i++) {
-                    String bbsDate = list.get(i).getBbsDate();
-                    String today = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
-                    String displayDate;
-                    if (bbsDate.startsWith(today)) {
-                        displayDate = bbsDate.substring(11, 13) + "시 " + bbsDate.substring(14, 16) + "분";
-                    } else {
-                        displayDate = bbsDate.substring(0, 10);
-                    }
-                %>
-                    <tr>  <!-- 게시글 목록 화면 출력  -->
-                        <td><%= list.get(i).getBbsID() %></td> <!-- 작성자 ID 출력  -->
-                        
-						<td> <!-- 게시판 목록 제목 클릭 시 ViewController(viewDetail) 호출, 추천수 10개 이상이면 제목을 굵게 표시 7-7 -->
-						<a href="viewDetail?bbsID=<%=list.get(i).getBbsID()%>&group=<%=groupName%>"
+				<tbody id="bbsTableBody">
+					<%
+				    for (int i = 0; i < list.size(); i++) {
+					%>
+					<tr>
+						<!-- 게시글 목록 화면 출력  -->
+						<td><%=startNumber - i%></td>
+						<td>
+							<!-- 게시판 목록 제목 클릭 시 ViewController(viewDetail) 호출, 추천수 10개 이상이면 제목을 굵게 표시 7-7 -->
+							<a href="viewDetail?bbsID=<%=list.get(i).getBbsID()%>&group=<%=groupName%>"
 							style="<%=list.get(i).getIsBold() ? "font-weight: bold; font-size:16px; color:black;" : "color:black;"%>">
 								<%=list.get(i).getBbsTitle()%>
-						</a></td> <!--  -->
-						
+						</a>
+						</td>
 						<td><%=list.get(i).getUserID()%></td>
-                        <td><%= displayDate %></td>
-                        <td><%= list.get(i).getInquiry() %></td>
-                        <td><%= list.get(i).getRecommendation() %></td>
-                        <td><%= list.get(i).getComments() %></td>
-                        <td><%= list.get(i).getIsPublic() == 1 ? "전체공개" : "회원공개" %></td>
-                    </tr>
-                <%
-                }
-                %>
-                </tbody>
-            </table>
+						<td><%=list.get(i).getBbsDate()%></td>
+						<td><%=list.get(i).getInquiry()%></td>
+						<td><%=list.get(i).getRecommendation()%></td>
+						<td><%=list.get(i).getComments()%></td>
+						<td><%=list.get(i).getIsPublic() == 1 ? "전체공개" : "회원공개"%></td>
+					</tr>
+					<%
+					}
+					%>
+				</tbody>
+			</table>
 
             <!-- 페이징 -->
             <div id="pagingArea" style="text-align: center; margin-top: 10px;">
@@ -195,13 +189,14 @@
 							ajax : "true" // Ajax 요청 표시
 						},
 						success : function(data) {
+							 var startNumber = data.startNumber;  // 자유,공지,질문 게시판 목록 각각 번호가 독립
 							// tbody 내용 교체
 							var tbody = "";
 							for (var i = 0; i < data.list.length; i++) {
 								var bbs = data.list[i];
 								tbody += "<tr>";
-								tbody += "<td>" + bbs.bbsID + "</td>";
-										
+								/* tbody += "<td>" + bbs.bbsID + "</td>"; */
+								tbody += "<td>" + (startNumber - i) + "</td>";   // 자유,공지,질문 게시판 목록 각각 번호가 독립
 								// 비동기 방식으로 페이징 넘길때 추천수 10개 이상이면 제목 굶게 수정 7-7
 							    var style = bbs.isBold ? "font-weight: bold; font-size:16px; color:black;" : "color:black;";
 								tbody += "<td><a href='viewDetail?bbsID=" + bbs.bbsID + "&group=" + currentGroup 

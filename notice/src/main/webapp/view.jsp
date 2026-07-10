@@ -21,12 +21,12 @@
 	Bbs bbs = (Bbs) request.getAttribute("bbs");
 	ArrayList<Comment> commentList = (ArrayList<Comment>) request.getAttribute("commentList");
 	
-	ArrayList<Bbs> bbsList = (ArrayList<Bbs>) request.getAttribute("bbsList"); // 7-9
+	ArrayList<Bbs> bbsList  = (ArrayList<Bbs>) request.getAttribute("bbsList"); // 7-9
 	int bottomPageNumber 	= (Integer) request.getAttribute("bottomPageNumber");
 	int totalBottomPages 	= (Integer) request.getAttribute("totalBottomPages");
 	int bottomStartPage 	= (Integer) request.getAttribute("bottomStartPage");
 	int bottomEndPage 		= (Integer) request.getAttribute("bottomEndPage");
-	
+	int bottomStartNumber 	= (Integer) request.getAttribute("bottomStartNumber");
 	%>
 	<nav class="navbar navbar-default">
 		<div class="navbar-header">
@@ -126,9 +126,9 @@
 	
 	<!-- 댓글 영역 -->
 	<div class="container" style="margin-top: 20px;">
-		
+		<h4>
 			댓글 (<%=commentList.size()%>)
-		
+		</h4>
 
 		<table class="table table-bordered">
 			<%
@@ -246,7 +246,7 @@
 							 <!--  게시글 상세 목록 화면 출력  -->
 					<tr <%if (isCurrent) {%> style="background-color: #fffbe6;"
 						<%}%>>
-						<td><%=row.getBbsID()%></td>
+						<td><%=bottomStartNumber - i%></td>
 						<td><a
 							href="viewDetail?bbsID=<%=row.getBbsID()%>&group=<%=groupName%>">
 								<%=row.getBbsTitle()%>
@@ -263,7 +263,7 @@
 					%>
 				</tbody>
 			</table>
-		<!-- 게시글 상세 게시글 목록 페이징 7-9  -->
+		<!-- 게시글 상세 게시글 목록 페이징  -->
 		<div style="text-align: center; margin-top: 10px;">
 			<!-- 이전 화살표 -->
 			<%

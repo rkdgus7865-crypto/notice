@@ -38,9 +38,12 @@ public class BbsController extends HttpServlet {
 
         // 페이징 계산
         int totalCount = bbsDAO.getTotalCount(groupName); // bbsDAO 클래스에 totalCount 값 전달
-        int totalPages = (int) Math.ceil((double) totalCount / 20);
-        int startPage  = ((pageNumber - 1) / 10) * 10 + 1;
-        int endPage    = Math.min(startPage + 9, totalPages);
+        int totalPages = (int) Math.ceil((double) totalCount / 20); // 한 페이지에 보이는 게시글 개수
+        int startPage  = ((pageNumber - 1) / 5) * 5 + 1; //페이지 번호 그룹 개수 1,2,3,4,5
+        int endPage    = Math.min(startPage + 4, totalPages);
+         
+        // 그룹 내 순번 계산  // 자유,공지,질문 게시판 목록 각각 번호가 독립
+        int startNumber = totalCount - ((pageNumber - 1) * 20);
         
         if ("true".equals(ajax)) {
             // ✅ Ajax 요청이면 JSON 으로 응답
@@ -54,6 +57,7 @@ public class BbsController extends HttpServlet {
             json.append("\"startPage\":" + startPage + ",");
             json.append("\"endPage\":" + endPage + ",");
             json.append("\"pageNumber\":" + pageNumber + ",");
+            json.append("\"startNumber\":" + startNumber + ","); // 자유,공지,질문 게시판 목록 각각 번호가 독립
             json.append("\"groupName\":\"" + groupName + "\","); // 게시판 그룹명 추가
             json.append("\"list\":["); // 게시글 목록 시작 
 
@@ -86,6 +90,7 @@ public class BbsController extends HttpServlet {
         request.setAttribute("startPage", startPage);
         request.setAttribute("endPage", endPage);
         request.setAttribute("pageNumber", pageNumber);
+        request.setAttribute("startNumber", startNumber);// 자유,공지,질문 게시판 목록 각각 번호가 독립   
         request.setAttribute("groupName", groupName);
 
         request.getRequestDispatcher("bbs.jsp").forward(request, response);

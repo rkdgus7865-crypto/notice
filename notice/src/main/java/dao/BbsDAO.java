@@ -122,43 +122,53 @@ public class BbsDAO {
 	    return 0;
 	}
 	
-	
 	public ArrayList<Bbs> getList(int pageNumber, String groupName){
-		String SQL = "SELECT * FROM BBS WHERE bbsID < ? AND bbsAvailable = 1 AND groupName = ? ORDER BY bbsID DESC LIMIT 20";
-		ArrayList<Bbs> list = new ArrayList<Bbs>();
-		
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try {
-			conn = getConnection();
-			pstmt = conn.prepareStatement(SQL);
-			pstmt.setInt(1, getNext() - (pageNumber - 1) * 20);
-			pstmt.setString(2, groupName);
-			rs = pstmt.executeQuery();
-			
-			while (rs.next()) {
-				Bbs bbs = new Bbs();
-				bbs.setBbsID(rs.getInt(1));
-				bbs.setBbsTitle(rs.getString(2));
-				bbs.setUserID(rs.getString(3));
-				bbs.setBbsDate(rs.getString(4));
-				bbs.setBbsContent(rs.getString(5));
-				bbs.setBbsAvailable(rs.getInt(6));
-				bbs.setInquiry(rs.getInt(7));
-				bbs.setRecommendation(rs.getInt(8)); 
-				bbs.setComments(rs.getInt(9)); 
-				bbs.setIsPublic(rs.getInt(10));
-				bbs.setIsBold(bbs.getRecommendation() >= 10);   // 추천수 10개 이상이면 게시글 제목 굶게 7-7
+	    String SQL = "SELECT * FROM BBS WHERE bbsAvailable = 1 AND groupName = ? "
+	        + "ORDER BY bbsID DESC LIMIT 20 OFFSET ?";
+	    ArrayList<Bbs> list = new ArrayList<Bbs>();
 
-				list.add(bbs);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			close(conn, pstmt, rs);
-		}
-		return list;
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+	    try {
+	        conn = getConnection();
+	        int offset = (pageNumber - 1) * 20;
+	        pstmt = conn.prepareStatement(SQL);
+	        pstmt.setString(1, groupName);
+	        pstmt.setInt(2, offset);
+	        rs = pstmt.executeQuery();
+	        while (rs.next()) {
+	            Bbs bbs = new Bbs();
+	            bbs.setBbsID(rs.getInt("bbsID"));
+	            bbs.setBbsTitle(rs.getString("bbsTitle"));
+	            bbs.setUserID(rs.getString("userID"));
+
+	            // 날짜 가공: 오늘 작성글이면 시간, 아니면 날짜만 표시
+	            String rawDate = rs.getString("bbsDate");
+	            String today = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+	            String displayDate;
+	            if (rawDate.startsWith(today)) {
+	                displayDate = rawDate.substring(11, 13) + "시 " + rawDate.substring(14, 16) + "분";
+	            } else {
+	                displayDate = rawDate.substring(0, 10);
+	            }
+	            bbs.setBbsDate(displayDate);
+
+	            bbs.setBbsContent(rs.getString("bbsContent"));
+	            bbs.setBbsAvailable(rs.getInt("bbsAvailable"));
+	            bbs.setInquiry(rs.getInt("inquiry"));
+	            bbs.setRecommendation(rs.getInt("recommendation"));
+	            bbs.setComments(rs.getInt("Comments"));
+	            bbs.setIsPublic(rs.getInt("bbsPublic"));
+	            bbs.setIsBold(bbs.getRecommendation() >= 10);
+	            list.add(bbs);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(conn, pstmt, rs);
+	    }
+	    return list;
 	}
 	
 	/**
