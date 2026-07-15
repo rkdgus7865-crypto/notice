@@ -58,7 +58,7 @@
 				<% } %>
 
 				<!--  action 변경 -->
-				<form method="post" action="joinAction">
+				<form method="post" action="joinAction" onsubmit="return validateJoin()">
 					<!-- 회원가입 폼 입력값을 JoinController로 전송 및 joinController 호출-->
 					<h3 style="text-align: center;">회원가입</h3>
 					<div class="form-group">
@@ -115,14 +115,45 @@
 							name="userDateOfBirth" maxlength="20">
 					</div>
 
-					<div class="form-group">
-						<label style="display: block; text-align: center;">가입일</label> <input
-							type="date" class="form-control" placeholder="가입일"
-							name="userDateOfJoining" maxlength="20">
-					</div>
 					<input type="submit" class="btn btn-primary form-control"
 						value="회원가입">
 				</form>
+
+				<script>
+					function validateJoin() {
+						var fields = [ {
+							name : "userID",
+							label : "아이디"
+						}, {
+							name : "userPassword",
+							label : "비밀번호"
+						}, {
+							name : "userName",
+							label : "이름"
+						}, {
+							name : "userEmail",
+							label : "이메일"
+						}, {
+							name : "userAddress",
+							label : "주소"
+						}, {
+							name : "userPhone",
+							label : "전화번호"
+						}, {
+							name : "userDateOfBirth",
+							label : "생년월일"
+						} ];
+
+						for (var i = 0; i < fields.length; i++) {
+							var value = document.getElementsByName(fields[i].name)[0].value;
+							if (value.trim() === "") {
+								alert(fields[i].label + "를 입력해주세요.");
+								return false;
+							}
+						}
+						return true;
+					}
+				</script>
 			</div>
 		</div>
 		<div class="col-lg-4"></div>

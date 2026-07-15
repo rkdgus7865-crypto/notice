@@ -72,7 +72,8 @@ public class BbsController extends HttpServlet {
                 json.append("\"recommendation\":" + bbs.getRecommendation() + ",");
                 json.append("\"comments\":" 	  + bbs.getComments() + ",");
                 json.append("\"isPublic\":" 	  + bbs.getIsPublic() + ",");   
-                json.append("\"isBold\":" 	      + bbs.getIsBold());  // 추천수 10개 이상이면 제목 굶게 수정 7-7
+                json.append("\"isBold\":" 	      + bbs.getIsBold() + ",");     // 추천수 10개 이상이면 제목 굶게 수정 7-7
+                json.append("\"isNotice\":" 	  + bbs.getIsNotice());        
                 json.append("}");
                 
 				if (i < list.size() - 1)

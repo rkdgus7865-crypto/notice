@@ -32,12 +32,17 @@ public class ViewController extends HttpServlet {
         String userID = (String) session.getAttribute("userID");
         boolean isGuest = (userID == null);
         
-        BbsDAO bbsDAO = new BbsDAO();      // 게시글 조회를 위해 DAO 객체 생성
+		/*
+		 * String viewedKey = "viewed_" + bbsID; if (session.getAttribute(viewedKey) ==
+		 * null) { bbsDAO.Inquiry(bbsID); // 조회수 증가 Inquiry Dao 메소드 호출
+		 * session.setAttribute(viewedKey, true); }
+		 */
         
-        String viewedKey = "viewed_" + bbsID;
-        if (session.getAttribute(viewedKey) == null) {
-            bbsDAO.Inquiry(bbsID); // 조회수 증가 Inquiry Dao 메소드 호출 
-            session.setAttribute(viewedKey, true);
+        String fromRecommend = request.getParameter("fromRecommend");
+        BbsDAO bbsDAO = new BbsDAO();      // 게시글 조회를 위해 DAO 객체 생성
+
+        if (!"true".equals(fromRecommend)) {
+            bbsDAO.Inquiry(bbsID);
         }
         
         Bbs bbs = bbsDAO.getDetail(bbsID); // 게시글 번호로 DB에서 게시글 상세 정보 조회

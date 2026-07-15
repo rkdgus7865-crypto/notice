@@ -32,8 +32,8 @@ public class RecommendController extends HttpServlet {
 
         try {
             // 추천 완료 후 해당 게시글 상세보기로 이동
-            response.sendRedirect("viewDetail?bbsID=" + bbsID + "&group=" 
-                + URLEncoder.encode(groupName, "UTF-8"));
+        	response.sendRedirect("viewDetail?bbsID=" + bbsID + "&group=" 
+        		   + URLEncoder.encode(groupName, "UTF-8") + "&fromRecommend=true");
         } catch (Exception e) {
             e.printStackTrace();
         }

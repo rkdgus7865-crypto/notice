@@ -17,7 +17,10 @@ public class CommentDAO {
 		return DriverManager.getConnection(dbURL, dbID, dbPassword);
 	}
 
-	// 댓글 등록
+	/**
+	 *  댓글 등록
+	 */
+	
 	public int write(int bbsID, String userID, String commentContent, int secretComment) {
 		String SQL = "INSERT INTO Comment (bbsID, userID, commentContent, secretComment) VALUES (?, ?, ?, ?)";
 		Connection conn = null;
@@ -38,7 +41,10 @@ public class CommentDAO {
 		}
 	}
 
-	// 게시글별 댓글 목록 조회
+	/**
+	 *  게시글별 댓글 목록 조회
+	 */
+	
 	public ArrayList<Comment> getList(int bbsID) {
 		String SQL = "SELECT * FROM Comment WHERE bbsID = ? AND commentAvailable = 1 ORDER BY commentID ASC";
 		ArrayList<Comment> list = new ArrayList<Comment>();
@@ -71,7 +77,10 @@ public class CommentDAO {
 		return list;
 	}
 
-	// 댓글 수정 (본인 확인 포함)
+	/**
+	 *  댓글 수정 (본인 확인 포함)
+	 */
+	
 	public int update(int commentID, String userID, String commentContent) {
 		String SQL = "UPDATE Comment SET commentContent = ?, commentUpdateDate = NOW() WHERE commentID = ? AND userID = ?";
 		Connection conn = null;
@@ -91,7 +100,10 @@ public class CommentDAO {
 		}
 	}
 
-	// 댓글 삭제 (소프트 삭제, 본인 확인 포함)
+	/**
+	 *  댓글 삭제 (소프트 삭제, 본인 확인 포함)
+	 */
+	
 	public int delete(int commentID, String userID) {
 		String SQL = "UPDATE Comment SET commentAvailable = 0 WHERE commentID = ? AND userID = ?";
 		Connection conn = null;
@@ -110,7 +122,10 @@ public class CommentDAO {
 		}
 	}
 
-	// 게시글의 댓글 수 카운트
+	/**
+	 *  게시글의 댓글 수 카운트
+	 */
+	
 	public int getCommentCount(int bbsID) {
 		String SQL = "SELECT COUNT(*) FROM Comment WHERE bbsID = ? AND commentAvailable = 1";
 		Connection conn = null;

@@ -112,6 +112,9 @@
 						<!-- 게시글 목록 화면 출력  -->
 						<td><%=startNumber - i%></td>
 						<td>
+						  <% if (list.get(i).getIsNotice() == 1) { %>
+       						 <span style="color: red; font-weight: bold;">[공지]</span> <!-- 공지글은 빨간색으로 표시  -->
+  						  <% } %>
 							<!-- 게시판 목록 제목 클릭 시 ViewController(viewDetail) 호출, 추천수 10개 이상이면 제목을 굵게 표시 7-7 -->
 							<a href="viewDetail?bbsID=<%=list.get(i).getBbsID()%>&group=<%=groupName%>"
 							style="<%=list.get(i).getIsBold() ? "font-weight: bold; font-size:16px; color:black;" : "color:black;"%>">
@@ -198,10 +201,10 @@
 								/* tbody += "<td>" + bbs.bbsID + "</td>"; */
 								tbody += "<td>" + (startNumber - i) + "</td>";   // 자유,공지,질문 게시판 목록 각각 번호가 독립
 								// 비동기 방식으로 페이징 넘길때 추천수 10개 이상이면 제목 굶게 수정 7-7
+							    var noticeTag = bbs.isNotice == 1 ? "<span style='color:red; font-weight:bold;'>[공지]</span> " : "";
 							    var style = bbs.isBold ? "font-weight: bold; font-size:16px; color:black;" : "color:black;";
-								tbody += "<td><a href='viewDetail?bbsID=" + bbs.bbsID + "&group=" + currentGroup 
-								 + "' style='" + style + "'>" + bbs.bbsTitle + "</a></td>";
-										
+								tbody += "<td>" + noticeTag + "<a href='viewDetail?bbsID=" + bbs.bbsID + "&group=" + currentGroup 
+  									  + "' style='" + style + "'>" + bbs.bbsTitle + "</a></td>";
 								tbody += "<td>" + bbs.userID + "</td>";
 								tbody += "<td>" + bbs.bbsDate + "</td>";
 								tbody += "<td>" + bbs.inquiry + "</td>";

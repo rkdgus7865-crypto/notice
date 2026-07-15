@@ -28,10 +28,13 @@ public class LoginController extends HttpServlet {
 		HttpSession session = request.getSession();
 
 		if (result == 1) {
-			session.setAttribute("userID", userID);
-			session.setAttribute("userGrade", userDAO.getGrade(userID));
-			response.sendRedirect("main.jsp");
-		} else {
+		    session.setAttribute("userID", userID);
+		    session.setAttribute("userGrade", userDAO.getGrade(userID));
+		    String name = userDAO.getName(userID);
+		    System.out.println("조회된 이름: " + name);   // ← 임시 확인용
+		    session.setAttribute("userName", name);
+		    response.sendRedirect("main.jsp");
+		}else {
 			String msg = "";
 			if (result == 0)
 				msg = "비밀번호가 틀립니다.";

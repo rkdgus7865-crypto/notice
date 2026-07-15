@@ -7,6 +7,12 @@ import java.sql.ResultSet;
 import dto.User;
 
 public class UserDAO {
+	
+	/**
+	 * 
+	 * MySql DB 연결
+	 * 
+	 */
 
 	private Connection getConnection() throws Exception {
 		String dbURL = "jdbc:mysql://localhost:3306/BBS";
@@ -16,7 +22,13 @@ public class UserDAO {
 		return DriverManager.getConnection(dbURL, dbID, dbPassword);
 	}
 
-	// 로그인
+	
+	/**
+	 * 
+	 * 로그인 
+	 * 
+	 */
+	
 	public int login(String userID, String userPassword) {
 		String SQL = "SELECT userPassword FROM USER WHERE userID = ?";
 		Connection conn = null;
@@ -43,11 +55,19 @@ public class UserDAO {
 		return -2; // DB 오류
 	}
 
-	// 회원가입
+	/**
+	 * 
+	 * 회원가입
+	 * 
+	 */
+	
 	public int join(User user) {
 		String SQL = "INSERT INTO USER " + "(userID, userPassword, userName, userGender, userEmail, "
 				+ "userAddress, userPhone, userDateOfBirth, userDateOfJoining, userGrade) "
 				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		
+		String joinDate = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date());
+		
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		try {
@@ -61,7 +81,7 @@ public class UserDAO {
 			pstmt.setString(6, user.getUserAddress());
 			pstmt.setString(7, user.getUserPhone());
 			pstmt.setString(8, user.getUserDateOfBirth());
-			pstmt.setString(9, user.getUserDateOfJoining());
+		    pstmt.setString(9, joinDate); // 사용자가 입력값 받지 않고 joinDate로  처리 
 			pstmt.setString(10, user.getUserGrade());
 			return pstmt.executeUpdate();
 		} catch (Exception e) {
@@ -72,7 +92,12 @@ public class UserDAO {
 		return -1;
 	}
 
-	// 회원 등급 조회
+	/**
+	 * 
+	 *  회원 등급 조회
+	 * 
+	 */
+	
 	public String getGrade(String userID) {
 		String SQL = "SELECT userGrade FROM USER WHERE userID = ?";
 		Connection conn = null;
@@ -93,8 +118,40 @@ public class UserDAO {
 		}
 		return null;
 	}
+	
+	/**
+	 * 	
+	 *  로그인 후 상단에 이름 표시 메서드
+	 * 
+	 */
+	
+	public String getName(String userID) {
+	    String SQL = "SELECT userName FROM USER WHERE userID = ?";
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+	    try {
+	        conn = getConnection();
+	        pstmt = conn.prepareStatement(SQL);
+	        pstmt.setString(1, userID);
+	        rs = pstmt.executeQuery();
+	        if (rs.next()) {
+	            return rs.getString("userName");
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(conn, pstmt, rs);
+	    }
+	    return null;
+	}
 
-	// 자원 해제 메서드
+	/**
+	 * 	
+	 *  자원 해제 메서드
+	 * 
+	 */
+	 
 	private void close(Connection conn, PreparedStatement pstmt, ResultSet rs) {
 		try {
 			if (rs != null) rs.close();

@@ -36,8 +36,10 @@ public class WriteController extends HttpServlet {
         String bbsContent = request.getParameter("bbsContent");
         String bbsPublic   = request.getParameter("bbsPublic"); // 회원 비회원 게시글 공개여부
         String groupName  = request.getParameter("groupName"); // 게시판 종류
+        String noticeParam = request.getParameter("isNotice"); // 공지용 게시글
         
         int publicValue = (bbsPublic != null) ? 1 : 0; // 체크 O → 1 (전체공개), 체크 X → 0 (회원공개)
+        int isNotice 	= (noticeParam != null) ? 1 : 0;
         // 빈값 체크
         if (bbsTitle.isBlank() || bbsContent.isBlank())
         {
@@ -47,15 +49,16 @@ public class WriteController extends HttpServlet {
         }
         
         // 파일 업로드 처리를 위한 변수
-        String originalFileName  = null;
+        String originalFileName  = null; // uploadFile 여행사진.png
         String savedFileName	 = null;
         
-        Part filePart = request.getPart("uploadFile");
-        if (filePart != null && filePart.getSize() > 0) {
-            originalFileName = extractFileName(filePart);
-            savedFileName = UUID.randomUUID().toString() + "_" + originalFileName;
-
-            String uploadPath = getServletContext().getRealPath("/uploads");
+        Part filePart = request.getPart("uploadFile"); // uploadFile -> 여행사진.png
+        if (filePart != null && filePart.getSize() > 0) { // 파일을 선택했는지 확인 파일을 안 올렸으면 저장하지 않음
+            originalFileName = extractFileName(filePart); // 업로드한 파일 이름을 얻음 에를들어 여행사진.png originalFileName -> 여행사진.png
+            savedFileName = UUID.randomUUID().toString() + "_" + originalFileName; // 파일명을 UUID를 붙여 바꾸는 것 여행사진.png -> 6f64d09c-09be-4bcb-aaf7-2f5c83c84f62_여행사진.png  
+            																	   // 왜? 같은 이름의 파일이 올라와도 서로 덮어쓰지 않도록 하기 위해
+            
+            String uploadPath = getServletContext().getRealPath("/uploads"); // 파일 저장 위치를 결정하는 코드
             File uploadDir = new File(uploadPath);
             if (!uploadDir.exists()) uploadDir.mkdirs();
 
@@ -66,13 +69,12 @@ public class WriteController extends HttpServlet {
         BbsDAO bbsDAO = new BbsDAO(); //BbsDAO 객체 생성 (DB 연결 준비)
         System.out.println("groupName: " + groupName);
 
-        int result = bbsDAO.write(bbsTitle, userID, bbsContent, publicValue, groupName,originalFileName, savedFileName);
+        int result = bbsDAO.write(bbsTitle, userID, bbsContent, publicValue, groupName,originalFileName, savedFileName, isNotice);
         System.out.println("result: " + result);
         if (result == -1) {
             request.setAttribute("errorMsg", "글쓰기에 실패했습니다.");
             request.getRequestDispatcher("write.jsp").forward(request, response);
         } else {
-			/* response.sendRedirect("bbs.jsp"); */
         	response.sendRedirect("bbsList?group=" + URLEncoder.encode(groupName, "UTF-8"));
         }
     }

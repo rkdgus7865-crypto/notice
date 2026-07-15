@@ -13,8 +13,10 @@
 
 	<%
     String userID = null;
+    String userName = null;
     if (session.getAttribute("userID") != null) {
         userID = (String) session.getAttribute("userID");
+        userName = (String) session.getAttribute("userName");
     }
 	%>
 	
@@ -62,6 +64,7 @@
 			 { 
 			 %>
 			<ul class="nav navbar-nav navbar-right">
+				<li style="padding: 15px 10px; color: black;"><%=userName%>님 환영합니다</li>
 				<li class="dropdown"><a href="#" class="dropdown-toggle"
 					data-toggle="dropdown" role="button" aria-haspopup="true"
 					aria-expanded="false"> 회원관리<span class="caret"></span>

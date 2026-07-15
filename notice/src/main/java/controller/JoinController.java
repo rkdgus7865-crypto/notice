@@ -17,7 +17,7 @@ public class JoinController extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8"); // 요청 데이터를 UTF-8(한글) 인코딩으로 처리
         response.setContentType("text/html; charset=UTF-8"); // 응답 데이터를 HTML 형식, UTF-8(한글) 인코딩으로 브라우저에 전송
-
+       
         // 이미 로그인된 경우
         HttpSession session = request.getSession();
         String sessionUserID = (String) session.getAttribute("userID");
@@ -35,11 +35,10 @@ public class JoinController extends HttpServlet {
         String userAddress  = request.getParameter("userAddress");
         String userPhone    = request.getParameter("userPhone");
         String userDateOfBirth = request.getParameter("userDateOfBirth");
-        String userDateOfJoining = request.getParameter("userDateOfJoining");
         
         if ( userID.isBlank()  || userPassword.isBlank()    || userName.isBlank()   || 
         	userGender.isBlank() || userEmail.isBlank()     || userAddress.isBlank() || 
-        	userPhone.isBlank()  || userDateOfBirth.isBlank() || userDateOfJoining.isBlank())
+				userPhone.isBlank() || userDateOfBirth.isBlank())
         	
         {
             request.setAttribute("errorMsg", "입력이 안 된 사항이 있습니다.");
@@ -57,7 +56,6 @@ public class JoinController extends HttpServlet {
         user.setUserAddress(userAddress);      
         user.setUserPhone(userPhone);           
         user.setUserDateOfBirth(userDateOfBirth); 
-        user.setUserDateOfJoining(userDateOfJoining); 
         
         String isVerified = request.getParameter("isVerified");
         

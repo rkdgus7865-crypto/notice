@@ -10,7 +10,7 @@ import dao.BbsDAO;
 import dao.CommentDAO;
 
 @WebServlet(urlPatterns = {"/commentWrite", "/commentUpdate", "/commentDelete", "/commentRecommend"}) // 댓글 관련 URL 요청을 하나의 CommentController에서 처리
-public class CommentController extends HttpServlet {
+public class CommentController extends HttpServlet { 
     private static final long serialVersionUID = 1L;
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -51,13 +51,13 @@ public class CommentController extends HttpServlet {
 
         if (userID == null || !"VERIFIED".equals(userGrade)) {
             response.sendRedirect("viewDetail?bbsID=" + bbsID + "&group="
-                + URLEncoder.encode(groupName, "UTF-8"));
+                + URLEncoder.encode(groupName, "UTF-8") + "&fromRecommend=true");
             return;
         }
 
         if (commentContent == null || commentContent.isBlank()) {
             response.sendRedirect("viewDetail?bbsID=" + bbsID + "&group="
-                + URLEncoder.encode(groupName, "UTF-8"));
+                + URLEncoder.encode(groupName, "UTF-8") + "&fromRecommend=true");
             return;
         }
 
@@ -71,7 +71,7 @@ public class CommentController extends HttpServlet {
         
         // 게시글 상세보기 화면으로 이동
         response.sendRedirect("viewDetail?bbsID=" + bbsID + "&group="
-            + URLEncoder.encode(groupName, "UTF-8"));
+            + URLEncoder.encode(groupName, "UTF-8") + "&fromRecommend=true");
     }
 
     // 댓글 수정 (본인만)
@@ -94,7 +94,7 @@ public class CommentController extends HttpServlet {
         commentDAO.update(commentID, userID, commentContent);
 
         response.sendRedirect("viewDetail?bbsID=" + bbsID + "&group="
-            + URLEncoder.encode(groupName, "UTF-8"));
+            + URLEncoder.encode(groupName, "UTF-8") + "&fromRecommend=true" );
     }
 
     // 댓글 삭제 (본인만)
@@ -121,7 +121,7 @@ public class CommentController extends HttpServlet {
         bbsDAO.updateCommentCount(bbsID, count);
 
         response.sendRedirect("viewDetail?bbsID=" + bbsID + "&group="
-            + URLEncoder.encode(groupName, "UTF-8"));
+            + URLEncoder.encode(groupName, "UTF-8") + "&fromRecommend=true");
     }
     
     // 게시글 댓글 추천

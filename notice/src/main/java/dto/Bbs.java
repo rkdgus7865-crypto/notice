@@ -15,6 +15,7 @@ public class Bbs {
 	private boolean isBold; 			// 게시글의 추천수 10개 이상 시 게시글 제목 굶게 표시 하기 위한 필드  (DB에 없고 recommendation, groupName 값으로 그때그때 Java 코드에서만  산되는 값
 	private String originalFileName;	// 사용자가 업로드한 원래 파일명 (다운로드 시 표시)
 	private String savedFileName;		// 서버에 저장된 실제 파일명 (중복 방지용 UUID 등)
+	private int isNotice;				// 게시판 공지글
 
 	public int getBbsID() {
 		return bbsID;
@@ -100,5 +101,13 @@ public class Bbs {
 	}
 	public void setSavedFileName(String savedFileName) {
 		this.savedFileName = savedFileName;
+	}
+
+	public int getIsNotice() {
+		return isNotice;
+	}
+
+	public void setIsNotice(int isNotice) {
+		this.isNotice = isNotice;
 	}
 }
