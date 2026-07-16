@@ -81,7 +81,7 @@ public class UserDAO {
 			pstmt.setString(6, user.getUserAddress());
 			pstmt.setString(7, user.getUserPhone());
 			pstmt.setString(8, user.getUserDateOfBirth());
-		    pstmt.setString(9, joinDate); // 사용자가 입력값 받지 않고 joinDate로  처리 
+		    pstmt.setString(9, joinDate); // 사용자 입력값 받지 않고 joinDate로  처리 
 			pstmt.setString(10, user.getUserGrade());
 			return pstmt.executeUpdate();
 		} catch (Exception e) {

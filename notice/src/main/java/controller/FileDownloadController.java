@@ -11,6 +11,10 @@ public class FileDownloadController extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * 파일 다운로드
+	 */
+	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		

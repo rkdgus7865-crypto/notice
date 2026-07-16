@@ -1,0 +1,40 @@
+/*
+ * package backupController;
+ * 
+ * import javax.servlet.*; import javax.servlet.http.*; import
+ * javax.servlet.annotation.*; import java.io.*; import java.net.URLEncoder;
+ * 
+ * @WebServlet("/fileDownload") public class FileDownloadController extends
+ * HttpServlet {
+ * 
+ * private static final long serialVersionUID = 1L;
+ * 
+ * protected void doGet(HttpServletRequest request, HttpServletResponse
+ * response) throws ServletException, IOException {
+ * 
+ * request.setCharacterEncoding("UTF-8");
+ * response.setContentType("text/html; charset=UTF-8");
+ * 
+ * String fileName = request.getParameter("fileName"); String originalName =
+ * request.getParameter("originalName");
+ * 
+ * String uploadPath = getServletContext().getRealPath("/uploads"); File file =
+ * new File(uploadPath, fileName);
+ * 
+ * if (!file.exists()) { response.sendError(HttpServletResponse.SC_NOT_FOUND);
+ * return; }
+ * 
+ * response.setContentType("application/octet-stream");
+ * 
+ * String encodedName = URLEncoder.encode(originalName, "UTF-8").replace("+",
+ * "%20");
+ * 
+ * response.setHeader( "Content-Disposition", "attachment; filename=\"" +
+ * encodedName + "\"; filename*=UTF-8''" + encodedName );
+ * response.setContentLength((int) file.length());
+ * 
+ * try (FileInputStream fis = new FileInputStream(file); OutputStream os =
+ * response.getOutputStream()) { byte[] buffer = new byte[4096]; int bytesRead;
+ * while ((bytesRead = fis.read(buffer)) != -1) { os.write(buffer, 0,
+ * bytesRead); } } } }
+ */
