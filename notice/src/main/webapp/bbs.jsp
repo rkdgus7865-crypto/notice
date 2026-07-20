@@ -1,6 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="dao.BbsDAO" %>
-<%@ page import="dto.Bbs" %>
+<%@ page import="dto.Bbs" %> <!--이건 필요해 — ArrayList<Bbs> list 타입 캐스팅  -->
 <%@ page import="java.util.ArrayList" %>
 <!DOCTYPE html>
 <html>
@@ -11,82 +10,22 @@
 <title>게시판</title>
 </head>
 <body>
-    <%
-    /* 세션에서 값 가져오기 */
-    String userID    = (String) session.getAttribute("userID");
-    String userGrade = (String) session.getAttribute("userGrade");
-    boolean isGuest    = (userID == null);
-    boolean isVerified = "VERIFIED".equals(userGrade);
+	<%
+	String userGrade = (String) session.getAttribute("userGrade");
+	boolean isVerified = "VERIFIED".equals(userGrade);
 
-    /* BbsController 에서 전달받은 값 */
-    ArrayList<Bbs> list = (ArrayList<Bbs>) request.getAttribute("list");
-    int totalPages      = (Integer) request.getAttribute("totalPages");
-    int startPage       = (Integer) request.getAttribute("startPage");
-    int endPage         = (Integer) request.getAttribute("endPage");
-    int pageNumber      = (Integer) request.getAttribute("pageNumber");
-    int startNumber 	= (Integer) request.getAttribute("startNumber"); // 자유,공지,질문 게시판 목록 각각 번호가 독립
-    %>
+	ArrayList<Bbs> list = (ArrayList<Bbs>) request.getAttribute("list");
+	int totalPages = (Integer) request.getAttribute("totalPages");
+	int startPage = (Integer) request.getAttribute("startPage");
+	int endPage = (Integer) request.getAttribute("endPage");
+	int pageNumber = (Integer) request.getAttribute("pageNumber");
+	int startNumber = (Integer) request.getAttribute("startNumber");
 
-    <nav class="navbar navbar-default">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed"
-                data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
-                aria-expanded="false">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="main.jsp">JSP 게시판 웹 사이트</a>
-        </div>
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav">
-                <li><a href="main.jsp">메인</a></li>
-                <li class="active dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"
-                       role="button" aria-haspopup="true" aria-expanded="false">
-                        게시판<span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="bbsList?group=자유게시판">자유게시판</a></li>
-                        <li><a href="bbsList?group=공지게시판">공지게시판</a></li>
-                        <li><a href="bbsList?group=질문게시판">질문게시판</a></li>
-                    </ul>
-                </li>
-            </ul>
-
-            <!-- 비회원 -->
-            <% if (isGuest) { %>
-            <ul class="nav navbar-nav navbar-right">
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"
-                       role="button" aria-haspopup="true" aria-expanded="false">
-                        접속하기<span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="login.jsp">로그인</a></li>
-                        <li><a href="join.jsp">회원가입</a></li>
-                    </ul>
-                </li>
-            </ul>
-            <% } else { %>
-            <!-- 로그인 회원 -->
-            <ul class="nav navbar-nav navbar-right">
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"
-                       role="button" aria-haspopup="true" aria-expanded="false">
-                        회원관리<span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="logoutAction.jsp">로그아웃</a></li>
-                    </ul>
-                </li>
-            </ul>
-            <% } %>
-        </div>
-    </nav>
-
-    <!-- 게시글 상단 고정 groupHeader 내용 가져옴 -->
-    <%@ include file="groupHeader.jsp" %>
+	request.setAttribute("currentPage", "board");
+	%>
+	
+	<%@ include file="navbar.jsp"%>
+	<%@ include file="groupHeader.jsp"%>
 
     <div class="container">
         <div class="row">

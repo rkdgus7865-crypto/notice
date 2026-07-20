@@ -2,9 +2,6 @@
 <%@ page import="dto.Bbs"%>
 <%@ page import="dto.Comment"%>
 <%@ page import="java.util.ArrayList"%>
-
-
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -15,48 +12,20 @@
 </head>
 <body>
 	<%
-	String userID = (String) session.getAttribute("userID");
 	String userGrade = (String) session.getAttribute("userGrade");
-	boolean isGuest = (userID == null);
-	Bbs bbs = (Bbs) request.getAttribute("bbs");
-	ArrayList<Comment> commentList = (ArrayList<Comment>) request.getAttribute("commentList");
-	
-	ArrayList<Bbs> bbsList  = (ArrayList<Bbs>) request.getAttribute("bbsList"); // 7-9
-	int bottomPageNumber 	= (Integer) request.getAttribute("bottomPageNumber");
-	int totalBottomPages 	= (Integer) request.getAttribute("totalBottomPages");
-	int bottomStartPage 	= (Integer) request.getAttribute("bottomStartPage");
-	int bottomEndPage 		= (Integer) request.getAttribute("bottomEndPage");
-	int bottomStartNumber 	= (Integer) request.getAttribute("bottomStartNumber");
+		Bbs bbs = (Bbs) request.getAttribute("bbs");
+		ArrayList<Comment> commentList = (ArrayList<Comment>) request.getAttribute("commentList");
+		ArrayList<Bbs> bbsList  = (ArrayList<Bbs>) request.getAttribute("bbsList");
+		int bottomPageNumber 	= (Integer) request.getAttribute("bottomPageNumber");
+		int totalBottomPages 	= (Integer) request.getAttribute("totalBottomPages");
+		int bottomStartPage 	= (Integer) request.getAttribute("bottomStartPage");
+		int bottomEndPage 		= (Integer) request.getAttribute("bottomEndPage");
+		int bottomStartNumber 	= (Integer) request.getAttribute("bottomStartNumber");
+
+		request.setAttribute("currentPage", "board");
 	%>
-	<nav class="navbar navbar-default">
-		<div class="navbar-header">
-			<button type="button" class="navbar-toggle collapsed"
-				data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
-				aria-expanded="false">
-				<span class="icon-bar"></span> <span class="icon-bar"></span> <span
-					class="icon-bar"></span>
-			</button>
-			<a class="navbar-brand" href="main.jsp">JSP 게시판 웹 사이트</a>
-		</div>
-		<div class="collapse navbar-collapse"
-			id="bs-example-navbar-collapse-1">
-			<ul class="nav navbar-nav">
-				<li class="active"><a href="main.jsp">메인</a></li>
-
-				<!--  게시판 드롭다운 -->
-				<li class="dropdown"><a href="#" class="dropdown-toggle"
-					data-toggle="dropdown" role="button" aria-haspopup="true"
-					aria-expanded="false"> 게시판<span class="caret"></span>
-				</a>
-					<ul class="dropdown-menu">
-						<li><a href="bbsList?group=자유게시판">자유게시판</a></li>
-						<li><a href="bbsList?group=공지게시판">공지게시판</a></li>
-						<li><a href="bbsList?group=질문게시판">질문게시판</a></li>
-					</ul></li>
-			</ul>
-
-		</div>
-	</nav>
+	
+	<%@ include file="navbar.jsp"%>
 	<!-- 게시글 상단 고정 groupHeader 내용 가져옴 -->
 	<%@ include file="groupHeader.jsp"%>
 

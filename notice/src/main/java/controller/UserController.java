@@ -7,13 +7,19 @@ import java.io.*;
 import dao.UserDAO;
 import dto.User;
 
-@WebServlet(urlPatterns = { "/joinAction", "/loginAction" })
+@WebServlet(urlPatterns = { "/joinAction", "/loginAction" }) // 이 UserController 클래스는  /joinAction 으로 오는 요청도 받고,  /loginAction 으로 오는 요청도 받겠다" 즉, 하나의 클래스가 URL 2개를 동시에 처리하도록 등록
 public class UserController extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		String path = request.getServletPath();
+	private static final long serialVersionUID = 1L; // 무에서 큰 의미 없고 그냥 관례로 붙이는 코드예요.
+	
+	
+	/*
+	 * "브라우저가 POST 방식으로 요청을 보내면, Tomcat이 이 doPost 메서드를 자동으로 호출해서 request(받은 정보)와
+	 * response(보낼 정보)를 넘겨주고, 혹시 에러 나면 Tomcat한테 처리를 맡긴다"
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) // protected  → 접근 제한자. 같은 패키지나 상속받은 클래스에서 호출 가능 , doPost  → 메서드 이름. HttpServlet이 정해놓은 이름(고정, 변경 불가)
+			throws ServletException, IOException {									// 브라우저가 POST 방식으로 요청 보내면 Tomcat이 자동으로 이 메서드를 호출함 
+																					// 매개변수 2개: HttpServletRequest request   → 브라우저가 보낸 요청 정보 (파라미터, 세션 등) HttpServletResponse response → 브라우저로 보낼 응답 정보 (redirect, forward 등)
+		String path = request.getServletPath(); // 브라우저가 "joinAction" 으로 요청 보냄 -> request 객체 안에 "이 요청 경로는 /joinAction 이야" 라고 자동 기록됨 -> request.getServletPath() 로 그 기록을 꺼내 보는 것
 
 		if (path.equals("/joinAction")) {
 			join(request, response);
@@ -26,17 +32,19 @@ public class UserController extends HttpServlet {
 	 * 회원가입 처리
 	 */
 	
-	private void join(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		request.setCharacterEncoding("UTF-8");
-		response.setContentType("text/html; charset=UTF-8");
+	private void join(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException { //private  → 이 UserController 클래스 안에서만 호출 가능 (외부에서 못 부름) 
+		request.setCharacterEncoding("UTF-8"); // 브라우저에서 서버로 들어오는 데이터(요청)의 인코딩을 UTF-8로 설정 회원가입 폼에서 "홍길동" 입력하면 → 깨지지 않고 정상적으로 서버가 받음 # 들어오는 데이터(한글 입력값) 안 깨지게 #
+		response.setContentType("text/html; charset=UTF-8"); // 서버에서 브라우저로 나가는 응답(HTML)의 타입과 인코딩을 지정 "이 응답은 HTML 문서고, UTF-8로 인코딩되어 있어" 라고 브라우저에게 알려줌  #나가는 응답(HTML 화면)의 한글 안 깨지게#
 
-		HttpSession session = request.getSession();
-		String sessionUserID = (String) session.getAttribute("userID");
-		if (sessionUserID != null) {
-			response.sendRedirect("main.jsp");
-			return;
+		HttpSession session = request.getSession(); // request 객체를 통해 현재 사용자의 세션(session)을 가져옴 세션이 이미 있으면 → 그 세션을 가져옴 세션이 없으면 → 새로 하나 만들어서 가져옴
+		String sessionUserID = (String) session.getAttribute("userID"); // session(사물함) 안에서 "userID" 라는 이름표가 붙은 값을 꺼내옴 로그인했을 때 session.setAttribute("userID", userID) 로 저장해뒀던 값
+																		//  로그인 안 한 상태라면 → sessionUserID = null 로그인 한 상태라면    → sessionUserID = "강현" 같은 값
+		if (sessionUserID != null) { // sessionUserID 가 null 이 아니면 (이미 로그인 되어 있는 사용자가 로그인 페이지나 회원가입 페이지에 다시 접근하려고 하면 그럴 필요 없으니깐 main.jsp 로 그냥 보내라)
+			response.sendRedirect("main.jsp"); // main.jsp 로 리다이렉트 시킴
+			return; //return; 으로 메서드 실행을 여기서 끝냄 (아래 로직 실행 안 함)
 		}
-
+		
+		// join.jsp 에서 form 태그의 input name 값 들을 받아서 request 요청 해서 getParameter로 받아옴
 		String userID = request.getParameter("userID");
 		String userPassword = request.getParameter("userPassword");
 		String userName = request.getParameter("userName");
@@ -46,10 +54,12 @@ public class UserController extends HttpServlet {
 		String userPhone = request.getParameter("userPhone");
 		String userDateOfBirth = request.getParameter("userDateOfBirth");
 
-		if (userID.isBlank() || userPassword.isBlank() || userName.isBlank() || userGender.isBlank()
-				|| userEmail.isBlank() || userAddress.isBlank() || userPhone.isBlank() || userDateOfBirth.isBlank()) {
-			request.setAttribute("errorMsg", "입력이 안 된 사항이 있습니다.");
-			request.getRequestDispatcher("join.jsp").forward(request, response);
+		if (userID.isBlank() || userPassword.isBlank() || userName.isBlank() || userGender.isBlank() // join.jsp 에서 form 태그의 input name 값 null 체크
+				|| userEmail.isBlank() || userAddress.isBlank() || userPhone.isBlank() || userDateOfBirth.isBlank()) 
+			
+		{
+			request.setAttribute("errorMsg", "입력이 안 된 사항이 있습니다."); // request 객체 안에 "errorMsg" 라는 이름표로 문자열을 담아둠 이제 이 request 객체를 다른 jsp로 넘기면 그 jsp에서도 "errorMsg" 라는 이름으로 이 값을 꺼내 쓸 수 있음
+			request.getRequestDispatcher("join.jsp").forward(request, response); //  딱 이번 요청 한 번만 유효 (forward 할 때만 넘어감) 실제로 request, response 를 들고 join.jsp 로 이동
 			return;
 		}
 
