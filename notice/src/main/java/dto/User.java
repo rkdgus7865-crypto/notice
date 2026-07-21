@@ -13,6 +13,7 @@ public class User {
 	private String userDateOfJoining;
 	
 	private String userGrade;
+	private int isTempPassword;
 	
 	public String getUserAddress() {
 		return userAddress;
@@ -75,6 +76,14 @@ public class User {
 
 	public void setUserGrade(String userGrade) {
 		this.userGrade = userGrade;
+	}
+	
+	public int getIsTempPassword() {
+		return isTempPassword;
+	}
+	
+	public void setIsTempPassword(int isTempPassword) {
+		this.isTempPassword = isTempPassword;
 	}
 
 }

@@ -7,7 +7,7 @@ import java.io.*;
 import dao.UserDAO;
 import dto.User;
 
-@WebServlet(urlPatterns = { "/joinAction", "/loginAction" }) // 이 UserController 클래스는  /joinAction 으로 오는 요청도 받고,  /loginAction 으로 오는 요청도 받겠다" 즉, 하나의 클래스가 URL 2개를 동시에 처리하도록 등록
+@WebServlet(urlPatterns = { "/joinAction", "/loginAction", "/findPasswordAction", "/changePasswordAction" }) // 이 UserController 클래스는  /joinAction 으로 오는 요청도 받고,  /loginAction 으로 오는 요청도 받겠다" 즉, 하나의 클래스가 URL 2개를 동시에 처리하도록 등록
 public class UserController extends HttpServlet {
 	private static final long serialVersionUID = 1L; // 무에서 큰 의미 없고 그냥 관례로 붙이는 코드예요.
 	
@@ -21,12 +21,16 @@ public class UserController extends HttpServlet {
 																					// 매개변수 2개: HttpServletRequest request   → 브라우저가 보낸 요청 정보 (파라미터, 세션 등) HttpServletResponse response → 브라우저로 보낼 응답 정보 (redirect, forward 등)
 		String path = request.getServletPath(); // 브라우저가 "joinAction" 으로 요청 보냄 -> request 객체 안에 "이 요청 경로는 /joinAction 이야" 라고 자동 기록됨 -> request.getServletPath() 로 그 기록을 꺼내 보는 것
 
-		if (path.equals("/joinAction")) {
-			join(request, response);
-		} else if (path.equals("/loginAction")) {
-			login(request, response);
-		}
-	}
+		  if (path.equals("/joinAction")) {
+	            join(request, response);
+	      } else if (path.equals("/loginAction")) {
+	            login(request, response);
+	      } else if (path.equals("/findPasswordAction")) {
+	            findPassword(request, response);
+	      } else if (path.equals("/changePasswordAction")) {
+	            changePassword(request, response);
+	      }
+	   }
 
 	/**
 	 * 회원가입 처리
@@ -99,31 +103,97 @@ public class UserController extends HttpServlet {
 	 */
 	
 	private void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		request.setCharacterEncoding("UTF-8");
-		response.setContentType("text/html; charset=UTF-8");
+	    request.setCharacterEncoding("UTF-8");
+	    response.setContentType("text/html; charset=UTF-8");
+	    String userID = request.getParameter("userID");
+	    String userPassword = request.getParameter("userPassword");
+	    UserDAO userDAO = new UserDAO();
+	    int result = userDAO.login(userID, userPassword);
+	    HttpSession session = request.getSession();
 
-		String userID = request.getParameter("userID");
-		String userPassword = request.getParameter("userPassword");
-		UserDAO userDAO = new UserDAO();
-		int result = userDAO.login(userID, userPassword);
-		HttpSession session = request.getSession();
+	    if (result == 1) {
+	        session.setAttribute("userID", userID);
+	        session.setAttribute("userGrade", userDAO.getGrade(userID));
+	        String name = userDAO.getName(userID);
+	        session.setAttribute("userName", name);
 
-		if (result == 1) {
-			session.setAttribute("userID", userID);
-			session.setAttribute("userGrade", userDAO.getGrade(userID));
-			String name = userDAO.getName(userID);
-			session.setAttribute("userName", name);
-			response.sendRedirect("main.jsp");
-		} else {
-			String msg = "";
-			if (result == 0)
-				msg = "비밀번호가 틀립니다.";
-			else if (result == -1)
-				msg = "존재하지 않는 아이디입니다.";
-			else if (result == -2)
-				msg = "데이터베이스 오류가 발생했습니다.";
-			request.setAttribute("errorMsg", msg);
-			request.getRequestDispatcher("login.jsp").forward(request, response);
-		}
+	        //  임시비밀번호 여부 체크해서 분기
+	        if (userDAO.isTempPassword(userID)) {
+	            response.sendRedirect("changePassword.jsp");
+	        } else {
+	            response.sendRedirect("main.jsp");
+	        }
+
+	    } else {
+	        String msg = "";
+	        if (result == 0)
+	            msg = "비밀번호가 틀립니다.";
+	        else if (result == -1)
+	            msg = "존재하지 않는 아이디입니다.";
+	        else if (result == -2)
+	            msg = "데이터베이스 오류가 발생했습니다.";
+	        request.setAttribute("errorMsg", msg);
+	        request.getRequestDispatcher("login.jsp").forward(request, response);
+	    }
 	}
+	
+	/**
+	 * 비밀번호 찾기 처리
+	 */
+	
+    private void findPassword(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
+
+        String userID    = request.getParameter("userID");
+        String userName  = request.getParameter("userName");
+
+        UserDAO userDAO = new UserDAO();
+        String tempPassword = userDAO.findPasswordAndReset(userID, userName);
+        
+        if (tempPassword == null) {
+            request.setAttribute("errorMsg", "일치하는 회원 정보가 없습니다.");
+            request.getRequestDispatcher("findPassword.jsp").forward(request, response);
+        } else {
+            request.setAttribute("tempPassword", tempPassword);
+            request.getRequestDispatcher("findPassword.jsp").forward(request, response);
+        }
+    }
+    
+    /**
+	 *  새 비밀번호 설정 처리
+	 */
+    
+    private void changePassword(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
+
+        String userID = (String) request.getSession().getAttribute("userID");
+        if (userID == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        String newPassword = request.getParameter("newPassword");
+        String newPasswordCheck = request.getParameter("newPasswordCheck");
+        
+        if (newPassword == null || newPassword.isBlank()) {
+            request.setAttribute("errorMsg", "새 비밀번호를 입력해주세요.");
+            request.getRequestDispatcher("changePassword.jsp").forward(request, response);
+            return;
+        }
+
+        //  서버단에서도 비밀번호 일치 확인
+        if (!newPassword.equals(newPasswordCheck)) {
+            request.setAttribute("errorMsg", "비밀번호가 일치하지 않습니다.");
+            request.getRequestDispatcher("changePassword.jsp").forward(request, response);
+            return;
+        }
+        
+        UserDAO userDAO = new UserDAO();
+        userDAO.changePassword(userID, newPassword);
+
+        response.sendRedirect("main.jsp");
+    }
+	
 }

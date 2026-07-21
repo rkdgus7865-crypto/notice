@@ -42,6 +42,11 @@
 					<input type="submit" class="btn btn-primary form-control"
 						value="로그인">
 				</form>
+
+				<div style="text-align: center; margin-top: 10px;">
+					<a href="findPassword.jsp">비밀번호 초기화</a>
+				</div>
+				
 			</div>
 		</div>
 		<div class="col-lg-4"></div>

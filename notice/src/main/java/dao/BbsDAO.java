@@ -197,18 +197,18 @@ public class BbsDAO {
 				bbs.setIsPublic(rs.getInt("bbsPublic"));			// 공개 여부 저장
 				bbs.setIsNotice(rs.getInt("isNotice")); 			// 공지글 여부 저장
 				
-				boolean isBold = (bbs.getRecommendation() >= 10);  // 추천수 10개 이상이면 제목을 굵게 표시
+				boolean isBold = (bbs.getRecommendation() >= 10);  // 추천수 10개 이상이면 isBold = ture 아니면 false 
 					
-				bbs.setIsBold(isBold);
+				bbs.setIsBold(isBold); //  Bbs 객체에 결과 저장 setIsBold 에 isBold = true 값 저장 
 					
-				list.add(bbs); // DB에서 읽어온 게시글 1개를 ArrayList에 추가하는 코드 예를 들어 DB에서 게시글이 20개 조회되면 while(rs.next()) 가 20번 반복되고, list.add(bbs); 도 20번 실행되어 list에 게시글 20개가 저장
+				list.add(bbs); // bbs 객체를 list에 넣음
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			close(conn, pstmt, rs);
 		}
-		return list;
+		return list; // 컨트롤러에서 ArrayList<Bbs> list = bbsDAO.getList(pageNumber, groupName); 이렇게 값 받음
 	}
 
 	/**

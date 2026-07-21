@@ -45,28 +45,30 @@
                 </thead>
 				<tbody id="bbsTableBody">
 					<%
-				    for (int i = 0; i < list.size(); i++) {
+				    for (int i = 0; i < list.size(); i++) { // list = 게시글 여러 개가 들어있는 목록 (ArrayList) / 0번째 게시글부터 19번째 게시글까지, 한 번에 하나씩 화면에 보여줌
 					%>
-					<tr>
+				<tr>
 						<!-- 게시글 목록 화면 출력  -->
-						<td><%=startNumber - i%></td>
-						<td>
-						  <% if (list.get(i).getIsNotice() == 1) { %>
-       						 <span style="color: red; font-weight: bold;">[공지]</span> <!-- 공지글은 빨간색으로 표시  -->
-  						  <% } %>
-							<!-- 게시판 목록 제목 클릭 시 ViewController(viewDetail) 호출, 추천수 10개 이상이면 제목을 굵게 표시 7-7 -->
+						<td><%=startNumber - i%></td> <!-- 컨트롤러에서 미리 계산해서 넘겨준 값  -->
+					<td>
+							<%
+							if (list.get(i).getIsBold()) { // getIsBold()<- BbsDao에 넣어둔 값  / list에 있는 게시글 목록의 i번째가 추천수가 10개 이상인지 확인 / isBold는 추천수 10개 이상을 값 (DAO에서 계산됨)
+							%> <span style="color: red;">[추천]</span>   <!-- if문 조건이 맞으면 게시글에 제목에 [추천]을 추가   -->
+							<%
+							}
+							%> 
 							<a href="viewDetail?bbsID=<%=list.get(i).getBbsID()%>&group=<%=groupName%>"
-							style="<%=list.get(i).getIsBold() ? "font-weight: bold; font-size:16px; color:black;" : "color:black;"%>">
-								<%=list.get(i).getBbsTitle()%>
-						</a>
-						</td>
+								style="<%=list.get(i).getIsNotice() == 1 ? "font-weight: bold; font-size:16px; color:black;" : "color:black;"%>"> <!-- i번째 게시글 제목을 i번째 게시글 번호로 가는 링크를 걸어서 i번째 게시글이 공지글이면 굵게 아니면 평소대로 화면에 출력-->
+								<%=list.get(i).getBbsTitle()%> <!-- i번째 게시글의 제목을 화면에 그대로 출력  -->
+					     	</a>
+					</td>
 						<td><%=list.get(i).getUserID()%></td>
 						<td><%=list.get(i).getBbsDate()%></td>
 						<td><%=list.get(i).getInquiry()%></td>
 						<td><%=list.get(i).getRecommendation()%></td>
 						<td><%=list.get(i).getComments()%></td>
 						<td><%=list.get(i).getIsPublic() == 1 ? "전체공개" : "회원공개"%></td>
-					</tr>
+				</tr>
 					<%
 					}
 					%>
@@ -137,13 +139,11 @@
 							for (var i = 0; i < data.list.length; i++) {
 								var bbs = data.list[i];
 								tbody += "<tr>";
-								/* tbody += "<td>" + bbs.bbsID + "</td>"; */
-								tbody += "<td>" + (startNumber - i) + "</td>";   // 자유,공지,질문 게시판 목록 각각 번호가 독립
-								// 비동기 방식으로 페이징 넘길때 추천수 10개 이상이면 제목 굶게 수정 7-7
-							    var noticeTag = bbs.isNotice == 1 ? "<span style='color:red; font-weight:bold;'>[공지]</span> " : "";
-							    var style = bbs.isBold ? "font-weight: bold; font-size:16px; color:black;" : "color:black;";
-								tbody += "<td>" + noticeTag + "<a href='viewDetail?bbsID=" + bbs.bbsID + "&group=" + currentGroup 
-  									  + "' style='" + style + "'>" + bbs.bbsTitle + "</a></td>";
+								tbody += "<td>" + (startNumber - i) + "</td>";
+								var recommendTag = bbs.isBold ? "<span style='color:red; font-weight:bold;'>[추천]</span> " : "";
+								var style = bbs.isNotice == 1 ? "font-weight: bold; font-size:16px; color:black;" : "color:black;";
+								tbody += "<td>" + recommendTag + "<a href='viewDetail?bbsID=" + bbs.bbsID + "&group=" + currentGroup 
+								      + "' style='" + style + "'>" + bbs.bbsTitle + "</a></td>";
 								tbody += "<td>" + bbs.userID + "</td>";
 								tbody += "<td>" + bbs.bbsDate + "</td>";
 								tbody += "<td>" + bbs.inquiry + "</td>";

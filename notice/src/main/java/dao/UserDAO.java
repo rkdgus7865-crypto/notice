@@ -145,7 +145,123 @@ public class UserDAO {
 	    }
 	    return null;
 	}
+	
+	/**
+	 * 	
+	 * 아이디,이름 일치 확인 후 임시비밀번호 발급
+	 * 
+	 */
+	
+	public String findPasswordAndReset(String userID, String userName) {
+	    String checkSQL = "SELECT * FROM USER WHERE userID = ? AND userName = ?";
+	    
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+	    
+	    try {
+	        conn = getConnection();
+	        pstmt = conn.prepareStatement(checkSQL);
+	        pstmt.setString(1, userID);
+	        pstmt.setString(2, userName);
+	        rs = pstmt.executeQuery();
 
+	        if (rs.next()) {
+	            // 일치하면 임시비밀번호 생성
+	            String tempPassword = generateTempPassword();
+
+	            close(conn, pstmt, rs);
+
+	            // 임시비밀번호로 업데이트 + isTempPassword = 1
+	            String updateSQL = "UPDATE USER SET userPassword = ?, isTempPassword = 1 WHERE userID = ?";
+	            conn = getConnection();
+	            pstmt = conn.prepareStatement(updateSQL);
+	            pstmt.setString(1, tempPassword);
+	            pstmt.setString(2, userID);
+	            pstmt.executeUpdate();
+
+	            return tempPassword;
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(conn, pstmt, rs);
+	    }
+	    return null; // 일치하는 회원 없음
+	}
+
+	/**
+	 * 	
+	 * 임시비밀번호 랜덤 생성 (8자리)
+	 * 
+	 */
+	
+	private String generateTempPassword() {
+		
+	    String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; // 비밀번호에 사용할 수 있는 문자들 (대문자+소문자+숫자)
+	    StringBuilder sb = new StringBuilder(); 
+	    java.util.Random random = new java.util.Random(); // 랜덤 값을 뽑아줌
+	    
+	    for (int i = 0; i < 8; i++) { // 8번 반복하면서 글자 하나씩 랜덤으로 뽑아 붙이기
+	        sb.append(chars.charAt(random.nextInt(chars.length()))); // chars.length() = 62개  -> random.nextInt(62)  0~61 사이의 랜덤 숫자 하나 뽑음 -> chars.charAt(그 숫자) → 그 위치에 있는 문자 하나 꺼냄
+	    }
+	    return sb.toString(); //  완성된 8자리 임시비밀번호 문자열 반환
+	}
+	
+	/**
+	 * 	
+	 * 새 비밀번호로 변경 + isTempPassword = 0
+	 * 
+	 */
+	
+	public int changePassword(String userID, String newPassword) {
+	    String SQL = "UPDATE USER SET userPassword = ?, isTempPassword = 0 WHERE userID = ?";
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    
+	    try {
+	        conn = getConnection();
+	        pstmt = conn.prepareStatement(SQL);
+	        pstmt.setString(1, newPassword);
+	        pstmt.setString(2, userID);
+	        
+	        return pstmt.executeUpdate(); 
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(conn, pstmt, null);
+	    }
+	    return -1;
+	}
+
+	/**
+	 * 	
+	 *  임시비밀번호 상태 확인 (로그인 후 체크용)
+	 * 
+	 */
+	
+	public boolean isTempPassword(String userID) {
+	    String SQL = "SELECT isTempPassword FROM USER WHERE userID = ?";
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+	    try {
+	        conn = getConnection();
+	        pstmt = conn.prepareStatement(SQL);
+	        pstmt.setString(1, userID);
+	        rs = pstmt.executeQuery();
+	        if (rs.next()) {
+	            return rs.getInt("isTempPassword") == 1;
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(conn, pstmt, rs);
+	    }
+	    return false;
+	}
+	
 	/**
 	 * 	
 	 *  자원 해제 메서드
