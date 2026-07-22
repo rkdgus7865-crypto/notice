@@ -24,7 +24,7 @@
 
 		request.setAttribute("currentPage", "board");
 	%>
-	
+
 	<%@ include file="navbar.jsp"%>
 	<!-- 게시글 상단 고정 groupHeader 내용 가져옴 -->
 	<%@ include file="groupHeader.jsp"%>
@@ -56,24 +56,25 @@
 
 			<!-- 추천 -->
 			<div style="text-align: center; margin-top: 20px;">
-				추천수: <b><%=bbs.getRecommendation()%></b>  
-				<a href="recommendAction?bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>"
+				추천수: <b><%=bbs.getRecommendation()%></b> <a
+					href="recommendAction?bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>"
 					class="btn btn-success">추천</a>
 			</div>
 		</div>
-		
-		
-			<!-- 첨부파일 -->
-			<%
+
+
+		<!-- 첨부파일 -->
+		<%
 			if (bbs.getOriginalFileName() != null) {
 			%>
-			<div style="margin-top: 10px;">
-				<b>첨부파일:</b> 
-				<a href="fileDownload?fileName=<%=bbs.getSavedFileName()%>&originalName=<%=java.net.URLEncoder.encode(bbs.getOriginalFileName(), "UTF-8")%>">    <!-- 파일명을 클릭하면 FileDownloadController(fileDownload) 호출 -->
-				<%=bbs.getOriginalFileName()%>  <!-- 사용자에게 보여줄 원본 파일명 -->
-				</a>
-			</div>
-			<%
+		<div style="margin-top: 10px;">
+			<b>첨부파일:</b> <a
+				href="fileDownload?fileName=<%=bbs.getSavedFileName()%>&originalName=<%=java.net.URLEncoder.encode(bbs.getOriginalFileName(), "UTF-8")%>">
+				<!-- 파일명을 클릭하면 FileDownloadController(fileDownload) 호출 --> <%=bbs.getOriginalFileName()%>
+				<!-- 사용자에게 보여줄 원본 파일명 -->
+			</a>
+		</div>
+		<%
 			}
 			%>
 
@@ -92,7 +93,7 @@
 			<a href="bbsList?group=<%=groupName%>" class="btn btn-default">목록</a>
 		</div>
 	</div>
-	
+
 	<!-- 댓글 영역 -->
 	<div class="container" style="margin-top: 20px;">
 		<h4>
@@ -166,14 +167,17 @@
 		<form method="post" action="commentWrite">
 			<input type="hidden" name="bbsID" value="<%=bbs.getBbsID()%>">
 			<input type="hidden" name="groupName" value="<%=groupName%>">
-			<div class="form-group"> <textarea name="commentContent" class="form-control" rows="3" placeholder="댓글을 입력하세요" maxlength="500"></textarea>
+			<div class="form-group">
+				<textarea name="commentContent" class="form-control" rows="3"
+					placeholder="댓글을 입력하세요" maxlength="500"></textarea>
 			</div>
 
 			<label> <input type="checkbox" name="secretComment" value="1">
 				비밀댓글
 			</label>
 
-			<button type="submit" class="btn btn-primary pull-right">댓글 작성</button>
+			<button type="submit" class="btn btn-primary pull-right">댓글
+				작성</button>
 		</form>
 		<%
 		} else if (isGuest) {
@@ -190,48 +194,47 @@
 
 
 	<!-- 하단 게시글 목록 7-9 -->
-		<div class="container" style="margin-top: 20px;">
-			<h4>게시글 목록</h4>
-			<table class="table table-striped"
-				style="text-align: center; border: 1px solid #dddddd">
-				<thead>
-					<tr>
-					    <th style="background-color: #eeeeee; text-align: center;">번호</th>
-                        <th style="background-color: #eeeeee; text-align: center;">제목</th>
-                        <th style="background-color: #eeeeee; text-align: center;">작성자</th>
-                        <th style="background-color: #eeeeee; text-align: center;">작성일</th>
-                        <th style="background-color: #eeeeee; text-align: center;">조회수</th>
-                        <th style="background-color: #eeeeee; text-align: center;">추천수</th>
-                        <th style="background-color: #eeeeee; text-align: center;">댓글수</th>
-                        <th style="background-color: #eeeeee; text-align: center;">공개여부</th>
-					</tr>
-				</thead>
-				<tbody>
-					<%
+	<div class="container" style="margin-top: 20px;">
+		<h4>게시글 목록</h4>
+		<table class="table table-striped"
+			style="text-align: center; border: 1px solid #dddddd">
+			<thead>
+				<tr>
+					<th style="background-color: #eeeeee; text-align: center;">번호</th>
+					<th style="background-color: #eeeeee; text-align: center;">제목</th>
+					<th style="background-color: #eeeeee; text-align: center;">작성자</th>
+					<th style="background-color: #eeeeee; text-align: center;">작성일</th>
+					<th style="background-color: #eeeeee; text-align: center;">조회수</th>
+					<th style="background-color: #eeeeee; text-align: center;">추천수</th>
+					<th style="background-color: #eeeeee; text-align: center;">댓글수</th>
+					<th style="background-color: #eeeeee; text-align: center;">공개여부</th>
+				</tr>
+			</thead>
+			<tbody>
+				<%
 					for (int i = 0; i < bbsList.size(); i++) {
 						Bbs row = bbsList.get(i);
 						boolean isCurrent = (row.getBbsID() == bbs.getBbsID());
-					%>   
-							 <!--  게시글 상세 목록 화면 출력  -->
-					<tr <%if (isCurrent) {%> style="background-color: #fffbe6;"
-						<%}%>>
-						<td><%=bottomStartNumber - i%></td>
-						<td><a
-							href="viewDetail?bbsID=<%=row.getBbsID()%>&group=<%=groupName%>">
-								<%=row.getBbsTitle()%>
-						</a></td>
-						<td><%=row.getUserID()%></td>
-						<td><%=row.getBbsDate()%></td>
-						<td><%=row.getInquiry()%></td>
-						<td><%=row.getRecommendation()%></td>
-						<td><%=row.getComments()%></td>
-						<td><%=row.getIsPublic() == 1 ? "전체공개" : "회원공개" %></td>
-					</tr>
-					<%
+					%>
+				<!--  게시글 상세 목록 화면 출력  -->
+				<tr <%if (isCurrent) {%> style="background-color: #fffbe6;" <%}%>>
+					<td><%=bottomStartNumber - i%></td>
+					<td><a
+						href="viewDetail?bbsID=<%=row.getBbsID()%>&group=<%=groupName%>">
+							<%=row.getBbsTitle()%>
+					</a></td>
+					<td><%=row.getUserID()%></td>
+					<td><%=row.getBbsDate()%></td>
+					<td><%=row.getInquiry()%></td>
+					<td><%=row.getRecommendation()%></td>
+					<td><%=row.getComments()%></td>
+					<td><%=row.getIsPublic() == 1 ? "전체공개" : "회원공개" %></td>
+				</tr>
+				<%
 					}
 					%>
-				</tbody>
-			</table>
+			</tbody>
+		</table>
 		<!-- 게시글 상세 게시글 목록 페이징  -->
 		<div style="text-align: center; margin-top: 10px;">
 			<!-- 이전 화살표 -->
@@ -281,7 +284,10 @@
 		</div>
 	</div>
 
-<script>
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script src="/notice/js/bootstrap.js"></script>
+
+	<script>
 function showEdit(commentID) {
     document.getElementById('viewMode' + commentID).style.display = 'none';
     document.getElementById('editForm' + commentID).style.display = 'block';
@@ -291,10 +297,6 @@ function cancelEdit(commentID) {
     document.getElementById('editForm' + commentID).style.display = 'none';
 }
 </script>
-	
-	
 
-	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-	<script src="/notice/js/bootstrap.js"></script>
 </body>
 </html>

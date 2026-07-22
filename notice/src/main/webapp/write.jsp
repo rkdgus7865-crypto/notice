@@ -72,9 +72,9 @@
 					</label>
 				</div>
 
-				<input type="submit" class="btn btn-primary pull-right" value="글쓰기">
+				<input type="submit" class="btn btn-primary pull-right" value="등록">
 				<a href="bbsList?group=<%=groupName%>"
-					class="btn btn-default pull-right" style="margin-right: 5px;">목록</a>
+					class="btn btn-default pull-right" style="margin-right: 5px;">취소</a>
 			</form>
 
 			<script>
@@ -87,10 +87,12 @@
 					
 					if (title.trim() === "") { 
 						alert("제목을 입력해주세요.");
+						document.getElementById("bbsTitle").focus();
 						return false;
 					}
 					if (content.trim() === "") {
 						alert("내용을 입력해주세요.");
+						document.getElementById("bbsContent").focus();
 						return false;
 					}
 					return true;

@@ -126,7 +126,7 @@ public class BbsDAO {
 	 */
 
 	public int getTotalCount(String groupName) {
-		String SQL = "SELECT COUNT(*) FROM BBS WHERE bbsAvailable = 1 AND groupName = ?";   // 삭제되지 않은(bbsAvailable = 1)
+		String SQL = "SELECT COUNT(*) FROM BBS WHERE bbsAvailable = 1 AND groupName = ? AND isNotice = 0";   // 삭제되지 않은(bbsAvailable = 1)
 																							// 게시글 중 전달받은 게시판 그룹의 게시글
 																							// 개수를 조회하는 SQL
 		Connection conn = null;
@@ -154,9 +154,9 @@ public class BbsDAO {
 	 */
 
 	public ArrayList<Bbs> getList(int pageNumber, String groupName) {
-		String SQL = "SELECT * FROM BBS WHERE bbsAvailable = 1 AND groupName = ? "  // 해당 게시판의 게시글을 최신순으로 20개 조회
-				+ "ORDER BY bbsID DESC LIMIT 20 OFFSET ?"; // LIMIT 20 OFFSET ? 20개씩 조회하고 offset부터 가져오기 LIMIT 20 OFFSET 40 41번째 게시글부터 20개 조회
-		
+		String SQL = "SELECT * FROM BBS WHERE bbsAvailable = 1 AND groupName = ? "// 해당 게시판의 게시글을 최신순으로 20개 조회
+		        + "ORDER BY bbsID DESC LIMIT 20 OFFSET ?";  // LIMIT 20 OFFSET ? 20개씩 조회하고 offset부터 가져오기 LIMIT 20 OFFSET 40 41번째 게시글부터 20개 조회
+	 
 		ArrayList<Bbs> list = new ArrayList<Bbs>();  // 게시글 목록을 저장할 리스트
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -357,6 +357,86 @@ public class BbsDAO {
 		} finally {
 			close(conn, pstmt, null);
 		}
+	}
+	
+	/**
+	 *  최근 공지게시글 최상단에 3개 공지
+	 */
+	
+	public ArrayList<Bbs> getNoticeList(String groupName) {
+	    String SQL = "SELECT * FROM BBS WHERE groupName = ? AND isNotice = 1 AND bbsAvailable = 1 ORDER BY bbsID DESC LIMIT 3";
+	    
+	    ArrayList<Bbs> list = new ArrayList<Bbs>();
+	    
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+	    
+	    try {
+	        conn = getConnection();
+	        pstmt = conn.prepareStatement(SQL);
+	        pstmt.setString(1, groupName);
+	        rs = pstmt.executeQuery();
+	        
+	        while (rs.next()) {
+	            Bbs bbs = new Bbs();
+	            bbs.setBbsID(rs.getInt("bbsID"));
+	            bbs.setBbsTitle(rs.getString("bbsTitle"));
+	            bbs.setUserID(rs.getString("userID"));
+	            bbs.setBbsDate(rs.getString("bbsDate"));
+	            bbs.setInquiry(rs.getInt("inquiry"));
+	            bbs.setRecommendation(rs.getInt("recommendation"));
+	            bbs.setComments(rs.getInt("comments"));
+	            bbs.setIsPublic(rs.getInt("bbsPublic"));
+	            bbs.setIsNotice(1);   // 이 메서드는 공지글만 조회하니까 무조건 1
+	            bbs.setIsBold(bbs.getRecommendation() >= 10); 
+
+	            list.add(bbs);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(conn, pstmt, rs);
+	    }
+	    return list;
+	}
+	
+	/**
+	 *  공지글만 조회
+	 */
+	
+	public ArrayList<Bbs> getNoticeOnlyList(String groupName) {
+	    String SQL = "SELECT * FROM BBS WHERE groupName = ? AND isNotice = 1 AND bbsAvailable = 1 ORDER BY bbsID DESC";
+	    ArrayList<Bbs> list = new ArrayList<Bbs>();
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+	    try {
+	        conn = getConnection();
+	        pstmt = conn.prepareStatement(SQL);
+	        pstmt.setString(1, groupName);
+	        rs = pstmt.executeQuery();
+	        while (rs.next()) {
+	            Bbs bbs = new Bbs();
+	            bbs.setBbsID(rs.getInt("bbsID"));
+	            bbs.setBbsTitle(rs.getString("bbsTitle"));
+	            bbs.setUserID(rs.getString("userID"));
+	            bbs.setBbsDate(rs.getString("bbsDate"));
+	            bbs.setInquiry(rs.getInt("inquiry"));
+	            bbs.setRecommendation(rs.getInt("recommendation"));
+	            bbs.setComments(rs.getInt("comments"));
+	            bbs.setIsPublic(rs.getInt("bbsPublic"));
+	            bbs.setIsNotice(1);   // 이 메서드는 공지글만 조회하니까 무조건 1
+	            bbs.setIsBold(bbs.getRecommendation() >= 10);  
+
+	            list.add(bbs);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(conn, pstmt, rs);
+	    }
+	    return list;
 	}
 
 	private void close(Connection conn, PreparedStatement pstmt, ResultSet rs) {

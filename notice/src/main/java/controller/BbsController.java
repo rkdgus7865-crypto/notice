@@ -64,8 +64,20 @@ public class BbsController extends HttpServlet {
 			groupName = "자유게시판";
 
 		String ajax = request.getParameter("ajax");
+		String noticeOnly = request.getParameter("noticeOnly");
 		BbsDAO bbsDAO = new BbsDAO();
-		ArrayList<Bbs> list = bbsDAO.getList(pageNumber, groupName);
+		ArrayList<Bbs> list;
+		if ("true".equals(noticeOnly)) {
+		    list = bbsDAO.getNoticeOnlyList(groupName);
+		} else {
+		    list = bbsDAO.getList(pageNumber, groupName);
+		}
+
+		// 공지게시판이 아니고, noticeOnly 모드도 아닐 때만 상단 공지 3개 조회
+		ArrayList<Bbs> noticeList = new ArrayList<Bbs>();
+		if (!"공지게시판".equals(groupName) && !"true".equals(noticeOnly)) {
+		    noticeList = bbsDAO.getNoticeList(groupName);
+		}
 
 		int totalCount = bbsDAO.getTotalCount(groupName);
 		int totalPages = (int) Math.ceil((double) totalCount / 20);
@@ -74,46 +86,67 @@ public class BbsController extends HttpServlet {
 		int startNumber = totalCount - ((pageNumber - 1) * 20);
 
 		if ("true".equals(ajax)) {
-			response.setContentType("application/json; charset=UTF-8");
-			PrintWriter out = response.getWriter();
-			StringBuilder json = new StringBuilder();
-			json.append("{");
-			json.append("\"totalPages\":" + totalPages + ",");
-			json.append("\"startPage\":" + startPage + ",");
-			json.append("\"endPage\":" + endPage + ",");
-			json.append("\"pageNumber\":" + pageNumber + ",");
-			json.append("\"startNumber\":" + startNumber + ",");
-			json.append("\"groupName\":\"" + groupName + "\",");
-			json.append("\"list\":[");
-			for (int i = 0; i < list.size(); i++) {
-				Bbs bbs = list.get(i);
-				json.append("{");
-				json.append("\"bbsID\":" + bbs.getBbsID() + ",");
-				json.append("\"bbsTitle\":\"" + bbs.getBbsTitle() + "\",");
-				json.append("\"userID\":\"" + bbs.getUserID() + "\",");
-				json.append("\"bbsDate\":\"" + bbs.getBbsDate() + "\",");
-				json.append("\"inquiry\":" + bbs.getInquiry() + ",");
-				json.append("\"recommendation\":" + bbs.getRecommendation() + ",");
-				json.append("\"comments\":" + bbs.getComments() + ",");
-				json.append("\"isPublic\":" + bbs.getIsPublic() + ",");
-				json.append("\"isBold\":" + bbs.getIsBold() + ",");
-				json.append("\"isNotice\":" + bbs.getIsNotice());
-				json.append("}");
-				if (i < list.size() - 1)
-					json.append(",");
-			}
-			json.append("]}");
-			out.print(json.toString());
-		} else {
-			request.setAttribute("list", list);
-			request.setAttribute("totalPages", totalPages);
-			request.setAttribute("startPage", startPage);
-			request.setAttribute("endPage", endPage);
-			request.setAttribute("pageNumber", pageNumber);
-			request.setAttribute("startNumber", startNumber);
-			request.setAttribute("groupName", groupName);
-			request.getRequestDispatcher("bbs.jsp").forward(request, response);
-		}
+	        response.setContentType("application/json; charset=UTF-8");
+	        PrintWriter out = response.getWriter();
+	        StringBuilder json = new StringBuilder();
+	        json.append("{");
+	        json.append("\"totalPages\":" + totalPages + ",");
+	        json.append("\"startPage\":" + startPage + ",");
+	        json.append("\"endPage\":" + endPage + ",");
+	        json.append("\"pageNumber\":" + pageNumber + ",");
+	        json.append("\"startNumber\":" + startNumber + ",");
+	        json.append("\"groupName\":\"" + groupName + "\",");
+	        json.append("\"noticeList\":[");
+	        
+	        for (int i = 0; i < noticeList.size(); i++) {
+	            Bbs notice = noticeList.get(i);
+	            json.append("{");
+	            json.append("\"bbsID\":" + notice.getBbsID() + ",");
+	            json.append("\"bbsTitle\":\"" + notice.getBbsTitle() + "\",");
+	            json.append("\"userID\":\"" + notice.getUserID() + "\",");
+	            json.append("\"bbsDate\":\"" + notice.getBbsDate() + "\",");
+	            json.append("\"inquiry\":" + notice.getInquiry() + ",");
+	            json.append("\"recommendation\":" + notice.getRecommendation() + ",");
+	            json.append("\"comments\":" + notice.getComments() + ",");
+	            json.append("\"isPublic\":" + notice.getIsPublic());
+	            json.append("}");
+	            if (i < noticeList.size() - 1) json.append(",");
+	        }
+	        json.append("],");
+
+	        json.append("\"list\":[");
+	        
+	        for (int i = 0; i < list.size(); i++) {
+	            Bbs bbs = list.get(i);
+	            json.append("{");
+	            json.append("\"bbsID\":" + bbs.getBbsID() + ",");
+	            json.append("\"bbsTitle\":\"" + bbs.getBbsTitle() + "\",");
+	            json.append("\"userID\":\"" + bbs.getUserID() + "\",");
+	            json.append("\"bbsDate\":\"" + bbs.getBbsDate() + "\",");
+	            json.append("\"inquiry\":" + bbs.getInquiry() + ",");
+	            json.append("\"recommendation\":" + bbs.getRecommendation() + ",");
+	            json.append("\"comments\":" + bbs.getComments() + ",");
+	            json.append("\"isPublic\":" + bbs.getIsPublic() + ",");
+	            json.append("\"isBold\":" + bbs.getIsBold() + ",");
+	            json.append("\"isNotice\":" + bbs.getIsNotice());
+	            json.append("}");
+	            
+	            if (i < list.size() - 1)
+	                json.append(",");
+	        }
+	        json.append("]}");
+	        out.print(json.toString());
+	    } else {
+	        request.setAttribute("list", list);
+	        request.setAttribute("noticeList", noticeList);  
+	        request.setAttribute("totalPages", totalPages);
+	        request.setAttribute("startPage", startPage);
+	        request.setAttribute("endPage", endPage);
+	        request.setAttribute("pageNumber", pageNumber);
+	        request.setAttribute("startNumber", startNumber);
+	        request.setAttribute("groupName", groupName);
+	        request.getRequestDispatcher("bbs.jsp").forward(request, response);
+	    }
 	}
 
 	/**

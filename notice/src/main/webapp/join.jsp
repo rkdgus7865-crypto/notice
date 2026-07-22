@@ -9,21 +9,22 @@
 <title>게시판</title>
 </head>
 <body>
-<%
+	<%
 request.setAttribute("currentPage", "join");
 %>
-<%@ include file="navbar.jsp"%>
+	<%@ include file="navbar.jsp"%>
 
-<div class="container">
+	<div class="container">
 		<div class="col-lg-4"></div>
 		<div class="col-lg-4">
 			<div class="jumbotron" style="padding-top: 20px">
-			
+
 				<% if (request.getAttribute("errorMsg") != null) { %>
 				<script>alert('<%= request.getAttribute("errorMsg") %>')</script>
 				<% } %>
-				
-				<form method="post" action="joinAction" onsubmit="return validateJoin()">
+
+				<form method="post" action="joinAction"
+					onsubmit="return validateJoin()">
 					<h3 style="text-align: center;">회원가입</h3>
 					<div class="form-group">
 						<input type="text" class="form-control" placeholder="아이디"
@@ -73,45 +74,53 @@ request.setAttribute("currentPage", "join");
 					<input type="submit" class="btn btn-primary form-control"
 						value="회원가입">
 				</form>
-				<script>
-					function validateJoin() {
-						var fields = [ {
-							name : "userID",
-							label : "아이디"
-						}, {
-							name : "userPassword",
-							label : "비밀번호"
-						}, {
-							name : "userName",
-							label : "이름"
-						}, {
-							name : "userEmail",
-							label : "이메일"
-						}, {
-							name : "userAddress",
-							label : "주소"
-						}, {
-							name : "userPhone",
-							label : "전화번호"
-						}, {
-							name : "userDateOfBirth",
-							label : "생년월일"
-						} ];
-						for (var i = 0; i < fields.length; i++) {
-							var value = document.getElementsByName(fields[i].name)[0].value;
-							if (value.trim() === "") {
-								alert(fields[i].label + "를 입력해주세요.");
-								return false;
-							}
-						}
-						return true;
-					}
-				</script>
+
 			</div>
 		</div>
 		<div class="col-lg-4"></div>
 	</div>
+	
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="/notice/js/bootstrap.js"></script>
+	<script>
+		function validateJoin() {
+			var fields = [ {
+				name : "userID",
+				label : "아이디"
+			}, {
+				name : "userPassword",
+				label : "비밀번호"
+			}, {
+				name : "userName",
+				label : "이름"
+			}, {
+				name : "userEmail",
+				label : "이메일"
+			}, {
+				name : "userAddress",
+				label : "주소"
+			}, {
+				name : "userPhone",
+				label : "전화번호"
+			}, {
+				name : "userDateOfBirth",
+				label : "생년월일"
+			} ];
+			
+			for (var i = 0; i < fields.length; i++) {
+				var value = document.getElementsByName(fields[i].name)[0].value;
+				if (value.trim() === "") {
+					alert(fields[i].label + "를 입력해주세요.");
+					document.getElementsByName(fields[i].name)[0].focus();
+					return false;
+				}
+			}
+			return true;
+		}
+	</script>
+
 </body>
 </html>
+
+
+
