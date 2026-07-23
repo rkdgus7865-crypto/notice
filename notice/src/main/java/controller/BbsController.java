@@ -350,7 +350,7 @@ public class BbsController extends HttpServlet {
 		}
 
 		int bbsID = Integer.parseInt(request.getParameter("bbsID"));
-		String bbsTitle = request.getParameter("bbsTitle");
+		String bbsTitle = request.getParameter("bbsTitle"); 
 		String bbsContent = request.getParameter("bbsContent");
 		String groupName = request.getParameter("groupName");
 		BbsDAO bbsDAO = new BbsDAO();

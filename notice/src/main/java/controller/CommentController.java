@@ -190,7 +190,7 @@ public class CommentController extends HttpServlet {
         if (bbsDAO.hasRecommended(bbsID, userID)) {
             bbsDAO.cancelRecommend(bbsID, userID);   // 이미 추천했으면 취소
         } else {
-            bbsDAO.recommend(bbsID, userID);          // 안 했으면 추천
+            bbsDAO.recommend(bbsID, userID);          // 안 했으면 추천 
         }
         response.sendRedirect("viewDetail?bbsID=" + bbsID + "&group="
             + URLEncoder.encode(groupName, "UTF-8") + "&fromRecommend=true");
