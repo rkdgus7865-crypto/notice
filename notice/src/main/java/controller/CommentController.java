@@ -143,7 +143,7 @@ public class CommentController extends HttpServlet {
      * @param request
      * @param response
      * @throws IOException
-     *  댓글 추천
+     *  댓글 추천, 추천 취소
      */
     
     private void recommendComment(HttpServletRequest request, HttpServletResponse response)
@@ -158,8 +158,11 @@ public class CommentController extends HttpServlet {
             return;
         }
         CommentDAO commentDAO = new CommentDAO();
-        if (!commentDAO.hasRecommended(commentID, userID)) {
-            commentDAO.recommend(commentID, userID);
+        
+        if (commentDAO.hasRecommended(commentID, userID)) {
+            commentDAO.cancelRecommend(commentID, userID);   // 이미 추천했으면 취소
+        } else {
+            commentDAO.recommend(commentID, userID);          // 안 했으면 추천
         }
         response.sendRedirect("viewDetail?bbsID=" + bbsID + "&group="
             + URLEncoder.encode(groupName, "UTF-8"));
@@ -173,7 +176,7 @@ public class CommentController extends HttpServlet {
      */
     
     private void recommendBbs(HttpServletRequest request, HttpServletResponse response)
-            throws IOException { // try-catch는 throws IOException 대체
+            throws IOException { 
         String userID = (String) request.getSession().getAttribute("userID");
 
         if (userID == null) {
@@ -184,9 +187,12 @@ public class CommentController extends HttpServlet {
         String groupName = request.getParameter("group");
         
         BbsDAO bbsDAO = new BbsDAO();
-        bbsDAO.recommend(bbsID);
-
-        response.sendRedirect("viewDetail?bbsID=" + bbsID + "&group=" 
+        if (bbsDAO.hasRecommended(bbsID, userID)) {
+            bbsDAO.cancelRecommend(bbsID, userID);   // 이미 추천했으면 취소
+        } else {
+            bbsDAO.recommend(bbsID, userID);          // 안 했으면 추천
+        }
+        response.sendRedirect("viewDetail?bbsID=" + bbsID + "&group="
             + URLEncoder.encode(groupName, "UTF-8") + "&fromRecommend=true");
     }
 }

@@ -65,25 +65,38 @@ public class BbsController extends HttpServlet {
 
 		String ajax = request.getParameter("ajax");
 		String noticeOnly = request.getParameter("noticeOnly");
+		
+		String searchType = request.getParameter("searchType");
+		String keyword = request.getParameter("keyword");
+     	boolean isSearch = (keyword != null && !keyword.trim().isEmpty());
+		
 		BbsDAO bbsDAO = new BbsDAO();
 		ArrayList<Bbs> list;
+		
 		if ("true".equals(noticeOnly)) {
-		    list = bbsDAO.getNoticeOnlyList(groupName);
-		} else {
-		    list = bbsDAO.getList(pageNumber, groupName);
-		}
+	        list = bbsDAO.getNoticeOnlyList(groupName);
+	    } else if (isSearch) {
+	        list = bbsDAO.searchList(pageNumber, groupName, searchType, keyword);
+	    } else {
+	        list = bbsDAO.getList(pageNumber, groupName);
+	    }
 
-		// 공지게시판이 아니고, noticeOnly 모드도 아닐 때만 상단 공지 3개 조회
-		ArrayList<Bbs> noticeList = new ArrayList<Bbs>();
-		if (!"공지게시판".equals(groupName) && !"true".equals(noticeOnly)) {
-		    noticeList = bbsDAO.getNoticeList(groupName);
-		}
+	    ArrayList<Bbs> noticeList = new ArrayList<Bbs>();
+	    if (!"true".equals(noticeOnly)) {
+	        noticeList = bbsDAO.getNoticeList(groupName);
+	    }
 
-		int totalCount = bbsDAO.getTotalCount(groupName);
-		int totalPages = (int) Math.ceil((double) totalCount / 20);
-		int startPage = ((pageNumber - 1) / 5) * 5 + 1;
-		int endPage = Math.min(startPage + 4, totalPages);
-		int startNumber = totalCount - ((pageNumber - 1) * 20);
+	    int totalCount;
+	    if (isSearch) {
+	        totalCount = bbsDAO.getSearchTotalCount(groupName, searchType, keyword);
+	    } else {
+	        totalCount = bbsDAO.getTotalCount(groupName);
+	    }
+
+		int totalPages = (int) Math.ceil((double) totalCount / 20); // 게시글 20개를 한 페이지에 표시 전체 게시글 수를 20으로 나누어 전체 페이지 수 계산
+		int startPage = ((pageNumber - 1) / 5) * 5 + 1;  // 페이지 번호 버튼을 5개 단위로 표시
+		int endPage = Math.min(startPage + 4, totalPages); // 시작 페이지부터 최대 5개까지만 표시  마지막 페이지가 전체 페이지 수를 넘지 않도록 제한
+		int startNumber = totalCount - ((pageNumber - 1) * 20); // 현재 페이지의 첫 번째 게시글 번호 계산 전체 23개일 때 1페이지 → 23번부터
 
 		if ("true".equals(ajax)) {
 	        response.setContentType("application/json; charset=UTF-8");
@@ -136,16 +149,17 @@ public class BbsController extends HttpServlet {
 	        }
 	        json.append("]}");
 	        out.print(json.toString());
-	    } else {
-	        request.setAttribute("list", list);
-	        request.setAttribute("noticeList", noticeList);  
-	        request.setAttribute("totalPages", totalPages);
-	        request.setAttribute("startPage", startPage);
-	        request.setAttribute("endPage", endPage);
-	        request.setAttribute("pageNumber", pageNumber);
-	        request.setAttribute("startNumber", startNumber);
-	        request.setAttribute("groupName", groupName);
-	        request.getRequestDispatcher("bbs.jsp").forward(request, response);
+	    } else {											 // Controller에서 계산한 데이터를 JSP로 전달
+	        request.setAttribute("list", list);				 // 현재 페이지의 일반 게시글 목록 전달
+	        request.setAttribute("noticeList", noticeList);  // 공지 게시글 목록 전달
+	        request.setAttribute("totalPages", totalPages);  // 전체 페이지 수 전달
+	        request.setAttribute("startPage", startPage);    // 페이지 버튼 시작 번호 전달
+	        request.setAttribute("endPage", endPage);		 // 페이지 버튼 마지막 번호 전달
+	        request.setAttribute("pageNumber", pageNumber);  // 현재 페이지 번호 전달
+	        request.setAttribute("startNumber", startNumber);// 게시글 번호 계산용 시작 번호 전달
+	        request.setAttribute("groupName", groupName);	 // 현재 게시판 그룹명 전달
+	        request.setAttribute("noticeOnly", noticeOnly);  // 공지글만 보기 여부 전달	
+	        request.getRequestDispatcher("bbs.jsp").forward(request, response); // request에 담은 데이터를 bbs.jsp로 전달 forward이므로 request 데이터가 유지된 상태로 JSP 실행
 	    }
 	}
 

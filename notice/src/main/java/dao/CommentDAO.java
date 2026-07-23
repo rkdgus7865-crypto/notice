@@ -198,6 +198,35 @@ public class CommentDAO {
 	        close(conn, pstmt2, null);   
 	    }
 	}
+	
+	/**
+	 * 댓글 추천 취소
+	 */
+	
+	public int cancelRecommend(int commentID, String userID) {
+	    String deleteSQL = "DELETE FROM CommentRecommend WHERE commentID = ? AND userID = ?";
+	    String updateSQL = "UPDATE Comment SET recommendCount = recommendCount - 1 WHERE commentID = ? AND recommendCount > 0";
+	    Connection conn = null;
+	    PreparedStatement pstmt1 = null;
+	    PreparedStatement pstmt2 = null;
+	    try {
+	        conn = getConnection();
+	        pstmt1 = conn.prepareStatement(deleteSQL);
+	        pstmt1.setInt(1, commentID);
+	        pstmt1.setString(2, userID);
+	        pstmt1.executeUpdate();
+
+	        pstmt2 = conn.prepareStatement(updateSQL);
+	        pstmt2.setInt(1, commentID);
+	        return pstmt2.executeUpdate();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return -1;
+	    } finally {
+	        close(null, pstmt1, null);
+	        close(conn, pstmt2, null);
+	    }
+	}
 
 	private void close(Connection conn, PreparedStatement pstmt, ResultSet rs) {
 		try {

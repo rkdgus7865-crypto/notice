@@ -11,22 +11,26 @@
 </head>
 <body>
 	<%
-	String userGrade = (String) session.getAttribute("userGrade");
-	String noticeOnly = request.getParameter("noticeOnly");
+	String userGrade = (String) session.getAttribute("userGrade"); // 세션에서 현재 로그인한 사용자의 등급을 가져옴
 	boolean isVerified = "VERIFIED".equals(userGrade);
-	
 
-	ArrayList<Bbs> list = (ArrayList<Bbs>) request.getAttribute("list"); 
-	ArrayList<Bbs> noticeList = (ArrayList<Bbs>) request.getAttribute("noticeList");
+	//  getAttribute 로 Controller가 다 계산해서 넘겨줌
+	ArrayList<Bbs> list       = (ArrayList<Bbs>) request.getAttribute("list");   	  // Controller가 전달한 일반 게시글 목록을 가져옴
+	ArrayList<Bbs> noticeList = (ArrayList<Bbs>) request.getAttribute("noticeList");  // Controller가 전달한 공지 게시글 목록을 가져옴
 	
-	int totalPages = (Integer) request.getAttribute("totalPages");
-	int startPage = (Integer) request.getAttribute("startPage");
-	int endPage = (Integer) request.getAttribute("endPage");
-	int pageNumber = (Integer) request.getAttribute("pageNumber");
-	int startNumber = (Integer) request.getAttribute("startNumber");
+	int totalPages   = (Integer) request.getAttribute("totalPages");  // 전체 게시글 페이지 수
+	int startPage    = (Integer) request.getAttribute("startPage");   // 현재 페이지 그룹의 시작 페이지 번호
+	int endPage      = (Integer) request.getAttribute("endPage");	  // 현재 페이지 그룹의 마지막 페이지 번호
+	int pageNumber   = (Integer) request.getAttribute("pageNumber");  // 현재 보고 있는 페이지 번호
+	int startNumber  = (Integer) request.getAttribute("startNumber"); // 현재 페이지에서 게시글 시작 번호
 	
-
-	request.setAttribute("currentPage", "board");
+	String noticeOnly = (String) request.getAttribute("noticeOnly");  // Controller가 전달한 공지글만 보기 여부
+	boolean isNoticeOnly = "true".equals(noticeOnly);				  // noticeOnly 값이 "true"이면 공지글만 표시
+	
+	String searchType = (String) request.getAttribute("searchType"); // 검색 타입 (드롭다운 값)
+ 	String keyword = (String) request.getAttribute("keyword");       // 검색어
+	
+	request.setAttribute("currentPage", "board");   // 현재 페이지가 게시판임을 표시
 	%>
 	
 	<%@ include file="navbar.jsp"%>
@@ -36,9 +40,30 @@
         <div class="row">
          <div style="text-align: left; margin-bottom: 10px;">
          <!--  공지만 보기 / 전체 목록 버튼 -->
-          <a href="bbsList?group=<%=groupName%>&noticeOnly=true" class="btn btn-info btn-sm">공지글</a>
-          <a href="bbsList?group=<%=groupName%>" class="btn btn-default btn-sm">전체글</a>
-        </div>
+				<a href="bbsList?group=<%=groupName%>&noticeOnly=true"class="btn btn-sm <%=isNoticeOnly ? "btn-info" : "btn-default"%>">공지글</a> <!--현재 게시판의 공지글만 보도록 bbsList Controller에 noticeOnly=true를 전달 공지글만 보는 상태라면 btn-info로 버튼을 강조 아니면 btn-default  -->
+			    <a href="bbsList?group=<%=groupName%>"class="btn btn-sm <%=!isNoticeOnly ? "btn-info" : "btn-default"%>">전체글</a>
+			</div>
+			
+						<!-- 검색 UI -->
+				<div style="text-align: right; margin-bottom: 10px;">
+				    <form action="bbsList" method="get" style="display:inline-block;">
+				        <input type="hidden" name="group" value="<%=groupName%>">
+				        <input type="hidden" name="pageNumber" value="1">
+				
+				        <select name="searchType" style="margin-right:5px;">
+				            <option value="title" selected>제목</option>
+				            <!-- 나중에 추가 예정
+				            <option value="writer">작성자</option>
+				            <option value="titleWriter">제목+작성자</option>
+				            -->
+				        </select>
+				
+				        <input type="text" name="keyword" value="<%=keyword != null ? keyword : ""%>"
+				               placeholder="검색어 입력" style="width:180px;">
+				        <button type="submit" class="btn btn-sm btn-primary">검색</button>
+				    </form>
+				</div>
+			
             <table class="table table-striped"
                 style="text-align: center; border: 1px solid #dddddd">
                 <thead>
@@ -171,6 +196,7 @@
 
 	<script>
 		var currentGroup = "<%=groupName%>";
+		var currentNoticeOnly = "<%=noticeOnly%>"; 
 		function loadPage(pageNumber) {
 		    $.ajax({
 		        url : "bbsList",
@@ -178,6 +204,7 @@
 		        data : {
 		            pageNumber : pageNumber,
 		            group : currentGroup,
+		            noticeOnly : currentNoticeOnly,
 		            ajax : "true" // Ajax 요청 표시
 		        },
 		        success : function(data) {
@@ -206,7 +233,7 @@
 		                var bbs = data.list[i];
 		                tbody += "<tr>";
 		                tbody += "<td>" + (startNumber - i) + "</td>";
-		                var recommendTag = bbs.isBold ? "<span style='color:red; font-weight:bold;'>[추천]</span> " : "";
+		                var recommendTag = bbs.isBold ? "<span style='color:black; font-weight:bold;'>[추천]</span> " : "";
 		                var style = bbs.isNotice == 1 ? "font-weight: bold; font-size:16px; color:black;" : "color:black;";
 		                tbody += "<td>" + recommendTag + "<a href='viewDetail?bbsID=" + bbs.bbsID + "&group=" + currentGroup 
 		                      + "' style='" + style + "'>" + bbs.bbsTitle + "</a></td>";

@@ -154,7 +154,7 @@ public class BbsDAO {
 	 */
 
 	public ArrayList<Bbs> getList(int pageNumber, String groupName) {
-		String SQL = "SELECT * FROM BBS WHERE bbsAvailable = 1 AND groupName = ? "// 해당 게시판의 게시글을 최신순으로 20개 조회
+		String SQL = "SELECT * FROM BBS WHERE bbsAvailable = 1 AND groupName = ? AND isNotice = 0 "// 해당 게시판의 게시글을 최신순으로 20개 조회
 		        + "ORDER BY bbsID DESC LIMIT 20 OFFSET ?";  // LIMIT 20 OFFSET ? 20개씩 조회하고 offset부터 가져오기 LIMIT 20 OFFSET 40 41번째 게시글부터 20개 조회
 	 
 		ArrayList<Bbs> list = new ArrayList<Bbs>();  // 게시글 목록을 저장할 리스트
@@ -294,26 +294,87 @@ public class BbsDAO {
 		}
 		return -1;
 	}
-
+	
+	/**
+	 * 게시글 댓글 추천 중복 확인
+	 */
+	
+	public boolean hasRecommended(int bbsID, String userID) {
+	    String SQL = "SELECT * FROM BbsRecommend WHERE bbsID = ? AND userID = ?";
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+	    try {
+	        conn = getConnection();
+	        pstmt = conn.prepareStatement(SQL);
+	        pstmt.setInt(1, bbsID);
+	        pstmt.setString(2, userID);
+	        rs = pstmt.executeQuery();
+	        return rs.next();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(conn, pstmt, rs);
+	    }
+	    return false;
+	}
+	
 	/**
 	 * 게시글 추천수 증가 7-7
 	 */
 
-	public int recommend(int bbsID) {
-		String SQL = "UPDATE BBS SET recommendation = recommendation + 1 WHERE bbsID = ?";
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		try {
-			conn = getConnection();
-			pstmt = conn.prepareStatement(SQL);
-			pstmt.setInt(1, bbsID);
-			return pstmt.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			close(conn, pstmt, null);
-		}
-		return -1;
+	public int recommend(int bbsID, String userID) {
+	    String insertSQL = "INSERT INTO BbsRecommend (bbsID, userID) VALUES (?, ?)";
+	    String updateSQL = "UPDATE BBS SET recommendation = recommendation + 1 WHERE bbsID = ?";
+	    Connection conn = null;
+	    PreparedStatement pstmt1 = null;
+	    PreparedStatement pstmt2 = null;
+	    try {
+	        conn = getConnection();
+	        pstmt1 = conn.prepareStatement(insertSQL);
+	        pstmt1.setInt(1, bbsID);
+	        pstmt1.setString(2, userID);
+	        pstmt1.executeUpdate();
+
+	        pstmt2 = conn.prepareStatement(updateSQL);
+	        pstmt2.setInt(1, bbsID);
+	        return pstmt2.executeUpdate();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return -1;
+	    } finally {
+	        close(null, pstmt1, null);
+	        close(conn, pstmt2, null);
+	    }
+	}
+	
+	/**
+	 * 게시글 추천 취소
+	 */
+	
+	public int cancelRecommend(int bbsID, String userID) {
+	    String deleteSQL = "DELETE FROM BbsRecommend WHERE bbsID = ? AND userID = ?";
+	    String updateSQL = "UPDATE BBS SET recommendation = recommendation - 1 WHERE bbsID = ?";
+	    Connection conn = null;
+	    PreparedStatement pstmt1 = null;
+	    PreparedStatement pstmt2 = null;
+	    try {
+	        conn = getConnection();
+	        pstmt1 = conn.prepareStatement(deleteSQL);
+	        pstmt1.setInt(1, bbsID);
+	        pstmt1.setString(2, userID);
+	        pstmt1.executeUpdate();
+
+	        pstmt2 = conn.prepareStatement(updateSQL);
+	        pstmt2.setInt(1, bbsID);
+	        return pstmt2.executeUpdate();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return -1;
+	    } finally {
+	        close(null, pstmt1, null);
+	        close(conn, pstmt2, null);
+	    }
 	}
 
 	/**
@@ -437,6 +498,89 @@ public class BbsDAO {
 	        close(conn, pstmt, rs);
 	    }
 	    return list;
+	}
+	
+	/**
+	 *  검색 유형에 따라 WHERE 조건 다르게 구성
+	 */
+	
+	public ArrayList<Bbs> searchList(int pageNumber, String groupName, String searchType, String keyword) {
+	    String SQL = "SELECT * FROM BBS WHERE bbsAvailable = 1 AND groupName = ? AND isNotice = 0 "
+	               + "AND bbsTitle LIKE ? "
+	               + "ORDER BY bbsID DESC LIMIT 20 OFFSET ?";
+
+	    ArrayList<Bbs> list = new ArrayList<Bbs>();
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+	    try {
+	        conn = getConnection();
+	        int offset = (pageNumber - 1) * 20;
+	        String likeKeyword = "%" + keyword + "%";
+	        pstmt = conn.prepareStatement(SQL);
+	        pstmt.setString(1, groupName);
+	        pstmt.setString(2, likeKeyword);
+	        pstmt.setInt(3, offset);
+
+	        rs = pstmt.executeQuery();
+	        while (rs.next()) {
+	            Bbs bbs = new Bbs();
+	            bbs.setBbsID(rs.getInt("bbsID"));
+	            bbs.setBbsTitle(rs.getString("bbsTitle"));
+	            bbs.setUserID(rs.getString("userID"));
+	            String rawDate = rs.getString("bbsDate");
+	            String today = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+	            String displayDate;
+	            if (rawDate.startsWith(today)) {
+	                displayDate = rawDate.substring(11, 13) + "시 " + rawDate.substring(14, 16) + "분";
+	            } else {
+	                displayDate = rawDate.substring(0, 10);
+	            }
+	            bbs.setBbsDate(displayDate);
+	            bbs.setBbsContent(rs.getString("bbsContent"));
+	            bbs.setBbsAvailable(rs.getInt("bbsAvailable"));
+	            bbs.setInquiry(rs.getInt("inquiry"));
+	            bbs.setRecommendation(rs.getInt("recommendation"));
+	            bbs.setComments(rs.getInt("Comments"));
+	            bbs.setIsPublic(rs.getInt("bbsPublic"));
+	            bbs.setIsNotice(rs.getInt("isNotice"));
+	            bbs.setIsBold(bbs.getRecommendation() >= 10);
+	            list.add(bbs);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(conn, pstmt, rs);
+	    }
+	    return list;
+	}
+
+	/**
+	 *  검색 결과 전체 개수 (페이징 계산용)
+	 */
+	
+	public int getSearchTotalCount(String groupName, String searchType, String keyword) {
+	    String SQL = "SELECT COUNT(*) FROM BBS WHERE bbsAvailable = 1 AND groupName = ? AND isNotice = 0 "
+	               + "AND bbsTitle LIKE ?";
+
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+	    try {
+	        conn = getConnection();
+	        String likeKeyword = "%" + keyword + "%";
+	        pstmt = conn.prepareStatement(SQL);
+	        pstmt.setString(1, groupName);
+	        pstmt.setString(2, likeKeyword);
+
+	        rs = pstmt.executeQuery();
+	        if (rs.next()) return rs.getInt(1);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(conn, pstmt, rs);
+	    }
+	    return 0;
 	}
 
 	private void close(Connection conn, PreparedStatement pstmt, ResultSet rs) {

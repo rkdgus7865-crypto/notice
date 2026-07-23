@@ -33,7 +33,7 @@ if (currentPage == null) currentPage = "";
                 </a>
                 <ul class="dropdown-menu">
                     <li><a href="bbsList?group=자유게시판">자유게시판</a></li>
-                    <li><a href="bbsList?group=공지게시판">공지게시판</a></li>
+                    <li><a href="bbsList?group=게임게시판">게임게시판</a></li>
                     <li><a href="bbsList?group=질문게시판">질문게시판</a></li>
                 </ul>
             </li>
