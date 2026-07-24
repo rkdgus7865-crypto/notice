@@ -10,6 +10,9 @@ public class Comment {
 	private int commentAvailable;
 	private int secretComment;
 	private int recommendCount;
+	private int parentCommentID;
+	private int commentStep;
+	private int commentOrder;
 
 	public int getCommentID() {
 		return commentID;
@@ -81,5 +84,30 @@ public class Comment {
 
 	public void setRecommendCount(int recommendCount) {
 		this.recommendCount = recommendCount;
+	}
+	
+	
+	public int getParentCommentID() {
+		return parentCommentID;
+	}
+
+	public void setParentCommentID(int parentCommentID) {
+		this.parentCommentID = parentCommentID;
+	}
+
+	public int getCommentStep() {
+		return commentStep;
+	}
+
+	public void setCommentStep(int commentStep) {
+		this.commentStep = commentStep;
+	}
+
+	public int getCommentOrder() {
+		return commentOrder;
+	}
+
+	public void setCommentOrder(int commentOrder) {
+		this.commentOrder = commentOrder;
 	}
 }

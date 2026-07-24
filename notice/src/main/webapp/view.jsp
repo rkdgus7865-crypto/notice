@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="dto.Bbs"%>
 <%@ page import="dto.Comment"%>
+<%@ page import="dao.CommentDAO"%>
 <%@ page import="java.util.ArrayList"%>
 <!DOCTYPE html>
 <html>
@@ -21,7 +22,14 @@
 		int bottomStartPage 	= (Integer) request.getAttribute("bottomStartPage");
 		int bottomEndPage 		= (Integer) request.getAttribute("bottomEndPage");
 		int bottomStartNumber 	= (Integer) request.getAttribute("bottomStartNumber");
-
+		
+		int commentPageNumber = (Integer) request.getAttribute("commentPageNumber");
+		int totalCommentPages = (Integer) request.getAttribute("totalCommentPages");
+		int commentStartPage  = (Integer) request.getAttribute("commentStartPage");
+		int commentEndPage    = (Integer) request.getAttribute("commentEndPage");
+		
+		boolean isRecommended = (Boolean) request.getAttribute("isRecommended"); // BbsController view 메소드에서  request.setAttribute("isRecommended", isRecommended); 한 값 받아옴
+		 
 		request.setAttribute("currentPage", "board");
 	%>
 
@@ -48,25 +56,23 @@
 		</table>
 
 		<!-- 본문 -->
-		<div
-			style="min-height: 300px; border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; display: flex; flex-direction: column;">
+		<div style="min-height: 300px; border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; display: flex; flex-direction: column;">
 			<div style="flex: 1;">
 				<%=bbs.getBbsContent()%>
 			</div>
 
-			<!-- 추천 -->
+			<!-- 게시글 추천 누르면 추천 UI -> 추천 취소 변경 -->
 			<div style="text-align: center; margin-top: 20px;">
-				추천수: <b><%=bbs.getRecommendation()%></b> <a
-					href="recommendAction?bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>"
-					class="btn btn-success">추천</a>
+				추천수: <b><%=bbs.getRecommendation()%></b> 
+				 <a href="recommendAction?bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>"class="btn <%=isRecommended ? "btn-danger" : "btn-success"%>"><%=isRecommended ? "추천취소" : "추천"%>
+				</a>
 			</div>
 		</div>
-
 
 		<!-- 첨부파일 -->
 		<%
 			if (bbs.getOriginalFileName() != null) {
-			%>
+		%>
 		<div style="margin-top: 10px;">
 			<b>첨부파일:</b> <a
 				href="fileDownload?fileName=<%=bbs.getSavedFileName()%>&originalName=<%=java.net.URLEncoder.encode(bbs.getOriginalFileName(), "UTF-8")%>">
@@ -76,20 +82,20 @@
 		</div>
 		<%
 			}
-			%>
+		%>
 
-		<!-- 게시판 내용 수정/삭제/목록 버튼 -->
-		<div style="text-align: right;">
+	<!-- 게시판 내용 수정/삭제/목록 버튼 -->
+	<div style="text-align: right;">
 			<%
-					if (!isGuest && userID.equals(bbs.getUserID())) {
+			   if (!isGuest && userID.equals(bbs.getUserID())) {
 			%>
 			<a href="editView?bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>"
 				class="btn btn-warning">수정</a> <a
 				href="deleteAction?bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>"
 				class="btn btn-danger" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</a>
 			<%
-					}
-					%>
+			  }
+			%>
 			<a href="bbsList?group=<%=groupName%>" class="btn btn-default">목록</a>
 		</div>
 	</div>
@@ -101,24 +107,49 @@
 		</h4>
 
 		<table class="table table-bordered">
-			<%
+		
+		<%
+   		 CommentDAO commentDAO = new CommentDAO();
+		%>
+			<%-- 댓글 목록을 순회하며 각 댓글 정보를 그리는 반복문 --%>
+		<% 
         for (int i = 0; i < commentList.size(); i++) {
             Comment comment = commentList.get(i);
         %>
-			<tr id="commentRow<%=comment.getCommentID()%>">
-				<td style="width: 15%;"><%=comment.getUserID()%></td>
+		<tr id="commentRow<%=comment.getCommentID()%>">
+			 <%-- <td style="width: 10%; padding-center: <%=comment.getCommentStep() * 30%>px;">
+  				  <%if (comment.getCommentStep() > 0) {%>ㄴ <%}%><%=comment.getUserID()%>
+			</td> --%>
+			<td style="width: 15%; padding-left: <%=15 + (comment.getCommentStep() * 30)%>px;
+    <%=comment.getCommentStep() > 0 ? "background-color: #f9f9f9;" : ""%>">
+    <%if (comment.getCommentStep() > 0) {%>
+        <span style="color: #6c7ae0; font-weight: bold;">ㄴ</span>
+    <%}%>
+    <%=comment.getUserID()%>
+</td>
 				<td>
-					<!-- 댓글 수정 후 댓글 content에 표시 평상시 보이는 내용 --> <span
-					id="viewMode<%=comment.getCommentID()%>"> <% /*비밀 댓글   */
+					<!-- 댓글 수정 후 댓글 content에 표시 평상시 보이는 내용 --> 
+					
+		<span id="viewMode<%=comment.getCommentID()%>">  <!-- 비밀 댓글   -->
+		<% 
         boolean isSecret = (comment.getSecretComment() == 1);
         boolean canSeeSecret = !isGuest && (userID.equals(comment.getUserID()) || userID.equals(bbs.getUserID()));
         if (isSecret && !canSeeSecret) {
-        %> 비밀댓글 <%
+        %> 비밀댓글 
+        <%
         } else {
-        %> <%=comment.getCommentContent()%> <% if (comment.getCommentUpdateDate() != null) { %>
-						<span style="color: gray; font-size: 12px;">(수정됨)</span> <% } %> <%
+        %> 
+        
+        <%=comment.getCommentContent()%> 
+        <% if (comment.getCommentUpdateDate() != null) { %>
+			<span style="color: gray; font-size: 12px;">(수정됨)</span> 
+		<% 
+		} 
+		%>
+		
+		<%
         }
-      %>
+      	%>
 				</span> <!-- 수정 모드 (평소엔 숨김) -->
 					<form id="editForm<%=comment.getCommentID()%>" method="post"
 						action="commentUpdate" style="display: none;">
@@ -137,28 +168,88 @@
 				</td>
 
 				<!-- 댓글 내용 수정 삭제  -->
-				<td style="width: 15%;"><%=comment.getCommentDate()%></td>
-				<td style="width: 15%;">
+				<td style="width: 15%;"><%=comment.getCommentDate()%></td><td style="width: 15%;">
 					<%
 					if (!isGuest && userID.equals(comment.getUserID())) {
 					%> <a href="#" class="btn btn-xs btn-warning"
 					onclick="showEdit(<%=comment.getCommentID()%>); return false;">수정</a>
-					<a
-					href="commentDelete?commentID=<%=comment.getCommentID()%>&bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>"
+					<a href="commentDelete?commentID=<%=comment.getCommentID()%>&bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>"
 					class="btn btn-xs btn-danger"
 					onclick="return confirm('댓글을 삭제하시겠습니까?')">삭제</a> <% } %>
 				</td>
-
-				<td style="width: 10%;">추천 <%=comment.getRecommendCount()%> <a
-					href="commentRecommend?commentID=<%=comment.getCommentID()%>&bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>"
-					class="btn btn-xs btn-success">👍</a>
+				<!-- 댓글 추천 -->
+				
+				 <%
+      				  boolean isCommentRecommended = (userID != null) && commentDAO.hasRecommended(comment.getCommentID(), userID);
+  				 %>
+  				 
+				<td style="width: 15%; white-space: nowrap;">
+				    추천수: <%=comment.getRecommendCount()%>
+				    <a href="commentRecommend?commentID=<%=comment.getCommentID()%>&bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>"
+				       class="btn btn-xs <%=isCommentRecommended ? "btn-danger" : "btn-success"%>">
+				        <%=isCommentRecommended ? "추천취소" : "추천"%>
+				   </a>
+				 <%-- 실명인증 회원만 답글 버튼 노출 --%>
+			    <% if (!isGuest && "VERIFIED".equals(userGrade)) { %>
+			        <a href="#" class="btn btn-xs btn-default"
+			           onclick="showReplyForm(<%=comment.getCommentID()%>); return false;">답글</a>
+			    <% } %>
 				</td>
-
 			</tr>
+			
+			<!-- 답글 작성 폼 추가 (</tr> 다음, for문 닫히기 전)  -->
+			<% if (!isGuest && "VERIFIED".equals(userGrade)) { %>
+			<tr id="replyFormRow<%=comment.getCommentID()%>" style="display:none;">
+			    <td colspan="5" style="padding-left: <%=20 + (comment.getCommentStep() * 20)%>px;">
+			        <form method="post" action="commentWrite">
+			            <input type="hidden" name="bbsID" value="<%=bbs.getBbsID()%>">
+			            <input type="hidden" name="groupName" value="<%=groupName%>">
+			            <input type="hidden" name="parentCommentID" value="<%=comment.getCommentID()%>">
+			            <div class="form-group">
+			                <textarea name="commentContent" class="form-control" rows="2"
+			                          placeholder="답글을 입력하세요" maxlength="500"></textarea>
+			            </div>
+			            <label>
+			                <input type="checkbox" name="secretComment" value="1"> 비밀댓글
+			            </label>
+			            <button type="submit" class="btn btn-xs btn-primary">답글 작성</button>
+			            <button type="button" class="btn btn-xs btn-default"
+			                    onclick="hideReplyForm(<%=comment.getCommentID()%>)">취소</button>
+			        </form>
+			    </td>
+			</tr>
+			<% } %>
+			
 			<%
 			}
 			%>
 		</table>
+		
+			<!-- 댓글 페이징 -->
+			<div style="text-align: center; margin-top: 10px; margin-bottom: 20px;">
+			    <!-- 이전 화살표 -->
+			    <% if (commentStartPage > 1) { %>
+			        <a href="viewDetail?bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>&commentPage=<%=commentStartPage - 1%>"
+			           class="btn btn-default btn-sm">◀</a>
+			    <% } %>
+			
+			    <!-- 페이지 번호 -->
+			    <% for (int i = commentStartPage; i <= commentEndPage; i++) { %>
+			        <% if (i == commentPageNumber) { %>
+			            <a href="viewDetail?bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>&commentPage=<%=i%>"
+			               class="btn btn-primary btn-sm"><%=i%></a>
+			        <% } else { %>
+			            <a href="viewDetail?bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>&commentPage=<%=i%>"
+			               class="btn btn-default btn-sm"><%=i%></a>
+			        <% } %>
+			    <% } %>
+			
+			    <!-- 다음 화살표 -->
+			    <% if (commentEndPage < totalCommentPages) { %>
+			        <a href="viewDetail?bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>&commentPage=<%=commentEndPage + 1%>"
+			           class="btn btn-default btn-sm">▶</a>
+			    <% } %>
+			</div>
 
 		<!-- 댓글 작성 폼 (실명인증 회원만) -->
 		<%
@@ -191,7 +282,6 @@
 		}
 		%>
 	</div>
-
 
 	<!-- 하단 게시글 목록 7-9 -->
 	<div class="container" style="margin-top: 20px;">
@@ -287,7 +377,7 @@
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="/notice/js/bootstrap.js"></script>
 
-	<script>
+<script>
 function showEdit(commentID) {
     document.getElementById('viewMode' + commentID).style.display = 'none';
     document.getElementById('editForm' + commentID).style.display = 'block';
@@ -295,6 +385,13 @@ function showEdit(commentID) {
 function cancelEdit(commentID) {
     document.getElementById('viewMode' + commentID).style.display = 'inline';
     document.getElementById('editForm' + commentID).style.display = 'none';
+}
+
+function showReplyForm(commentID) {
+    document.getElementById('replyFormRow' + commentID).style.display = '';
+}
+function hideReplyForm(commentID) {
+    document.getElementById('replyFormRow' + commentID).style.display = 'none';
 }
 </script>
 

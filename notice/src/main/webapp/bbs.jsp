@@ -51,11 +51,12 @@
 				        <input type="hidden" name="pageNumber" value="1">
 				
 				        <select name="searchType" style="margin-right:5px;">
-				            <option value="title" selected>제목</option>
-				            <!-- 나중에 추가 예정
-				            <option value="writer">작성자</option>
-				            <option value="titleWriter">제목+작성자</option>
-				            -->
+				             <option value="title">제목</option>
+								    <option value="comment">댓글</option>
+								    <option value="writer">작성자</option>
+								    <option value="titleComment">제목+댓글</option>
+								    <option value="commentWriter">댓글+작성자</option>
+								    <option value="titleCommentWriter">제목+댓글+작성자</option>
 				        </select>
 				
 				        <input type="text" name="keyword" value="<%=keyword != null ? keyword : ""%>"

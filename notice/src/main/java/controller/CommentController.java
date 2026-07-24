@@ -7,7 +7,7 @@ import java.net.URLEncoder;
 import dao.BbsDAO;
 import dao.CommentDAO;
 
-@WebServlet(urlPatterns = {"/commentWrite", "/commentUpdate", "/commentDelete", "/commentRecommend", "/recommendAction"})
+@WebServlet(urlPatterns = {"/commentWrite", "/commentUpdate", "/commentDelete", "/commentRecommend"})
 public class CommentController extends HttpServlet { 
     private static final long serialVersionUID = 1L;
 
@@ -32,9 +32,7 @@ public class CommentController extends HttpServlet {
             deleteComment(request, response);		  // 댓글 삭제
         } else if (path.equals("/commentRecommend")) {
             recommendComment(request, response); 	  // 댓글 추천
-        } else if (path.equals("/recommendAction")) {
-            recommendBbs(request, response);   		  // 게시글 추천
-        }
+        } 
     }
 
     /**
@@ -58,6 +56,11 @@ public class CommentController extends HttpServlet {
         String secretParam = request.getParameter("secretComment");
         
         int secretComment = (secretParam != null) ? 1 : 0; // 체크했으면 1 비밀댓글, 안 했으면 0 공개댓글로 변환
+        
+        // 대댓글인지 판단하는 파라미터
+        String parentCommentIDParam = request.getParameter("parentCommentID");
+        boolean isReply = (parentCommentIDParam != null && !parentCommentIDParam.isBlank());
+        int parentCommentID = isReply ? Integer.parseInt(parentCommentIDParam) : 0;
 
         // 검증 1 실명인증 회원인지 확인 
         if (userID == null || !"VERIFIED".equals(userGrade)) {
@@ -74,7 +77,13 @@ public class CommentController extends HttpServlet {
         }
 
         CommentDAO commentDAO = new CommentDAO();
-        commentDAO.write(bbsID, userID, commentContent, secretComment);
+        
+        // 분기 추가: 대댓글이면 writeReply, 아니면 기존 write
+        if (isReply) {
+            commentDAO.writeReply(bbsID, userID, commentContent, secretComment, parentCommentID);
+        } else {
+            commentDAO.write(bbsID, userID, commentContent, secretComment);
+        }
 
         BbsDAO bbsDAO = new BbsDAO();
         int count = commentDAO.getCommentCount(bbsID);
@@ -168,31 +177,4 @@ public class CommentController extends HttpServlet {
             + URLEncoder.encode(groupName, "UTF-8"));
     }
 
-    /**
-     * @param request
-     * @param response
-     * @throws IOException
-     *  게시글 추천 
-     */
-    
-    private void recommendBbs(HttpServletRequest request, HttpServletResponse response)
-            throws IOException { 
-        String userID = (String) request.getSession().getAttribute("userID");
-
-        if (userID == null) {
-            response.sendRedirect("login.jsp");
-            return;
-        }
-        int bbsID = Integer.parseInt(request.getParameter("bbsID"));
-        String groupName = request.getParameter("group");
-        
-        BbsDAO bbsDAO = new BbsDAO();
-        if (bbsDAO.hasRecommended(bbsID, userID)) {
-            bbsDAO.cancelRecommend(bbsID, userID);   // 이미 추천했으면 취소
-        } else {
-            bbsDAO.recommend(bbsID, userID);          // 안 했으면 추천 
-        }
-        response.sendRedirect("viewDetail?bbsID=" + bbsID + "&group="
-            + URLEncoder.encode(groupName, "UTF-8") + "&fromRecommend=true");
-    }
 }

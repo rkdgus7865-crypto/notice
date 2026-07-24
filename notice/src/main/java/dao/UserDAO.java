@@ -22,7 +22,6 @@ public class UserDAO {
 		return DriverManager.getConnection(dbURL, dbID, dbPassword);
 	}
 
-	
 	/**
 	 * 
 	 * 로그인 
@@ -153,7 +152,7 @@ public class UserDAO {
 	 */
 	
 	public String findPasswordAndReset(String userID, String userName) {
-	    String checkSQL = "SELECT * FROM USER WHERE userID = ? AND userName = ?";
+	    String SQL = "SELECT * FROM USER WHERE userID = ? AND userName = ?";
 	    
 	    Connection conn = null;
 	    PreparedStatement pstmt = null;
@@ -161,7 +160,7 @@ public class UserDAO {
 	    
 	    try {
 	        conn = getConnection();
-	        pstmt = conn.prepareStatement(checkSQL);
+	        pstmt = conn.prepareStatement(SQL);
 	        pstmt.setString(1, userID);
 	        pstmt.setString(2, userName);
 	        rs = pstmt.executeQuery();

@@ -310,7 +310,7 @@ public class BbsDAO {
 	        pstmt.setInt(1, bbsID);
 	        pstmt.setString(2, userID);
 	        rs = pstmt.executeQuery();
-	        return rs.next();
+	        return rs.next(); //DB 조회 결과에 데이터가 있으면 true, 없으면 false를 반환
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    } finally {
@@ -503,11 +503,43 @@ public class BbsDAO {
 	/**
 	 *  검색 유형에 따라 WHERE 조건 다르게 구성
 	 */
-	
+	// 수정본
 	public ArrayList<Bbs> searchList(int pageNumber, String groupName, String searchType, String keyword) {
-	    String SQL = "SELECT * FROM BBS WHERE bbsAvailable = 1 AND groupName = ? AND isNotice = 0 "
-	               + "AND bbsTitle LIKE ? "
-	               + "ORDER BY bbsID DESC LIMIT 20 OFFSET ?";
+	    StringBuilder SQL = new StringBuilder();
+	    SQL.append("SELECT * FROM BBS WHERE bbsAvailable = 1 AND groupName = ? AND isNotice = 0");
+
+	    ArrayList<String> conditions = new ArrayList<String>();
+	    ArrayList<String> params = new ArrayList<String>();
+	    String likeKeyword = "%" + keyword + "%";
+
+	    boolean useTitle = searchType.contains("title");
+	    boolean useComment = searchType.contains("comment");
+	    boolean useWriter = searchType.contains("writer");
+
+	    if (useTitle) {
+	        conditions.add("bbsTitle LIKE ?");
+	        params.add(likeKeyword);
+	    }
+	    if (useComment) {
+	        conditions.add("EXISTS (SELECT 1 FROM Comment c WHERE c.bbsID = BBS.bbsID "
+	                      + "AND c.commentAvailable = 1 AND c.secretComment = 0 AND c.commentContent LIKE ?)");
+	        params.add(likeKeyword);
+	    }
+	    if (useWriter) {
+	        conditions.add("userID LIKE ?");
+	        params.add(likeKeyword);
+	    }
+
+	    if (!conditions.isEmpty()) {
+	        SQL.append(" AND (");
+	        for (int i = 0; i < conditions.size(); i++) {
+	            SQL.append(conditions.get(i));
+	            if (i < conditions.size() - 1) SQL.append(" OR ");
+	        }
+	        SQL.append(")");
+	    }
+
+	    SQL.append(" ORDER BY bbsID DESC LIMIT 20 OFFSET ?");
 
 	    ArrayList<Bbs> list = new ArrayList<Bbs>();
 	    Connection conn = null;
@@ -516,11 +548,13 @@ public class BbsDAO {
 	    try {
 	        conn = getConnection();
 	        int offset = (pageNumber - 1) * 20;
-	        String likeKeyword = "%" + keyword + "%";
-	        pstmt = conn.prepareStatement(SQL);
-	        pstmt.setString(1, groupName);
-	        pstmt.setString(2, likeKeyword);
-	        pstmt.setInt(3, offset);
+	        pstmt = conn.prepareStatement(SQL.toString());
+	        int idx = 1;
+	        pstmt.setString(idx++, groupName);
+	        for (String p : params) {
+	            pstmt.setString(idx++, p);
+	        }
+	        pstmt.setInt(idx++, offset);
 
 	        rs = pstmt.executeQuery();
 	        while (rs.next()) {
@@ -554,25 +588,112 @@ public class BbsDAO {
 	    }
 	    return list;
 	}
+//  실행잘되는코드
+//	public ArrayList<Bbs> searchList(int pageNumber, String groupName, String searchType, String keyword) {
+//	    String SQL = "SELECT * FROM BBS WHERE bbsAvailable = 1 AND groupName = ? AND isNotice = 0 "
+//	               + "AND bbsTitle LIKE ? "
+//	               + "ORDER BY bbsID DESC LIMIT 20 OFFSET ?";
+//
+//	    ArrayList<Bbs> list = new ArrayList<Bbs>();
+//	    Connection conn = null;
+//	    PreparedStatement pstmt = null;
+//	    ResultSet rs = null;
+//	    try {
+//	        conn = getConnection();
+//	        int offset = (pageNumber - 1) * 20;
+//	        String likeKeyword = "%" + keyword + "%";
+//	        pstmt = conn.prepareStatement(SQL);
+//	        pstmt.setString(1, groupName);
+//	        pstmt.setString(2, likeKeyword);
+//	        pstmt.setInt(3, offset);
+//
+//	        rs = pstmt.executeQuery();
+//	        while (rs.next()) {
+//	            Bbs bbs = new Bbs();
+//	            bbs.setBbsID(rs.getInt("bbsID"));
+//	            bbs.setBbsTitle(rs.getString("bbsTitle"));
+//	            bbs.setUserID(rs.getString("userID"));
+//	            String rawDate = rs.getString("bbsDate");
+//	            String today = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+//	            String displayDate;
+//	            if (rawDate.startsWith(today)) {
+//	                displayDate = rawDate.substring(11, 13) + "시 " + rawDate.substring(14, 16) + "분";
+//	            } else {
+//	                displayDate = rawDate.substring(0, 10);
+//	            }
+//	            bbs.setBbsDate(displayDate);
+//	            bbs.setBbsContent(rs.getString("bbsContent"));
+//	            bbs.setBbsAvailable(rs.getInt("bbsAvailable"));
+//	            bbs.setInquiry(rs.getInt("inquiry"));
+//	            bbs.setRecommendation(rs.getInt("recommendation"));
+//	            bbs.setComments(rs.getInt("Comments"));
+//	            bbs.setIsPublic(rs.getInt("bbsPublic"));
+//	            bbs.setIsNotice(rs.getInt("isNotice"));
+//	            bbs.setIsBold(bbs.getRecommendation() >= 10);
+//	            list.add(bbs);
+//	        }
+//	    } catch (Exception e) {
+//	        e.printStackTrace();
+//	    } finally {
+//	        close(conn, pstmt, rs);
+//	    }
+//	    return list;
+//	}
 
+	
+	
 	/**
 	 *  검색 결과 전체 개수 (페이징 계산용)
 	 */
-	
+	// 수정본
 	public int getSearchTotalCount(String groupName, String searchType, String keyword) {
-	    String SQL = "SELECT COUNT(*) FROM BBS WHERE bbsAvailable = 1 AND groupName = ? AND isNotice = 0 "
-	               + "AND bbsTitle LIKE ?";
+	    StringBuilder SQL = new StringBuilder();
+	    SQL.append("SELECT COUNT(*) FROM BBS WHERE bbsAvailable = 1 AND groupName = ? AND isNotice = 0");
+
+	    ArrayList<String> conditions = new ArrayList<String>();
+	    ArrayList<String> params = new ArrayList<String>();
+	    String likeKeyword = "%" + keyword + "%";
+
+	    boolean useTitle = searchType.contains("title");
+	    boolean useComment = searchType.contains("comment");
+	    boolean useWriter = searchType.contains("writer");
+
+	    if (useTitle) {
+	        conditions.add("bbsTitle LIKE ?");
+	        params.add(likeKeyword);
+	    }
+	    if (useComment) {
+	        // 삭제되지 않고(commentAvailable=1), 비밀댓글이 아닌(secretComment=0) 댓글 중
+	        // 키워드를 포함한 댓글이 하나라도 있으면 이 게시글을 검색 결과에 포함
+	        conditions.add("EXISTS (SELECT 1 FROM Comment c WHERE c.bbsID = BBS.bbsID "
+	                      + "AND c.commentAvailable = 1 AND c.secretComment = 0 AND c.commentContent LIKE ?)");
+	        params.add(likeKeyword);
+	    }
+	    if (useWriter) {
+	        conditions.add("userID LIKE ?");
+	        params.add(likeKeyword);
+	    }
+
+	    if (!conditions.isEmpty()) {
+	        SQL.append(" AND (");
+	        for (int i = 0; i < conditions.size(); i++) {
+	            SQL.append(conditions.get(i));
+	            if (i < conditions.size() - 1) SQL.append(" OR ");
+	        }
+	        SQL.append(")");
+	    }
 
 	    Connection conn = null;
 	    PreparedStatement pstmt = null;
 	    ResultSet rs = null;
 	    try {
 	        conn = getConnection();
-	        String likeKeyword = "%" + keyword + "%";
-	        pstmt = conn.prepareStatement(SQL);
-	        pstmt.setString(1, groupName);
-	        pstmt.setString(2, likeKeyword);
-
+	        pstmt = conn.prepareStatement(SQL.toString());
+	        int idx = 1;
+	        pstmt.setString(idx++, groupName);
+	        for (String p : params) {
+	            pstmt.setString(idx++, p);
+	        }
 	        rs = pstmt.executeQuery();
 	        if (rs.next()) return rs.getInt(1);
 	    } catch (Exception e) {
