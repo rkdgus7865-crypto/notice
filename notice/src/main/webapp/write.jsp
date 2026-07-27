@@ -77,31 +77,34 @@
 					class="btn btn-default pull-right" style="margin-right: 5px;">취소</a>
 			</form>
 
-			<script>
-				function validateWrite() {
-					/* var title 	= document.getElementsByName("bbsTitle")[0].value; 
-					var content = document.getElementsByName("bbsContent")[0].value; */
-					
-					var title   = document.getElementById("bbsTitle").value; // 이름이 bbsTitle인 요소 id 찾아서 그 안에 사용자가 입력한 값을 가져옴
-					var content = document.getElementById("bbsContent").value;
-					
-					if (title.trim() === "") { 
-						alert("제목을 입력해주세요.");
-						document.getElementById("bbsTitle").focus();
-						return false;
-					}
-					if (content.trim() === "") {
-						alert("내용을 입력해주세요.");
-						document.getElementById("bbsContent").focus();
-						return false;
-					}
-					return true;
-				}
-			</script>
-
+		
 		</div>
 	</div>
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="/notice/js/bootstrap.js"></script>
+	
+	
+<script>
+	function validateWrite() {
+		/* var title 	= document.getElementsByName("bbsTitle")[0].value; 
+		var content = document.getElementsByName("bbsContent")[0].value; */
+
+		var title = document.getElementById("bbsTitle").value; // 이름이 bbsTitle인 요소 id 찾아서 그 안에 사용자가 입력한 값을 가져옴
+		var content = document.getElementById("bbsContent").value;
+
+		if (title.trim() === "") {
+			alert("제목을 입력해주세요.");
+			document.getElementById("bbsTitle").focus();
+			return false;
+		}
+		if (content.trim() === "") {
+			alert("내용을 입력해주세요.");
+			document.getElementById("bbsContent").focus();
+			return false;
+		}
+		return true;
+	}
+	
+</script>
 </body>
 </html>

@@ -54,9 +54,9 @@
 				             <option value="title">제목</option>
 								    <option value="comment">댓글</option>
 								    <option value="writer">작성자</option>
-								    <option value="titleComment">제목+댓글</option>
-								    <option value="commentWriter">댓글+작성자</option>
-								    <option value="titleCommentWriter">제목+댓글+작성자</option>
+								    <option value="titlecomment">제목+댓글</option>
+								    <option value="commentwriter">댓글+작성자</option>
+								    <option value="titlecommentwriter">제목+댓글+작성자</option>
 				        </select>
 				
 				        <input type="text" name="keyword" value="<%=keyword != null ? keyword : ""%>"
@@ -113,32 +113,46 @@
 			    for (int i = 0; i < list.size(); i++) { // list = 게시글 여러 개가 들어있는 목록 (ArrayList) / 0번째 게시글부터 19번째 게시글까지, 한 번에 하나씩 화면에 보여줌
 			    %>
 					<tr>
-					    <td>
-					            <%
-					            if ("true".equals(noticeOnly)) {
-					            %>
-					                공지
-					            <%
-					            } else {
-					            %>
-					                <%=startNumber - i%>
-					            <%
-					            }
-					            %>
-					   </td>
-			        <td>
-			            <%
-			            if (list.get(i).getIsBold()) { // getIsBold()<- BbsDao에 넣어둔 값  / list에 있는 게시글 목록의 i번째가 추천수가 10개 이상인지 확인 / isBold는 추천수 10개 이상을 값 (DAO에서 계산됨)
-			            %> <span style="color: red;">[추천]</span>   <!-- if문 조건이 맞으면 게시글에 제목에 [추천]을 추가   -->
-			            <%
-			            }
-			            %>
+						<td>
+							<%
+							if ("true".equals(noticeOnly)) {
+							%> 공지 <%
+							} else if (list.get(i).getReplyStep() > 0) {
+							%> 
+								<%-- 답글은 댓글처럼 번호를 따로 안 보여줌 (댓글 목록도 번호가 없음) --%> 
+							 <%
+							 } else {
+							 %> 
+								 <%=startNumber - i%> 
+							 <%
+							 }
+							 %>
+						</td>
+						<td style="<%=list.get(i).getReplyStep() > 0 ? "text-align: left;" : ""%>">
+
+							<%-- ㄴ + 들여쓰기를 제목 칸 하나에 같이 처리--%> 
+							<%
+ 							if (list.get(i).getReplyStep() > 0) {
+							%> 
+							 	<span style="padding-left: <%=(list.get(i).getReplyStep() - 1) * 20%>px; color: #999;">ㄴ</span>
+							<%
+							}
+							%>
+							
+							<%
+ 							if (list.get(i).getIsBold()) { // getIsBold()<- BbsDao에 넣어둔 값  / list에 있는 게시글 목록의 i번째가 추천수가 10개 이상인지 확인 / isBold는 추천수 10개 이상을 값 (DAO에서 계산됨)
+ 							%> <span style="color: red;">[추천]</span> <!-- if문 조건이 맞으면 게시글에 제목에 [추천]을 추가   -->
+							<%
+			           		 }
+			            	%> 
+			            	
 			            <a href="viewDetail?bbsID=<%=list.get(i).getBbsID()%>&group=<%=groupName%>"
-			                style="<%=list.get(i).getIsNotice() == 1 ? "font-weight: bold; font-size:16px; color:black;" : "color:black;"%>"> <!-- i번째 게시글 제목을 i번째 게시글 번호로 가는 링크를 걸어서 i번째 게시글이 공지글이면 굵게 아니면 평소대로 화면에 출력-->
-			                <%=list.get(i).getBbsTitle()%> <!-- i번째 게시글의 제목을 화면에 그대로 출력  -->
-			            </a>
-			        </td>
-			        <td><%=list.get(i).getUserID()%></td>
+							style="<%=list.get(i).getIsNotice() == 1 ? "font-weight: bold; font-size:16px; color:black;" : "color:black;"%>">
+								<!-- i번째 게시글 제목을 i번째 게시글 번호로 가는 링크를 걸어서 i번째 게시글이 공지글이면 굵게 아니면 평소대로 화면에 출력-->
+								<%=list.get(i).getBbsTitle()%> <!-- i번째 게시글의 제목을 화면에 그대로 출력  -->
+						</a>
+						</td>
+						<td><%=list.get(i).getUserID()%></td>
 			        <td><%=list.get(i).getBbsDate()%></td>
 			        <td><%=list.get(i).getInquiry()%></td>
 			        <td><%=list.get(i).getRecommendation()%></td>
@@ -219,7 +233,7 @@
 		                tbody += "<tr style='background-color: #f9f9f9;'>";
 		                tbody += "<td>공지</td>";
 		                tbody += "<td><a href='viewDetail?bbsID=" + notice.bbsID + "&group=" + currentGroup
-		                       + "' style='font-weight: bold; color: #d9534f;'>" + notice.bbsTitle + "</a></td>";
+		                       + "' style='font-weight: bold; color: black;'>" + notice.bbsTitle + "</a></td>";
 		                tbody += "<td>" + notice.userID + "</td>";
 		                tbody += "<td>" + notice.bbsDate + "</td>";
 		                tbody += "<td>" + notice.inquiry + "</td>";

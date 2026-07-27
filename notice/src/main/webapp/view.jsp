@@ -66,12 +66,50 @@
 				추천수: <b><%=bbs.getRecommendation()%></b> 
 				 <a href="recommendAction?bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>"class="btn <%=isRecommended ? "btn-danger" : "btn-success"%>"><%=isRecommended ? "추천취소" : "추천"%>
 				</a>
+
+				<%--  게시글 답글쓰기 버튼 (실명인증 회원만) --%>
+				<%
+				if (!isGuest && "VERIFIED".equals(userGrade)) {
+				%>
+				<button type="button" class="btn btn-default"
+					onclick="showBbsReplyForm()">답글쓰기</button>
+				<%
+				}
+				%>
 			</div>
+
+			<%-- 게시글 답글 작성 폼 (평소엔 숨김, 버튼 누르면 JS로 보이게 함) --%>
+			<%
+			if (!isGuest && "VERIFIED".equals(userGrade)) {
+			%>
+			<div id="bbsReplyFormArea"
+				style="display: none; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+				<form method="post" action="writeAction">  <!-- 답글 등록 요청을 writeAction 컨트롤러로 보내는 폼 -->
+					<input type="hidden" name="groupName" value="<%=groupName%>">  		 <!-- 어떤 게시판그룹에 등록할지 hidden 값으로 같이 전송 -->
+					<input type="hidden" name="parentBbsID" value="<%=bbs.getBbsID()%>"> <!-- 이 답글이 어떤 원본 게시글에 대한 답글인지 원본 글 번호를 hidden 값으로 전송 -->
+
+					<div class="form-group">
+						<input type="text" id="bbsTitle" name="bbsTitle"
+							class="form-control" placeholder="답글 제목" maxlength="50">
+					</div>
+					<div class="form-group">
+						<textarea id="bbsContent" name="bbsContent" class="form-control"
+							rows="4" placeholder="답글 내용을 입력하세요" maxlength="2048"></textarea>
+					</div>
+					<button type="submit" class="btn btn-primary">답글 등록</button>
+					<button type="button" class="btn btn-default"
+						onclick="hideBbsReplyForm()">취소</button>
+				</form>
+			</div>
+			<%
+			}
+			%>
+
 		</div>
 
 		<!-- 첨부파일 -->
 		<%
-			if (bbs.getOriginalFileName() != null) {
+		if (bbs.getOriginalFileName() != null) {
 		%>
 		<div style="margin-top: 10px;">
 			<b>첨부파일:</b> <a
@@ -197,7 +235,7 @@
 				</td>
 			</tr>
 			
-			<!-- 답글 작성 폼 추가 (</tr> 다음, for문 닫히기 전)  -->
+			<!-- 댓글 답글 작성 폼 추가 (</tr> 다음, for문 닫히기 전)  -->
 			<% if (!isGuest && "VERIFIED".equals(userGrade)) { %>
 			<tr id="replyFormRow<%=comment.getCommentID()%>" style="display:none;">
 			    <td colspan="5" style="padding-left: <%=20 + (comment.getCommentStep() * 20)%>px;">
@@ -382,6 +420,7 @@ function showEdit(commentID) {
     document.getElementById('viewMode' + commentID).style.display = 'none';
     document.getElementById('editForm' + commentID).style.display = 'block';
 }
+
 function cancelEdit(commentID) {
     document.getElementById('viewMode' + commentID).style.display = 'inline';
     document.getElementById('editForm' + commentID).style.display = 'none';
@@ -390,9 +429,19 @@ function cancelEdit(commentID) {
 function showReplyForm(commentID) {
     document.getElementById('replyFormRow' + commentID).style.display = '';
 }
+
 function hideReplyForm(commentID) {
     document.getElementById('replyFormRow' + commentID).style.display = 'none';
 }
+
+function showBbsReplyForm() {
+    document.getElementById('bbsReplyFormArea').style.display = '';
+}
+
+function hideBbsReplyForm() {
+    document.getElementById('bbsReplyFormArea').style.display = 'none';
+}
+
 </script>
 
 </body>

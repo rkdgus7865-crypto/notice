@@ -16,6 +16,9 @@ public class Bbs {
 	private String originalFileName;	// 사용자가 업로드한 원래 파일명 (다운로드 시 표시)
 	private String savedFileName;		// 서버에 저장된 실제 파일명 (중복 방지용 UUID 등)
 	private int isNotice;				// 게시판 공지글
+	private int parentBbsID;			// 답글이면 부모글 ID, 원글이면 NULL
+	private int replyStep;				// 들여쓰기 단계 (원글=0, 답글=1, 답글의 답글=2...)
+	private int replyOrder;				// 화면에 보여줄 정렬 순서
 
 	public int getBbsID() {
 		return bbsID;
@@ -89,7 +92,6 @@ public class Bbs {
 	public void setIsBold(boolean isBold) { 
 	    this.isBold = isBold; 
 	}
-
 	public String getOriginalFileName() {
 		return originalFileName;
 	}
@@ -102,12 +104,28 @@ public class Bbs {
 	public void setSavedFileName(String savedFileName) {
 		this.savedFileName = savedFileName;
 	}
-
 	public int getIsNotice() {
 		return isNotice;
 	}
-
 	public void setIsNotice(int isNotice) {
 		this.isNotice = isNotice;
+	}
+	public int getParentBbsID() {
+		return parentBbsID;
+	}
+	public void setParentBbsID(int parentBbsID) {
+		this.parentBbsID = parentBbsID;
+	}
+	public int getReplyStep() {
+		return replyStep;
+	}
+	public void setReplyStep(int replyStep) {
+		this.replyStep = replyStep;
+	}
+	public int getReplyOrder() {
+		return replyOrder;
+	}
+	public void setReplyOrder(int replyOrder) {
+		this.replyOrder = replyOrder;
 	}
 }

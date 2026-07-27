@@ -6,21 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import dto.User;
 
-public class UserDAO {
-	
-	/**
-	 * 
-	 * MySql DB 연결
-	 * 
-	 */
-
-	private Connection getConnection() throws Exception {
-		String dbURL = "jdbc:mysql://localhost:3306/BBS";
-		String dbID = "root";
-		String dbPassword = "050700";
-		Class.forName("com.mysql.cj.jdbc.Driver");
-		return DriverManager.getConnection(dbURL, dbID, dbPassword);
-	}
+public class UserDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 
 	/**
 	 * 
@@ -259,21 +245,5 @@ public class UserDAO {
 	        close(conn, pstmt, rs);
 	    }
 	    return false;
-	}
-	
-	/**
-	 * 	
-	 *  자원 해제 메서드
-	 * 
-	 */
-	 
-	private void close(Connection conn, PreparedStatement pstmt, ResultSet rs) {
-		try {
-			if (rs != null) rs.close();
-			if (pstmt != null) pstmt.close();
-			if (conn != null) conn.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 }

@@ -7,15 +7,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import dto.Comment;
 
-public class CommentDAO {
-
-	private Connection getConnection() throws Exception {
-		String dbURL = "jdbc:mysql://localhost:3306/BBS";
-		String dbID = "root";
-		String dbPassword = "050700";
-		Class.forName("com.mysql.cj.jdbc.Driver");
-		return DriverManager.getConnection(dbURL, dbID, dbPassword);
-	}
+public class CommentDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 
 	/**
 	 *  댓글 등록
@@ -64,12 +56,8 @@ public class CommentDAO {
 	 */
 	
 	public ArrayList<Comment> getList(int bbsID, int pageNumber) {
-//	    String SQL = "SELECT * FROM Comment WHERE bbsID = ? AND commentAvailable = 1 "
-//	        + "ORDER BY commentID ASC LIMIT 20 OFFSET ?";
 		String SQL = "SELECT * FROM Comment WHERE bbsID = ? AND commentAvailable = 1 "
 		    + "ORDER BY commentOrder ASC LIMIT 20 OFFSET ?"; 
-//		String SQL = "SELECT * FROM Comment WHERE bbsID = ? AND commentAvailable = 1 "
-//	        + "ORDER BY commentOrder DESC LIMIT 20 OFFSET ?";
 	    ArrayList<Comment> list = new ArrayList<Comment>();
 	    Connection conn = null;
 	    PreparedStatement pstmt = null;
@@ -270,7 +258,7 @@ public class CommentDAO {
 	    try {
 	        conn = getConnection();
 
-	        // 1. 부모 댓글의 현재 정렬순서(commentOrder), 들여쓰기단계(commentStep) 조회
+	        //  부모 댓글의 현재 정렬순서(commentOrder), 들여쓰기단계(commentStep) 조회
 	        String selectParentSQL = "SELECT commentOrder, commentStep FROM Comment WHERE commentID = ?";
 	        pstmt1 = conn.prepareStatement(selectParentSQL);
 	        pstmt1.setInt(1, parentCommentID);
@@ -283,7 +271,7 @@ public class CommentDAO {
 	            parentStep = rs.getInt("commentStep");
 	        }
 
-	        // 2. 부모보다 순서가 뒤인 댓글들을 한 칸씩 뒤로 밀기
+	        //  부모보다 순서가 뒤인 댓글들을 한 칸씩 뒤로 밀기
 	        //    (새 대댓글이 부모 바로 다음 자리에 들어갈 공간을 만듦)
 	        String shiftSQL = "UPDATE Comment SET commentOrder = commentOrder + 1 "
 	                         + "WHERE bbsID = ? AND commentOrder > ?";
@@ -292,7 +280,7 @@ public class CommentDAO {
 	        pstmt2.setInt(2, parentOrder);
 	        pstmt2.executeUpdate();
 
-	        // 3. 새 대댓글 삽입 (부모 바로 다음 순서, 부모보다 들여쓰기 한 단계 깊게)
+	        //  새 대댓글 삽입 (부모 바로 다음 순서, 부모보다 들여쓰기 한 단계 깊게)
 	        String insertSQL = "INSERT INTO Comment "
 	                          + "(bbsID, userID, commentContent, secretComment, parentCommentID, commentStep, commentOrder) "
 	                          + "VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -314,18 +302,5 @@ public class CommentDAO {
 	        close(null, pstmt2, null);
 	        close(conn, pstmt3, null);
 	    }
-	}
-
-	private void close(Connection conn, PreparedStatement pstmt, ResultSet rs) {
-		try {
-			if (rs != null)
-				rs.close();
-			if (pstmt != null)
-				pstmt.close();
-			if (conn != null)
-				conn.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 }

@@ -20,7 +20,7 @@ public class BbsController extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)  // GET 방식 요청(주소창 입력, 링크 클릭 등)이 오면 이 메서드가 실행됨
 			throws ServletException, IOException {
 		String path = request.getServletPath();  // 지금 들어온 요청이 6개 URL 중 정확히 어떤 URL인지 문자열로 확인
-		// 단순히 정보를 요청라 Get 요청
+		// 단순히 정보를 요청하면 Get 요청
 		if (path.equals("/bbsList")) { 			 	 // 게시판 목록 조회
 			list(request, response);
 		} else if (path.equals("/viewDetail")) { 	 // 게시판 상세 조회
@@ -29,8 +29,8 @@ public class BbsController extends HttpServlet {
 			editView(request, response);
 		} else if (path.equals("/deleteAction")) {   // 게시글 삭제
 			delete(request, response);
-		} else if (path.equals("/recommendAction")) {
-            recommendBbs(request, response);   		  // 게시글 추천
+		} else if (path.equals("/recommendAction")) { // 게시글 추천
+            recommendBbs(request, response);   		  
         }
 	}
 
@@ -58,7 +58,7 @@ public class BbsController extends HttpServlet {
 
 		int pageNumber = 1; // 페이지 번호 기본값
 		if (request.getParameter("pageNumber") != null) { // URL에서 넘어온 페이지 번호로 덮어씀
-			pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
+			pageNumber = Integer.parseInt(request.getParameter("pageNumber")); 
 		}
 
 		String groupName = request.getParameter("group"); // 어떤 게시판인지 파라미터로 받음
@@ -75,7 +75,7 @@ public class BbsController extends HttpServlet {
 		BbsDAO bbsDAO = new BbsDAO(); // 게시글 DB 작업을 담당할 DAO 객체 생성
 		ArrayList<Bbs> list;  // 화면에 보여줄 게시글 목록 (아래에서 조건별로 채워질 예정)
 		
-		if ("true".equals(noticeOnly)) { // 화면에 보여줄 게시글 목록(list) 조회 - 상황별로 3가지 중 하나만 실행됨
+		if ("true".equals(noticeOnly)) { // 공지글 인지 아닌지 / 화면에 보여줄 게시글 목록(list) 조회 - 상황별로 3가지 중 하나만 실행됨
 	        list = bbsDAO.getNoticeOnlyList(groupName); // 1) 공지글만 보기 모드면 공지글만 조회
 	    } else if (isSearch) {
 	        list = bbsDAO.searchList(pageNumber, groupName, searchType, keyword);  // 검색어가 있으면 검색 결과 조회
@@ -192,6 +192,11 @@ public class BbsController extends HttpServlet {
 
 		int publicValue = (bbsPublic != null) ? 1 : 0;
 		int isNotice = (noticeParam != null) ? 1 : 0;
+		
+		// 답글인지 판단하는 파라미터
+	    String parentBbsIDParam = request.getParameter("parentBbsID"); // URL에서 parentBbsID 파라미터 받기 답글 작성 시 어떤 글에 대한 답글인지를 나타내는 값
+	    boolean isReply = (parentBbsIDParam != null && !parentBbsIDParam.isBlank()); // parentBbsID 값이 존재하고 비어있지 않으면 -> 답글 작성 요청
+	    int parentBbsID = isReply ? Integer.parseInt(parentBbsIDParam) : 0; // 답글이면 문자열을 숫자로 변환 일반 글이면 의미 없는 값 0 으로 둠
 
 		if (bbsTitle.isBlank() || bbsContent.isBlank()) {
 			request.setAttribute("errorMsg", "입력이 안 된 사항이 있습니다.");
@@ -201,21 +206,33 @@ public class BbsController extends HttpServlet {
 
 		String originalFileName = null;
 		String savedFileName = null;
-
-		Part filePart = request.getPart("uploadFile");
-		if (filePart != null && filePart.getSize() > 0) {
-			originalFileName = extractFileName(filePart);
-			savedFileName = UUID.randomUUID().toString() + "_" + originalFileName;
-			String uploadPath = getServletContext().getRealPath("/uploads");
-			File uploadDir = new File(uploadPath);
-			if (!uploadDir.exists())
-				uploadDir.mkdirs();
-			filePart.write(uploadPath + File.separator + savedFileName);
-		}
+		
+		  if (!isReply) {
+			  Part filePart = request.getPart("uploadFile");
+		        if (filePart != null && filePart.getSize() > 0) {
+		            originalFileName = extractFileName(filePart);
+		            savedFileName = UUID.randomUUID().toString() + "_" + originalFileName;
+		            String uploadPath = getServletContext().getRealPath("/uploads");
+		            File uploadDir = new File(uploadPath);
+		            if (!uploadDir.exists())
+		                uploadDir.mkdirs();
+		            filePart.write(uploadPath + File.separator + savedFileName);
+		        }
+		    }
 
 		BbsDAO bbsDAO = new BbsDAO();
-		int result = bbsDAO.write(bbsTitle, userID, bbsContent, publicValue, groupName, originalFileName, savedFileName,
-				isNotice);
+		
+
+		
+		// 분기 추가 답글이면 writeReply, 아니면 기존 write
+	    int result;
+	    if (isReply) {
+	        result = bbsDAO.writeReply(bbsTitle, userID, bbsContent, publicValue, groupName,
+	                originalFileName, savedFileName, parentBbsID);
+	    } else {
+	        result = bbsDAO.write(bbsTitle, userID, bbsContent, publicValue, groupName,
+	                originalFileName, savedFileName, isNotice);
+	    }
 
 		if (result == -1) {
 			request.setAttribute("errorMsg", "글쓰기에 실패했습니다.");

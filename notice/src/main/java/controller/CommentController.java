@@ -79,6 +79,7 @@ public class CommentController extends HttpServlet {
         CommentDAO commentDAO = new CommentDAO();
         
         // 분기 추가: 대댓글이면 writeReply, 아니면 기존 write
+        
         if (isReply) {
             commentDAO.writeReply(bbsID, userID, commentContent, secretComment, parentCommentID);
         } else {

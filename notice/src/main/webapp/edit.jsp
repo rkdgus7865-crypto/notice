@@ -8,7 +8,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="/notice/css/bootstrap.css">
 <title>게시글 수정</title>
+<script>
+	function validateEdit() {
+		var title = document.getElementById("bbsTitle").value;
+		var content = document.getElementById("bbsContent").value;
+
+		if (title.trim() === "") {
+			alert("제목을 입력해주세요.");
+			return false;
+		}
+		if (content.trim() === "") {
+			alert("내용을 입력해주세요.");
+			return false;
+		}
+		return true;
+	}
+	
+</script>
 </head>
+
 <body>
 	<%
     Bbs bbs = (Bbs) request.getAttribute("bbs");
@@ -48,25 +66,6 @@
 					class="btn btn-default">취소</a>
 			</div>
 		</form>
-
-
-		<script>
-function validateEdit() {
-    var title = document.getElementById("bbsTitle").value;
-    var content = document.getElementById("bbsContent").value;
-
-    if (title.trim() === "") {
-        alert("제목을 입력해주세요.");
-        return false;
-    }
-    if (content.trim() === "") {
-        alert("내용을 입력해주세요.");
-        return false;
-    }
-    return true;
-}
-</script>
-
 	</div>
 </body>
 </html>
