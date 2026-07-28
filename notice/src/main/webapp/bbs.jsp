@@ -64,23 +64,23 @@
 				        <button type="submit" class="btn btn-sm btn-primary">검색</button>
 				    </form>
 				</div>
+				
+							<table class="table table-striped"
+			    style="text-align: center; border: 1px solid #dddddd; table-layout: fixed; width: 100%;">
+			    <thead> <!-- 제목 답글 -->
+			        <tr>
+			            <th style="background-color: #eeeeee; text-align: center; width: 7%;">번호</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 22%;">제목</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 10%;">작성자</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 20%;">작성일</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 9%;">조회수</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 9%;">추천수</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 9%;">댓글수</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 16%;">공개여부</th>
+			        </tr>
+			    </thead>
 			
-            <table class="table table-striped"
-                style="text-align: center; border: 1px solid #dddddd">
-                <thead>
-                    <tr>
-                        <th style="background-color: #eeeeee; text-align: center;">번호</th>
-                        <th style="background-color: #eeeeee; text-align: center;">제목</th>
-                        <th style="background-color: #eeeeee; text-align: center;">작성자</th>
-                        <th style="background-color: #eeeeee; text-align: center;">작성일</th>
-                        <th style="background-color: #eeeeee; text-align: center;">조회수</th>
-                        <th style="background-color: #eeeeee; text-align: center;">추천수</th>
-                        <th style="background-color: #eeeeee; text-align: center;">댓글수</th>
-                        <th style="background-color: #eeeeee; text-align: center;">공개여부</th>
-                    </tr>
-                </thead>
-                
-				<tbody id="bbsTableBody">
+			    <tbody id="bbsTableBody">
 
 			   <%-- 상단 고정 공지글 3개 --%>
 				<%
@@ -127,32 +127,24 @@
 							 <%
 							 }
 							 %>
-						</td>
-						<td style="<%=list.get(i).getReplyStep() > 0 ? "text-align: left;" : ""%>">
-
-							<%-- ㄴ + 들여쓰기를 제목 칸 하나에 같이 처리--%> 
-							<%
- 							if (list.get(i).getReplyStep() > 0) {
-							%> 
-							 	<span style="padding-left: <%=(list.get(i).getReplyStep() - 1) * 20%>px; color: #999;">ㄴ</span>
-							<%
-							}
-							%>
-							
-							<%
- 							if (list.get(i).getIsBold()) { // getIsBold()<- BbsDao에 넣어둔 값  / list에 있는 게시글 목록의 i번째가 추천수가 10개 이상인지 확인 / isBold는 추천수 10개 이상을 값 (DAO에서 계산됨)
- 							%> <span style="color: red;">[추천]</span> <!-- if문 조건이 맞으면 게시글에 제목에 [추천]을 추가   -->
-							<%
-			           		 }
-			            	%> 
-			            	
-			            <a href="viewDetail?bbsID=<%=list.get(i).getBbsID()%>&group=<%=groupName%>"
-							style="<%=list.get(i).getIsNotice() == 1 ? "font-weight: bold; font-size:16px; color:black;" : "color:black;"%>">
-								<!-- i번째 게시글 제목을 i번째 게시글 번호로 가는 링크를 걸어서 i번째 게시글이 공지글이면 굵게 아니면 평소대로 화면에 출력-->
-								<%=list.get(i).getBbsTitle()%> <!-- i번째 게시글의 제목을 화면에 그대로 출력  -->
-						</a>
-						</td>
-						<td><%=list.get(i).getUserID()%></td>
+	
+						 <td style="padding-left: <%=(list.get(i).getReplyStep() > 0) ? (80 + (list.get(i).getReplyStep() - 1) * 20) : 0%>px;">
+						    <%
+						    if (list.get(i).getReplyStep() > 0) {
+						    %>  <span style="color: #6c7ae0; font-weight: bold;">ㄴ</span> <%
+						    }
+						    if (list.get(i).getIsBold()) {
+						    %> <span style="color: red;">[추천]</span>
+						    <%
+						    }
+						    %>
+						    <a href="viewDetail?bbsID=<%=list.get(i).getBbsID()%>&group=<%=groupName%>"
+						        style="<%=list.get(i).getIsNotice() == 1 ? "font-weight: bold; font-size:16px; color:black;" : "color:black;"%>">
+						        <%=list.get(i).getBbsTitle()%>
+						    </a>
+						</td> 
+						
+					<td><%=list.get(i).getUserID()%></td>
 			        <td><%=list.get(i).getBbsDate()%></td>
 			        <td><%=list.get(i).getInquiry()%></td>
 			        <td><%=list.get(i).getRecommendation()%></td>
@@ -247,11 +239,24 @@
 		            for (var i = 0; i < data.list.length; i++) {
 		                var bbs = data.list[i];
 		                tbody += "<tr>";
-		                tbody += "<td>" + (startNumber - i) + "</td>";
+		                
+		            	 // 답글이면 번호 대신 빈칸
+		                if (bbs.replyStep > 0) {
+		                    tbody += "<td></td>";
+		                } else {
+		                    tbody += "<td>" + (startNumber - i) + "</td>";
+		                }
+		                
 		                var recommendTag = bbs.isBold ? "<span style='color:black; font-weight:bold;'>[추천]</span> " : "";
 		                var style = bbs.isNotice == 1 ? "font-weight: bold; font-size:16px; color:black;" : "color:black;";
-		                tbody += "<td>" + recommendTag + "<a href='viewDetail?bbsID=" + bbs.bbsID + "&group=" + currentGroup 
-		                      + "' style='" + style + "'>" + bbs.bbsTitle + "</a></td>";
+		                
+		                // 제목 칸: 답글이면 들여쓰기 + ㄴ 표시 
+		                var paddingLeft = (bbs.replyStep > 0) ? (80 + (bbs.replyStep - 1) * 20) : 0;
+		                var replyMark = (bbs.replyStep > 0) ? "<span style='color: #6c7ae0; font-weight: bold;'>ㄴ</span> " : "";
+
+		                tbody += "<td style='padding-left: " + paddingLeft + "px;'>" + replyMark + recommendTag
+		                       + "<a href='viewDetail?bbsID=" + bbs.bbsID + "&group=" + currentGroup
+		                       + "' style='" + style + "'>" + bbs.bbsTitle + "</a></td>";
 		                tbody += "<td>" + bbs.userID + "</td>";
 		                tbody += "<td>" + bbs.bbsDate + "</td>";
 		                tbody += "<td>" + bbs.inquiry + "</td>";

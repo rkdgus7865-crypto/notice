@@ -159,12 +159,12 @@
   				  <%if (comment.getCommentStep() > 0) {%>ㄴ <%}%><%=comment.getUserID()%>
 			</td> --%>
 			<td style="width: 15%; padding-left: <%=15 + (comment.getCommentStep() * 30)%>px;
-    <%=comment.getCommentStep() > 0 ? "background-color: #f9f9f9;" : ""%>">
-    <%if (comment.getCommentStep() > 0) {%>
-        <span style="color: #6c7ae0; font-weight: bold;">ㄴ</span>
-    <%}%>
-    <%=comment.getUserID()%>
-</td>
+		    <%=comment.getCommentStep() > 0 ? "background-color: #f9f9f9;" : ""%>">
+		    <%if (comment.getCommentStep() > 0) {%>
+		        <span style="color: #6c7ae0; font-weight: bold;">ㄴ</span>
+		    <%}%>
+		    <%=comment.getUserID()%>
+		</td>
 				<td>
 					<!-- 댓글 수정 후 댓글 content에 표시 평상시 보이는 내용 --> 
 					
@@ -324,43 +324,61 @@
 	<!-- 하단 게시글 목록 7-9 -->
 	<div class="container" style="margin-top: 20px;">
 		<h4>게시글 목록</h4>
-		<table class="table table-striped"
-			style="text-align: center; border: 1px solid #dddddd">
-			<thead>
-				<tr>
-					<th style="background-color: #eeeeee; text-align: center;">번호</th>
-					<th style="background-color: #eeeeee; text-align: center;">제목</th>
-					<th style="background-color: #eeeeee; text-align: center;">작성자</th>
-					<th style="background-color: #eeeeee; text-align: center;">작성일</th>
-					<th style="background-color: #eeeeee; text-align: center;">조회수</th>
-					<th style="background-color: #eeeeee; text-align: center;">추천수</th>
-					<th style="background-color: #eeeeee; text-align: center;">댓글수</th>
-					<th style="background-color: #eeeeee; text-align: center;">공개여부</th>
-				</tr>
-			</thead>
-			<tbody>
+		
+						<table class="table table-striped"
+			    style="text-align: center; border: 1px solid #dddddd; table-layout: fixed; width: 100%;">
+			    <thead>
+			        <tr>
+			            <th style="background-color: #eeeeee; text-align: center; width: 7%;">번호</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 16%;">제목</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 10%;">작성자</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 20%;">작성일</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 9%;">조회수</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 9%;">추천수</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 9%;">댓글수</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 20%;">공개여부</th>
+			        </tr>
+			    </thead>
+			    <tbody id="bbsTableBody">
+			    
 				<%
-					for (int i = 0; i < bbsList.size(); i++) {
-						Bbs row = bbsList.get(i);
-						boolean isCurrent = (row.getBbsID() == bbs.getBbsID());
-					%>
-				<!--  게시글 상세 목록 화면 출력  -->
-				<tr <%if (isCurrent) {%> style="background-color: #fffbe6;" <%}%>>
-					<td><%=bottomStartNumber - i%></td>
-					<td><a
-						href="viewDetail?bbsID=<%=row.getBbsID()%>&group=<%=groupName%>">
-							<%=row.getBbsTitle()%>
-					</a></td>
-					<td><%=row.getUserID()%></td>
-					<td><%=row.getBbsDate()%></td>
-					<td><%=row.getInquiry()%></td>
-					<td><%=row.getRecommendation()%></td>
-					<td><%=row.getComments()%></td>
-					<td><%=row.getIsPublic() == 1 ? "전체공개" : "회원공개" %></td>
-				</tr>
-				<%
-					}
-					%>
+    for (int i = 0; i < bbsList.size(); i++) {
+        Bbs row = bbsList.get(i);
+        boolean isCurrent = (row.getBbsID() == bbs.getBbsID());
+    %>
+    <tr <%if (isCurrent) {%> style="background-color: #fffbe6;" <%}%>>
+        <td>
+            <%
+            if (row.getReplyStep() > 0) {
+            %>
+            <%
+            } else {
+            %>
+                <%=bottomStartNumber - i%>
+            <%
+            }
+            %>
+        </td>
+        <td style="padding-left: <%=(row.getReplyStep() > 0) ? (80 + (row.getReplyStep() - 1) * 20) : 0%>px;">
+            <%
+            if (row.getReplyStep() > 0) {
+            %> <span style="color: #6c7ae0; font-weight: bold;">ㄴ</span> <%
+            }
+            %>
+            <a href="viewDetail?bbsID=<%=row.getBbsID()%>&group=<%=groupName%>" style="color: black;"> <!--하단 게시글 목록 글씨 색 수정  -->
+                <%=row.getBbsTitle()%>
+            </a>
+        </td>
+        <td><%=row.getUserID()%></td>
+        <td><%=row.getBbsDate()%></td>
+        <td><%=row.getInquiry()%></td>
+        <td><%=row.getRecommendation()%></td>
+        <td><%=row.getComments()%></td>
+        <td><%=row.getIsPublic() == 1 ? "전체공개" : "회원공개"%></td>
+    </tr>
+    <%
+    }
+    %>
 			</tbody>
 		</table>
 		<!-- 게시글 상세 게시글 목록 페이징  -->

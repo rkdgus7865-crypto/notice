@@ -143,7 +143,11 @@ public class BbsController extends HttpServlet {
 	            json.append("\"comments\":" + bbs.getComments() + ",");
 	            json.append("\"isPublic\":" + bbs.getIsPublic() + ",");
 	            json.append("\"isBold\":" + bbs.getIsBold() + ",");
-	            json.append("\"isNotice\":" + bbs.getIsNotice());
+	            json.append("\"isNotice\":" + bbs.getIsNotice() + ",");
+	            
+	            json.append("\"replyStep\":" + bbs.getReplyStep());
+	       
+	            
 	            json.append("}");
 	            
 	            if (i < list.size() - 1)
