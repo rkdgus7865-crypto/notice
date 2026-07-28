@@ -66,7 +66,7 @@ public class BbsController extends HttpServlet {
 			groupName = "자유게시판";  // 게시판 지정 안 하고 들어오면 기본값으로 자유게시판 보여줌
 
 		String ajax = request.getParameter("ajax");
-		String noticeOnly = request.getParameter("noticeOnly"); // 공지글만 보기 모드인지 여부
+		String noticeOnly = request.getParameter("noticeOnly"); // 공지글만 보기 모드인지 여부 
 		
 		String searchType = request.getParameter("searchType"); // 검색 조건 (제목/작성자/댓글 조합)
 		String keyword = request.getParameter("keyword"); // 검색어
@@ -224,19 +224,9 @@ public class BbsController extends HttpServlet {
 		        }
 		    }
 
-		BbsDAO bbsDAO = new BbsDAO();
-		
-
-		
-		// 분기 추가 답글이면 writeReply, 아니면 기존 write
-	    int result;
-	    if (isReply) {
-	        result = bbsDAO.writeReply(bbsTitle, userID, bbsContent, publicValue, groupName,
-	                originalFileName, savedFileName, parentBbsID);
-	    } else {
-	        result = bbsDAO.write(bbsTitle, userID, bbsContent, publicValue, groupName,
-	                originalFileName, savedFileName, isNotice);
-	    }
+		  BbsDAO bbsDAO = new BbsDAO();
+			int result = bbsDAO.write(bbsTitle, userID, bbsContent, publicValue, groupName, originalFileName, savedFileName,
+					isNotice);
 
 		if (result == -1) {
 			request.setAttribute("errorMsg", "글쓰기에 실패했습니다.");
