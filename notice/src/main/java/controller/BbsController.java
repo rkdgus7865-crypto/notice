@@ -224,9 +224,19 @@ public class BbsController extends HttpServlet {
 		        }
 		    }
 
-		  BbsDAO bbsDAO = new BbsDAO();
-			int result = bbsDAO.write(bbsTitle, userID, bbsContent, publicValue, groupName, originalFileName, savedFileName,
-					isNotice);
+		BbsDAO bbsDAO = new BbsDAO();
+		
+
+		
+		// 분기 추가 답글이면 writeReply, 아니면 기존 write
+	    int result;
+	    if (isReply) {
+	        result = bbsDAO.writeReply(bbsTitle, userID, bbsContent, publicValue, groupName,
+	                originalFileName, savedFileName, parentBbsID);
+	    } else {
+	        result = bbsDAO.write(bbsTitle, userID, bbsContent, publicValue, groupName,
+	                originalFileName, savedFileName, isNotice);
+	    }
 
 		if (result == -1) {
 			request.setAttribute("errorMsg", "글쓰기에 실패했습니다.");
@@ -316,9 +326,26 @@ public class BbsController extends HttpServlet {
 		if (request.getParameter("bottomPage") != null) {
 			bottomPageNumber = Integer.parseInt(request.getParameter("bottomPage"));
 		}
+		
+		String bottomSearchType = request.getParameter("bottomSearchType");
+		String bottomKeyword = request.getParameter("bottomKeyword");
+		String bottomNoticeOnly = request.getParameter("bottomNoticeOnly");
+		boolean bottomIsSearch = (bottomKeyword != null && !bottomKeyword.trim().isEmpty());
+		
+		ArrayList<Bbs> bbsList;
+		int totalBottomCount;
 
-		ArrayList<Bbs> bbsList = bbsDAO.getList(bottomPageNumber, groupName);
-		int totalBottomCount = bbsDAO.getTotalCount(groupName);
+		if ("true".equals(bottomNoticeOnly)) {
+		    bbsList = bbsDAO.getNoticeOnlyList(groupName);
+		    totalBottomCount = bbsDAO.getTotalCount(groupName);
+		} else if (bottomIsSearch) {
+		    bbsList = bbsDAO.searchList(bottomPageNumber, groupName, bottomSearchType, bottomKeyword);
+		    totalBottomCount = bbsDAO.getSearchTotalCount(groupName, bottomSearchType, bottomKeyword);
+		} else {
+		    bbsList = bbsDAO.getList(bottomPageNumber, groupName);
+		    totalBottomCount = bbsDAO.getTotalCount(groupName);
+		}
+
 		int totalBottomPages = (int) Math.ceil((double) totalBottomCount / 20);
 		int bottomStartPage = ((bottomPageNumber - 1) / 5) * 5 + 1;
 		int bottomEndPage = Math.min(bottomStartPage + 4, totalBottomPages);
@@ -330,6 +357,10 @@ public class BbsController extends HttpServlet {
 		request.setAttribute("bottomStartPage", bottomStartPage);
 		request.setAttribute("bottomEndPage", bottomEndPage);
 		request.setAttribute("bottomStartNumber", bottomStartNumber);
+		
+		request.setAttribute("bottomSearchType", bottomSearchType);
+		request.setAttribute("bottomKeyword", bottomKeyword);
+		request.setAttribute("bottomNoticeOnly", bottomNoticeOnly);
 
 		request.getRequestDispatcher("view.jsp").forward(request, response);
 	}

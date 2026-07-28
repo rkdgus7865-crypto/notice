@@ -27,6 +27,8 @@
 		int totalCommentPages = (Integer) request.getAttribute("totalCommentPages");
 		int commentStartPage  = (Integer) request.getAttribute("commentStartPage");
 		int commentEndPage    = (Integer) request.getAttribute("commentEndPage");
+		String bottomNoticeOnly = (String) request.getAttribute("bottomNoticeOnly");
+		String bottomKeyword = (String) request.getAttribute("bottomKeyword");
 		
 		boolean isRecommended = (Boolean) request.getAttribute("isRecommended"); // BbsController view 메소드에서  request.setAttribute("isRecommended", isRecommended); 한 값 받아옴
 		 
@@ -322,8 +324,40 @@
 	</div>
   
 	<!-- 하단 게시글 목록 7-9 -->
-	<div class="container" style="margin-top: 20px;">
-		<h4>게시글 목록</h4>
+<div class="container" style="margin-top: 20px;">
+    <h4>게시글 목록</h4>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <!-- 왼쪽: 공지글/전체글 버튼 -->
+        <div>
+            <a href="viewDetail?bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>&bottomNoticeOnly=true"
+               class="btn btn-sm <%=("true".equals(bottomNoticeOnly)) ? "btn-info" : "btn-default"%>">공지글</a>
+            <a href="viewDetail?bbsID=<%=bbs.getBbsID()%>&group=<%=groupName%>"
+               class="btn btn-sm <%=(!"true".equals(bottomNoticeOnly)) ? "btn-info" : "btn-default"%>">전체글</a>
+        </div>
+
+        <!-- 오른쪽: 검색 폼 -->
+        <div>
+            <form action="viewDetail" method="get" style="display:inline-block;">
+                <input type="hidden" name="bbsID" value="<%=bbs.getBbsID()%>">
+                <input type="hidden" name="group" value="<%=groupName%>">
+                <input type="hidden" name="bottomPage" value="1">
+
+                <select name="bottomSearchType" style="margin-right:5px;">
+                    <option value="title">제목</option>
+                    <option value="comment">댓글</option>
+                    <option value="writer">작성자</option>
+                    <option value="titlecomment">제목+댓글</option>
+                    <option value="commentwriter">댓글+작성자</option>
+                    <option value="titlecommentwriter">제목+댓글+작성자</option>
+                </select>
+
+                <input type="text" name="bottomKeyword" value="<%=bottomKeyword != null ? bottomKeyword : ""%>"
+                       placeholder="검색어 입력" style="width:180px;">
+                <button type="submit" class="btn btn-sm btn-primary">검색</button>
+            </form>
+        </div>
+    </div>
 		
 						<table class="table table-striped"
 			    style="text-align: center; border: 1px solid #dddddd; table-layout: fixed; width: 100%;">

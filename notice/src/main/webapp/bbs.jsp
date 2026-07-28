@@ -65,38 +65,38 @@
 				    </form>
 				</div>
 				  
-							<table class="table table-striped"
-			    style="text-align: center; border: 1px solid #dddddd; table-layout: fixed; width: 100%;">
-			    <thead> <!-- 제목 답글 -->
-			        <tr>
-			            <th style="background-color: #eeeeee; text-align: center; width: 7%;">번호</th>
-			            <th style="background-color: #eeeeee; text-align: center; width: 22%;">제목</th>
-			            <th style="background-color: #eeeeee; text-align: center; width: 10%;">작성자</th>
-			            <th style="background-color: #eeeeee; text-align: center; width: 20%;">작성일</th>
-			            <th style="background-color: #eeeeee; text-align: center; width: 9%;">조회수</th>
-			            <th style="background-color: #eeeeee; text-align: center; width: 9%;">추천수</th>
-			            <th style="background-color: #eeeeee; text-align: center; width: 9%;">댓글수</th>
-			            <th style="background-color: #eeeeee; text-align: center; width: 16%;">공개여부</th>
-			        </tr>
-			    </thead>
-			
-			    <tbody id="bbsTableBody">
+				<table class="table table-striped"
+                style="text-align: center; border: 1px solid #dddddd">
+                <thead>
+                    <tr>
+                        <th style="background-color: #eeeeee; text-align: center;">번호</th>
+                        <th style="background-color: #eeeeee; text-align: left;">제목</th>
+                        <th style="background-color: #eeeeee; text-align: center;">작성자</th>
+                        <th style="background-color: #eeeeee; text-align: center;">작성일</th>
+                        <th style="background-color: #eeeeee; text-align: center;">조회수</th>
+                        <th style="background-color: #eeeeee; text-align: center;">추천수</th>
+                        <th style="background-color: #eeeeee; text-align: center;">댓글수</th>
+                        <th style="background-color: #eeeeee; text-align: center;">공개여부</th>
+                    </tr>
+                </thead>
+                
+				<tbody id="bbsTableBody">
 
 			   <%-- 상단 고정 공지글 3개 --%>
 				<%
 				for (int i = 0; i < noticeList.size(); i++) {
 				%>
 				<tr style="background-color: #f9f9f9;">
-				    <td>공지</td>
-				    <td>
-				        <% if (noticeList.get(i).getIsBold()) { %>
-				            <span style="color: red;">[추천]</span>
-				        <% } %>
-				        <a href="viewDetail?bbsID=<%=noticeList.get(i).getBbsID()%>&group=<%=groupName%>"
-				           style="font-weight: bold; color: black;"> <!-- 공지글이니까 항상 굵게만, 빨간색은 제거 -->
-				            <%=noticeList.get(i).getBbsTitle()%>
-				        </a>
-				    </td>
+				   <td>공지</td>
+<td style="text-align: left; padding-left: 0px;">
+    <% if (noticeList.get(i).getIsBold()) { %>
+        <span style="color: red;">[추천]</span>
+    <% } %>
+    <a href="viewDetail?bbsID=<%=noticeList.get(i).getBbsID()%>&group=<%=groupName%>"
+       style="font-weight: bold; color: black;">
+        <%=noticeList.get(i).getBbsTitle()%>
+    </a>
+</td>
 				    <td><%=noticeList.get(i).getUserID()%></td>
 				    <td><%=noticeList.get(i).getBbsDate()%></td>
 				    <td><%=noticeList.get(i).getInquiry()%></td>
@@ -128,7 +128,7 @@
 							 }
 							 %>
 	
-						 <td style="padding-left: <%=(list.get(i).getReplyStep() > 0) ? (80 + (list.get(i).getReplyStep() - 1) * 20) : 0%>px;">
+						 <td style="text-align: left; padding-left: <%=(list.get(i).getReplyStep() > 0) ? (50 + (list.get(i).getReplyStep() - 1) * 20) : 0%>px;">
 						    <%
 						    if (list.get(i).getReplyStep() > 0) {
 						    %>  <span style="color: #6c7ae0; font-weight: bold;">ㄴ</span> <%
