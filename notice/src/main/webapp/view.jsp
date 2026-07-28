@@ -320,7 +320,7 @@
 		}
 		%>
 	</div>
- 
+  
 	<!-- 하단 게시글 목록 7-9 -->
 	<div class="container" style="margin-top: 20px;">
 		<h4>게시글 목록</h4>

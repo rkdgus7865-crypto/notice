@@ -64,7 +64,7 @@
 				        <button type="submit" class="btn btn-sm btn-primary">검색</button>
 				    </form>
 				</div>
-				 
+				  
 							<table class="table table-striped"
 			    style="text-align: center; border: 1px solid #dddddd; table-layout: fixed; width: 100%;">
 			    <thead> <!-- 제목 답글 -->
