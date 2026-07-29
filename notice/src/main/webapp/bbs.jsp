@@ -29,58 +29,62 @@
 	
 	String searchType = (String) request.getAttribute("searchType"); // 검색 타입 (드롭다운 값)
  	String keyword = (String) request.getAttribute("keyword");       // 검색어
-	
+ 	
 	request.setAttribute("currentPage", "board");   // 현재 페이지가 게시판임을 표시
 	%>
 	
 	<%@ include file="navbar.jsp"%>
 	<%@ include file="groupHeader.jsp"%>
 	
-    <div class="container">
-        <div class="row">
-         <div style="text-align: left; margin-bottom: 10px;">
-         <!--  공지만 보기 / 전체 목록 버튼 -->
-				<a href="bbsList?group=<%=groupName%>&noticeOnly=true"class="btn btn-sm <%=isNoticeOnly ? "btn-info" : "btn-default"%>">공지글</a> <!--현재 게시판의 공지글만 보도록 bbsList Controller에 noticeOnly=true를 전달 공지글만 보는 상태라면 btn-info로 버튼을 강조 아니면 btn-default  -->
-			    <a href="bbsList?group=<%=groupName%>"class="btn btn-sm <%=!isNoticeOnly ? "btn-info" : "btn-default"%>">전체글</a>
-			</div>
 			
 						<!-- 검색 UI -->
-				<div style="text-align: right; margin-bottom: 10px;">
-				    <form action="bbsList" method="get" style="display:inline-block;">
-				        <input type="hidden" name="group" value="<%=groupName%>">
-				        <input type="hidden" name="pageNumber" value="1">
+				<div class="container">
+				    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+				        <!-- 왼쪽: 공지글/전체글 버튼 -->
+				        <div>
+				            <a href="bbsList?group=<%=groupName%>&noticeOnly=true"
+				               class="btn btn-sm <%=isNoticeOnly ? "btn-info" : "btn-default"%>">공지글</a>
+				            <a href="bbsList?group=<%=groupName%>"
+				               class="btn btn-sm <%=!isNoticeOnly ? "btn-info" : "btn-default"%>">전체글</a>
+				        </div>
 				
-				        <select name="searchType" style="margin-right:5px;">
-				             <option value="title">제목</option>
-								    <option value="comment">댓글</option>
-								    <option value="writer">작성자</option>
-								    <option value="titlecomment">제목+댓글</option>
-								    <option value="commentwriter">댓글+작성자</option>
-								    <option value="titlecommentwriter">제목+댓글+작성자</option>
-				        </select>
+				        <!-- 오른쪽: 검색 폼 -->
+				        <div>
+				            <form action="bbsList" method="get" style="display:inline-block;">
+				                <input type="hidden" name="group" value="<%=groupName%>">
+				                <input type="hidden" name="pageNumber" value="1">
 				
-				        <input type="text" name="keyword" value="<%=keyword != null ? keyword : ""%>"
-				               placeholder="검색어 입력" style="width:180px;">
-				        <button type="submit" class="btn btn-sm btn-primary">검색</button>
-				    </form>
-				</div>
+				                <select name="searchType" style="margin-right:5px;">
+				                    <option value="title">제목</option>
+				                    <option value="comment">댓글</option>
+				                    <option value="writer">작성자</option>
+				                    <option value="titlecomment">제목+댓글</option>
+				                    <option value="commentwriter">댓글+작성자</option>
+				                    <option value="titlecommentwriter">제목+댓글+작성자</option>
+				                </select>
+				
+				                <input type="text" name="keyword" value="<%=keyword != null ? keyword : ""%>"
+				                       placeholder="검색어 입력" style="width:180px;">
+				                <button type="submit" class="btn btn-sm btn-primary">검색</button>
+				            </form>
+				        </div>
+    			 </div>
 				  
 				<table class="table table-striped"
-                style="text-align: center; border: 1px solid #dddddd">
-                <thead>
-                    <tr>
-                        <th style="background-color: #eeeeee; text-align: center;">번호</th>
-                        <th style="background-color: #eeeeee; text-align: left;">제목</th>
-                        <th style="background-color: #eeeeee; text-align: center;">작성자</th>
-                        <th style="background-color: #eeeeee; text-align: center;">작성일</th>
-                        <th style="background-color: #eeeeee; text-align: center;">조회수</th>
-                        <th style="background-color: #eeeeee; text-align: center;">추천수</th>
-                        <th style="background-color: #eeeeee; text-align: center;">댓글수</th>
-                        <th style="background-color: #eeeeee; text-align: center;">공개여부</th>
-                    </tr>
-                </thead>
-                
-				<tbody id="bbsTableBody">
+			    style="text-align: center; border: 1px solid #dddddd; table-layout: fixed; width: 100%;">
+			    <thead>
+			        <tr>
+			            <th style="background-color: #eeeeee; text-align: center; width: 7%;">번호</th>
+			            <th style="background-color: #eeeeee; text-align: left; width: 51%;">제목</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 8%;">작성자</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 8%;">작성일</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 6%;">조회수</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 6%;">추천수</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 6%;">댓글수</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 8%;">공개여부</th>
+			        </tr>
+			    </thead>
+			    <tbody id="bbsTableBody">
 
 			   <%-- 상단 고정 공지글 3개 --%>
 				<%
@@ -116,9 +120,9 @@
 						<td>
 							<%
 							if ("true".equals(noticeOnly)) {
-							%> 공지 <%
+							%> 공지 <%-- <%
 							} else if (list.get(i).getReplyStep() > 0) {
-							%> 
+							%>  --%>
 								<%-- 답글은 댓글처럼 번호를 따로 안 보여줌 (댓글 목록도 번호가 없음) --%> 
 							 <%
 							 } else {
@@ -128,7 +132,7 @@
 							 }
 							 %>
 	
-						 <td style="text-align: left; padding-left: <%=(list.get(i).getReplyStep() > 0) ? (50 + (list.get(i).getReplyStep() - 1) * 20) : 0%>px;">
+							 <td style="text-align: left; padding-left: <%=(list.get(i).getReplyStep() > 0) ? (20 + (list.get(i).getReplyStep() - 1) * 20) : 0%>px;">
 						    <%
 						    if (list.get(i).getReplyStep() > 0) {
 						    %>  <span style="color: #6c7ae0; font-weight: bold;">ㄴ</span> <%
@@ -219,12 +223,12 @@
 	
 		            var tbody = "";
 	
-		            //  상단 고정 공지글 3개 먼저 출력
+		        //  상단 고정 공지글 3개 먼저 출력
 		            for (var i = 0; i < data.noticeList.length; i++) {
 		                var notice = data.noticeList[i];
 		                tbody += "<tr style='background-color: #f9f9f9;'>";
 		                tbody += "<td>공지</td>";
-		                tbody += "<td><a href='viewDetail?bbsID=" + notice.bbsID + "&group=" + currentGroup
+		                tbody += "<td style='text-align: left; padding-left: 0px; word-break: break-all;'><a href='viewDetail?bbsID=" + notice.bbsID + "&group=" + currentGroup
 		                       + "' style='font-weight: bold; color: black;'>" + notice.bbsTitle + "</a></td>";
 		                tbody += "<td>" + notice.userID + "</td>";
 		                tbody += "<td>" + notice.bbsDate + "</td>";
@@ -239,24 +243,19 @@
 		            for (var i = 0; i < data.list.length; i++) {
 		                var bbs = data.list[i];
 		                tbody += "<tr>";
-		                
-		            	 // 답글이면 번호 대신 빈칸
-		                if (bbs.replyStep > 0) {
-		                    tbody += "<td></td>";
-		                } else {
-		                    tbody += "<td>" + (startNumber - i) + "</td>";
-		                }
+		                tbody += "<td>" + (startNumber - i) + "</td>";
 		                
 		                var recommendTag = bbs.isBold ? "<span style='color:black; font-weight:bold;'>[추천]</span> " : "";
 		                var style = bbs.isNotice == 1 ? "font-weight: bold; font-size:16px; color:black;" : "color:black;";
 		                
 		                // 제목 칸: 답글이면 들여쓰기 + ㄴ 표시 
-		                var paddingLeft = (bbs.replyStep > 0) ? (80 + (bbs.replyStep - 1) * 20) : 0;
-		                var replyMark = (bbs.replyStep > 0) ? "<span style='color: #6c7ae0; font-weight: bold;'>ㄴ</span> " : "";
-
-		                tbody += "<td style='padding-left: " + paddingLeft + "px;'>" + replyMark + recommendTag
-		                       + "<a href='viewDetail?bbsID=" + bbs.bbsID + "&group=" + currentGroup
-		                       + "' style='" + style + "'>" + bbs.bbsTitle + "</a></td>";
+		    			var paddingLeft = (bbs.replyStep > 0) ? (20 + (bbs.replyStep - 1) * 20) : 0;
+						var replyMark = (bbs.replyStep > 0) ? "<span style='color: #6c7ae0; font-weight: bold;'>ㄴ</span> " : "";
+				
+			           tbody += "<td style='text-align: left; padding-left: " + paddingLeft + "px; word-break: break-all;'>"
+				        + replyMark + recommendTag
+				        + "<a href='viewDetail?bbsID=" + bbs.bbsID + "&group=" + currentGroup
+				        + "' style='" + style + "'>" + bbs.bbsTitle + "</a></td>";
 		                tbody += "<td>" + bbs.userID + "</td>";
 		                tbody += "<td>" + bbs.bbsDate + "</td>";
 		                tbody += "<td>" + bbs.inquiry + "</td>";

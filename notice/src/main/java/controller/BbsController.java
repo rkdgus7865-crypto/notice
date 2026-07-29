@@ -1,3 +1,4 @@
+
 package controller;
 
 import javax.servlet.*;
@@ -345,6 +346,13 @@ public class BbsController extends HttpServlet {
 		    bbsList = bbsDAO.getList(bottomPageNumber, groupName);
 		    totalBottomCount = bbsDAO.getTotalCount(groupName);
 		}
+		
+		ArrayList<Bbs> bottomNoticeList; // 공지글만 보기 모드일 때는 bbsList 자체가 이미 공지글이라 중복 방지 위해 빈 리스트로 둠
+		if ("true".equals(bottomNoticeOnly)) {
+		    bottomNoticeList = new ArrayList<Bbs>();
+		} else {
+		    bottomNoticeList = bbsDAO.getNoticeList(groupName);
+		}
 
 		int totalBottomPages = (int) Math.ceil((double) totalBottomCount / 20);
 		int bottomStartPage = ((bottomPageNumber - 1) / 5) * 5 + 1;
@@ -357,10 +365,10 @@ public class BbsController extends HttpServlet {
 		request.setAttribute("bottomStartPage", bottomStartPage);
 		request.setAttribute("bottomEndPage", bottomEndPage);
 		request.setAttribute("bottomStartNumber", bottomStartNumber);
-		
 		request.setAttribute("bottomSearchType", bottomSearchType);
 		request.setAttribute("bottomKeyword", bottomKeyword);
 		request.setAttribute("bottomNoticeOnly", bottomNoticeOnly);
+		request.setAttribute("bottomNoticeList", bottomNoticeList);
 
 		request.getRequestDispatcher("view.jsp").forward(request, response);
 	}

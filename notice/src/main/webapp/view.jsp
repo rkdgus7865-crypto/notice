@@ -17,6 +17,7 @@
 		Bbs bbs = (Bbs) request.getAttribute("bbs");
 		ArrayList<Comment> commentList = (ArrayList<Comment>) request.getAttribute("commentList");
 		ArrayList<Bbs> bbsList  = (ArrayList<Bbs>) request.getAttribute("bbsList");
+		ArrayList<Bbs> bottomNoticeList = (ArrayList<Bbs>) request.getAttribute("bottomNoticeList");
 		int bottomPageNumber 	= (Integer) request.getAttribute("bottomPageNumber");
 		int totalBottomPages 	= (Integer) request.getAttribute("totalBottomPages");
 		int bottomStartPage 	= (Integer) request.getAttribute("bottomStartPage");
@@ -29,10 +30,13 @@
 		int commentEndPage    = (Integer) request.getAttribute("commentEndPage");
 		String bottomNoticeOnly = (String) request.getAttribute("bottomNoticeOnly");
 		String bottomKeyword = (String) request.getAttribute("bottomKeyword");
-		
 		boolean isRecommended = (Boolean) request.getAttribute("isRecommended"); // BbsController view 메소드에서  request.setAttribute("isRecommended", isRecommended); 한 값 받아옴
 		 
 		request.setAttribute("currentPage", "board");
+		
+		String listAction = "viewDetail";
+	    String extraQuery = "&bbsID=" + bbs.getBbsID();
+	    String extraHidden = "<input type='hidden' name='bbsID' value='" + bbs.getBbsID() + "'>";
 	%>
 
 	<%@ include file="navbar.jsp"%>
@@ -108,21 +112,6 @@
 			%>
 
 		</div>
-
-		<!-- 첨부파일 -->
-		<%
-		if (bbs.getOriginalFileName() != null) {
-		%>
-		<div style="margin-top: 10px;">
-			<b>첨부파일:</b> <a
-				href="fileDownload?fileName=<%=bbs.getSavedFileName()%>&originalName=<%=java.net.URLEncoder.encode(bbs.getOriginalFileName(), "UTF-8")%>">
-				<!-- 파일명을 클릭하면 FileDownloadController(fileDownload) 호출 --> <%=bbs.getOriginalFileName()%>
-				<!-- 사용자에게 보여줄 원본 파일명 -->
-			</a>
-		</div>
-		<%
-			}
-		%>
 
 	<!-- 게시판 내용 수정/삭제/목록 버튼 -->
 	<div style="text-align: right;">
@@ -352,54 +341,72 @@
                     <option value="titlecommentwriter">제목+댓글+작성자</option>
                 </select>
 
-                <input type="text" name="bottomKeyword" value="<%=bottomKeyword != null ? bottomKeyword : ""%>"
-                       placeholder="검색어 입력" style="width:180px;">
-                <button type="submit" class="btn btn-sm btn-primary">검색</button>
-            </form>
-        </div>
-    </div>
+			                <input type="text" name="bottomKeyword" value="<%=bottomKeyword != null ? bottomKeyword : ""%>"
+			                       placeholder="검색어 입력" style="width:180px;">
+			                <button type="submit" class="btn btn-sm btn-primary">검색</button>
+			            </form>
+			        </div>
+			    </div>
 		
-						<table class="table table-striped"
+			   <table class="table table-striped"
 			    style="text-align: center; border: 1px solid #dddddd; table-layout: fixed; width: 100%;">
 			    <thead>
 			        <tr>
 			            <th style="background-color: #eeeeee; text-align: center; width: 7%;">번호</th>
-			            <th style="background-color: #eeeeee; text-align: center; width: 16%;">제목</th>
-			            <th style="background-color: #eeeeee; text-align: center; width: 10%;">작성자</th>
-			            <th style="background-color: #eeeeee; text-align: center; width: 20%;">작성일</th>
-			            <th style="background-color: #eeeeee; text-align: center; width: 9%;">조회수</th>
-			            <th style="background-color: #eeeeee; text-align: center; width: 9%;">추천수</th>
-			            <th style="background-color: #eeeeee; text-align: center; width: 9%;">댓글수</th>
-			            <th style="background-color: #eeeeee; text-align: center; width: 20%;">공개여부</th>
+			            <th style="background-color: #eeeeee; text-align: left; width: 51%;">제목</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 8%;">작성자</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 8%;">작성일</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 6%;">조회수</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 6%;">추천수</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 6%;">댓글수</th>
+			            <th style="background-color: #eeeeee; text-align: center; width: 8%;">공개여부</th>
 			        </tr>
 			    </thead>
 			    <tbody id="bbsTableBody">
 			    
-				<%
+			<%
+			for (int i = 0; i < bottomNoticeList.size(); i++) {
+   			Bbs notice = bottomNoticeList.get(i);
+			%>
+			
+		<tr style="background-color: #f9f9f9;">
+		    <td>공지</td>
+		    
+		    <td style="text-align: left; padding-left: 0px;">
+		    
+		        <a href="viewDetail?bbsID=<%=notice.getBbsID()%>&group=<%=groupName%>" 
+		        style="font-weight: bold; color: black;">
+		            <%=notice.getBbsTitle()%>
+		        </a>
+		    </td>
+		    <td><%=notice.getUserID()%></td>
+		    <td><%=notice.getBbsDate()%></td>
+		    <td><%=notice.getInquiry()%></td>
+		    <td><%=notice.getRecommendation()%></td>
+		    <td><%=notice.getComments()%></td>
+		    <td><%=notice.getIsPublic() == 1 ? "전체공개" : "회원공개"%></td>
+		</tr>
+<%
+}
+%>    
+			    
+    <%
     for (int i = 0; i < bbsList.size(); i++) {
         Bbs row = bbsList.get(i);
         boolean isCurrent = (row.getBbsID() == bbs.getBbsID());
     %>
     <tr <%if (isCurrent) {%> style="background-color: #fffbe6;" <%}%>>
         <td>
-            <%
-            if (row.getReplyStep() > 0) {
-            %>
-            <%
-            } else {
-            %>
-                <%=bottomStartNumber - i%>
-            <%
-            }
-            %>
+        	<%=bottomStartNumber - i%>
         </td>
-        <td style="padding-left: <%=(row.getReplyStep() > 0) ? (80 + (row.getReplyStep() - 1) * 20) : 0%>px;">
+        
+        <td style="text-align: left; padding-left: <%=(row.getReplyStep() > 0) ? (20 + (row.getReplyStep() - 1) * 20) : 0%>px; word-break: break-all;">
             <%
             if (row.getReplyStep() > 0) {
             %> <span style="color: #6c7ae0; font-weight: bold;">ㄴ</span> <%
             }
             %>
-            <a href="viewDetail?bbsID=<%=row.getBbsID()%>&group=<%=groupName%>" style="color: black;"> <!--하단 게시글 목록 글씨 색 수정  -->
+            <a href="viewDetail?bbsID=<%=row.getBbsID()%>&group=<%=groupName%>" style="color: black;">
                 <%=row.getBbsTitle()%>
             </a>
         </td>
@@ -409,11 +416,11 @@
         <td><%=row.getRecommendation()%></td>
         <td><%=row.getComments()%></td>
         <td><%=row.getIsPublic() == 1 ? "전체공개" : "회원공개"%></td>
-    </tr>
-    <%
-    }
-    %>
-			</tbody>
+	    </tr>
+	    <%
+	    }
+	    %>
+		</tbody>
 		</table>
 		<!-- 게시글 상세 게시글 목록 페이징  -->
 		<div style="text-align: center; margin-top: 10px;">

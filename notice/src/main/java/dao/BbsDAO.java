@@ -446,7 +446,9 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	            bbs.setBbsID(rs.getInt("bbsID"));
 	            bbs.setBbsTitle(rs.getString("bbsTitle"));
 	            bbs.setUserID(rs.getString("userID"));
-	            bbs.setBbsDate(rs.getString("bbsDate"));
+	            String rawDate = rs.getString("bbsDate");
+	            String displayDate = (rawDate != null && rawDate.length() >= 10) ? rawDate.substring(0, 10) : rawDate;
+	            bbs.setBbsDate(displayDate);
 	            bbs.setInquiry(rs.getInt("inquiry"));
 	            bbs.setRecommendation(rs.getInt("recommendation"));
 	            bbs.setComments(rs.getInt("comments"));
@@ -507,107 +509,6 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	 *  검색 유형에 따라 WHERE 조건 다르게 구성
 	 */
 	
-//	public ArrayList<Bbs> searchList(int pageNumber, String groupName, String searchType, String keyword) {
-//	    StringBuilder SQL = new StringBuilder(); 
-//	    
-//	    SQL.append("SELECT * FROM BBS WHERE bbsAvailable = 1 AND groupName = ? AND isNotice = 0"); // 검색 조건과 상관없이 항상 붙는 공통 필터    
-//
-//	    ArrayList<String> conditions = new ArrayList<String>(); // 제목/댓글/작성자 검색 조건을 저장하는 리스트
-//	    ArrayList<String> params = new ArrayList<String>();		// 위 조건문의 ? 자리에 실제로 검색어를 순서대로 담을 리스트
-//	    String likeKeyword = "%" + keyword + "%";
-//
-//	    boolean useTitle = searchType.contains("title");     // bbs.jsp 에 드롭다운 받아온 값 유효성 검사 // contains로 판단하는 이유 드롭다운이 제목,댓글,작성자, 등등 6가지 조합인데 값 하나 titleComment에 title과 Comment가 동시에 들어있으니 문자열 안에 특정 단어가 포함되어 있는지만 검사하면 6개 옵션을 하나의 로직으로 다 처리 가능
-//	    boolean useComment = searchType.contains("comment");
-//	    boolean useWriter = searchType.contains("writer");
-//
-//	    if (useTitle) { // 제목
-//	        conditions.add("bbsTitle LIKE ?");
-//	        params.add(likeKeyword);
-//	    }
-//	    if (useComment) { // 댓글 EXISTS  댓글 내용은 BBS 테이블이 아니라 별개의 Comment 테이블에 있음 이 게시글에 달린 댓글들 중에 키워드가 있는 게 하나라도 있는지 확인해야 하는데 단순 LIKE로는 다른 테이블 값을 검사할 수 없음 그래서 서브쿼리로 이 BBS.bbsID에 연결된 Comment 중에 조건 맞는 게 존재하냐 EXISTS 를 물어봄
-//	        conditions.add("EXISTS (SELECT 1 FROM Comment c WHERE c.bbsID = BBS.bbsID " + "AND c.commentAvailable = 1 AND c.secretComment = 0 AND c.commentContent LIKE ?)");
-//	        params.add(likeKeyword);
-//	    }
-//	    if (useWriter) { // 작성자 
-//	        conditions.add("userID LIKE ?");
-//	        params.add(likeKeyword);
-//	    }
-//
-//	    if (!conditions.isEmpty()) {  // 선택된 조건이 하나라도 있으면, 그것들을 OR로 묶어서 SQL에 붙임
-//	        SQL.append(" AND (");
-//	        for (int i = 0; i < conditions.size(); i++) {
-//	            SQL.append(conditions.get(i));
-//	            if (i < conditions.size() - 1) SQL.append(" OR "); // 마지막 조건 뒤에는 OR 안 붙임
-//	        }
-//	        SQL.append(")");
-//	    }
-//
-////	    SQL.append(" ORDER BY bbsID DESC LIMIT 20 OFFSET ?"); // 최신글 먼저, 페이지당 20개
-//	    
-//	    SQL.append(" ORDER BY replyOrder ASC LIMIT 20 OFFSET ?");
-//
-//	    ArrayList<Bbs> list = new ArrayList<Bbs>();
-//	    Connection conn = null;
-//	    PreparedStatement pstmt = null;
-//	    ResultSet rs = null;
-//	    
-//	    try {
-//	        conn = getConnection();
-//	        int offset = (pageNumber - 1) * 20; // 몇 번째 게시글부터 가져올지 계산 (1페이지=0부터 2페이지=20부터)
-//	        pstmt = conn.prepareStatement(SQL.toString()); // 위에서 만든 SQL 문장을 실행 준비 상태로 만들고 지금까지 append한 걸 다 합쳐서 진짜 String으로 뽑아냄
-//	        int idx = 1; // 지금 몇 번째 ? 빈칸을 채우고 있는지 세는 번호표 1번부터 시작
-//	        pstmt.setString(idx++, groupName); // 1번째 (=groupName 자리)에 값을 넣음 idx++는 넣고 나서 idx를 1 증가시킴 -> 다음 줄부터는 idx가 2가 됨
-//	        
-//	        for (int i = 0; i < params.size(); i++) {
-//	            String p = params.get(i);      // i번째 값을 꺼내서 p에 담음  params 리스트에 있는 값 들을 하나씩 꺼내서, 2번째, 3번째 ?에 순서대로 채움
-//	            pstmt.setString(idx++, p);	   // 제목+작성자 검색이면 params에 값이 2개 들어있어서 이 반복문이 2번 돎 -> idx는 2->3->4로 증가
-//	        }
-//
-//	        
-//	        pstmt.setInt(idx++, offset); // 마지막 ? 이 예시에서는 4번째에 페이징 offset 값을 넣음
-//
-//	        rs = pstmt.executeQuery();
-//	        
-//	        while (rs.next()) { // 검색 결과로 나온 게시글들을 한 줄씩 확인하면서 DB 컬럼값을 하나씩 꺼내 Bbs 객체에 채우고 다 채운 객체를 리스트에 쌓는 작업을 게시글 개수만큼 반복
-//	            Bbs bbs = new Bbs();
-//	            bbs.setBbsID(rs.getInt("bbsID"));
-//	            bbs.setBbsTitle(rs.getString("bbsTitle"));
-//	            bbs.setUserID(rs.getString("userID"));
-//	            String rawDate = rs.getString("bbsDate");
-//	            String today = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
-//	            String displayDate;
-//	            if (rawDate.startsWith(today)) {
-//	                displayDate = rawDate.substring(11, 13) + "시 " + rawDate.substring(14, 16) + "분";
-//	            } 
-//	            else {
-//	                displayDate = rawDate.substring(0, 10);
-//	            }
-//	            
-//	            bbs.setBbsDate(displayDate);
-//	            bbs.setBbsContent(rs.getString("bbsContent"));
-//	            bbs.setBbsAvailable(rs.getInt("bbsAvailable"));
-//	            bbs.setInquiry(rs.getInt("inquiry"));
-//	            bbs.setRecommendation(rs.getInt("recommendation"));
-//	            bbs.setComments(rs.getInt("Comments"));
-//	            bbs.setIsPublic(rs.getInt("bbsPublic"));
-//	            bbs.setIsNotice(rs.getInt("isNotice"));
-//	            
-//	            bbs.setParentBbsID(rs.getInt("parentBbsID"));
-//	            bbs.setReplyStep(rs.getInt("replyStep"));
-//	            bbs.setReplyOrder(rs.getInt("replyOrder"));
-//	            
-//	            bbs.setIsBold(bbs.getRecommendation() >= 10);
-//	            
-//	            list.add(bbs);
-//	        }
-//	    } catch (Exception e) {
-//	        e.printStackTrace();
-//	    } finally {
-//	        close(conn, pstmt, rs);
-//	    }
-//	    return list;
-//	}
-	
 	public ArrayList<Bbs> searchList(int pageNumber, String groupName, String searchType, String keyword) {
 	    Connection conn = null;
 	    PreparedStatement pstmt1 = null;
@@ -624,11 +525,12 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	        conn = getConnection();
 	        String likeKeyword = "%" + keyword + "%";
 	        String lowerSearchType = searchType.toLowerCase();
+	        
 	        boolean useTitle = lowerSearchType.contains("title");
 	        boolean useComment = lowerSearchType.contains("comment");
 	        boolean useWriter = lowerSearchType.contains("writer");
 
-	        // ── 1단계: 검색 조건에 맞는 글들의 bbsID, parentBbsID를 뽑음 ──
+	        // 검색 조건에 맞는 글들의 bbsID, parentBbsID를 뽑음
 	        StringBuilder matchSQL = new StringBuilder();
 	        matchSQL.append("SELECT bbsID, parentBbsID FROM BBS WHERE bbsAvailable = 1 AND groupName = ? AND isNotice = 0");
 
@@ -679,8 +581,8 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	            childrenToResolve.add(bbsID); // 검색된 글 자신의 자손도 찾아야 하니 큐에 추가
 	        }
 
-	        // ── 2단계: 조상(부모, 부모의 부모...)을 원글까지 계속 거슬러 올라가며 수집 ──
-	        String selectParentSQL = "SELECT bbsID, parentBbsID FROM BBS WHERE bbsID = ?";
+	        // 조상 부모, 부모의 부모를 원글까지 계속 거슬러 올라가며 수집 
+	        String selectParentSQL = "SELECT bbsID, parentBbsID FROM BBS WHERE bbsID = ? AND bbsAvailable = 1";
 	        pstmt2 = conn.prepareStatement(selectParentSQL);
 
 	        while (!parentsToResolve.isEmpty()) {
@@ -700,10 +602,10 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	            rs2.close();
 	        }
 
-	        // ── 3단계 (신규): 자손(답글, 답글의 답글...)을 계속 찾아 내려가며 수집 ──
-	        // parentBbsID = ? 로 "이 글을 부모로 하는 답글들"을 찾고,
-	        // 찾은 답글도 다시 큐에 넣어서 그 답글의 답글까지 계속 파고듦
-	        String selectChildrenSQL = "SELECT bbsID FROM BBS WHERE parentBbsID = ?";
+	        // 신규 자손답글, 답글의 답글을 계속 찾아 내려가며 수집 
+	        // parentBbsID = ? 로 이 글을 부모로 하는 답글들을 찾고
+	        // 찾은 답글도 다시 큐에 넣어서 그 답글의 답글까지 계속 파고듬
+	        String selectChildrenSQL = "SELECT bbsID FROM BBS WHERE parentBbsID = ? AND bbsAvailable = 1";
 	        pstmt3 = conn.prepareStatement(selectChildrenSQL);
 
 	        while (!childrenToResolve.isEmpty()) {
@@ -724,9 +626,10 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	            return list;
 	        }
 
-	        // ── 4단계: 검색 결과 + 조상 + 자손을 합쳐서, replyOrder 순으로 최종 조회 ──
+	        // 검색 결과 + 조상 + 자손을 합쳐서, replyOrder 순으로 최종 조회
 	        StringBuilder finalSQL = new StringBuilder();
-	        finalSQL.append("SELECT * FROM BBS WHERE bbsID IN (");
+	        finalSQL.append("SELECT * FROM BBS WHERE bbsAvailable = 1 AND bbsID IN (");
+	        
 	        for (int i = 0; i < resultIDs.size(); i++) {
 	            finalSQL.append("?");
 	            if (i < resultIDs.size() - 1) finalSQL.append(",");
@@ -785,63 +688,122 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	 *  검색 결과 전체 개수 (페이징 계산용)
 	 */
 	
-	public int getSearchTotalCount(String groupName, String searchType, String keyword) {
-	    StringBuilder SQL = new StringBuilder();
-	    SQL.append("SELECT COUNT(*) FROM BBS WHERE bbsAvailable = 1 AND groupName = ? AND isNotice = 0");
-
-	    ArrayList<String> conditions = new ArrayList<String>(); // 제목/댓글/작성자 검색 조건을 저장하는 리스트
-	    ArrayList<String> params = new ArrayList<String>();		// 위 조건문의 ? 자리에 실제로 검색어를 순서대로 담을 리스트
-	    String likeKeyword = "%" + keyword + "%";
-
-	    boolean useTitle = searchType.contains("title");
-	    boolean useComment = searchType.contains("comment");
-	    boolean useWriter = searchType.contains("writer");
-
-	    if (useTitle) {
-	        conditions.add("bbsTitle LIKE ?");
-	        params.add(likeKeyword);
-	    }
-	    if (useComment) {
-	        // 삭제되지 않고(commentAvailable=1), 비밀댓글이 아닌(secretComment=0) 댓글 중
-	        // 키워드를 포함한 댓글이 하나라도 있으면 이 게시글을 검색 결과에 포함
-	        conditions.add("EXISTS (SELECT 1 FROM Comment c WHERE c.bbsID = BBS.bbsID " + "AND c.commentAvailable = 1 AND c.secretComment = 0 AND c.commentContent LIKE ?)"); 
-	        params.add(likeKeyword);
-	    }
-	    if (useWriter) {
-	        conditions.add("userID LIKE ?");
-	        params.add(likeKeyword);
-	    }
-
-	    if (!conditions.isEmpty()) {
-	        SQL.append(" AND (");
-	        for (int i = 0; i < conditions.size(); i++) {
-	            SQL.append(conditions.get(i));
-	            if (i < conditions.size() - 1) SQL.append(" OR ");
-	        }
-	        SQL.append(")");
-	    }
-
+	public int getSearchTotalCount(String groupName, String searchType, String keyword) { // 검색 결과에 번호가 음수로 나오는 이유  getSearchTotalCount이 세는 개수와 실제 화면에나오는 개수가 달라서 
+		
 	    Connection conn = null;
-	    PreparedStatement pstmt = null;
-	    ResultSet rs = null;
-	    
+	    PreparedStatement pstmt1 = null;
+	    PreparedStatement pstmt2 = null;
+	    PreparedStatement pstmt3 = null;
+	    ResultSet rs1 = null;
+	    ResultSet rs2 = null;
+	    ResultSet rs3 = null;
+
 	    try {
 	        conn = getConnection();
-	        pstmt = conn.prepareStatement(SQL.toString());
-	        int idx = 1; // 첫 번째 ?부터 값을 넣기 위해 번호를 1로 시작
-	        pstmt.setString(idx++, groupName);
-	        
-	        for (int i = 0; i < params.size(); i++) {
-	            String p = params.get(i);      // i번째 값을 꺼내서 p에 담음  params 리스트에 있는 값 들을 하나씩 꺼내서, 2번째, 3번째 ?에 순서대로 채움
-	            pstmt.setString(idx++, p);	   // 제목+작성자 검색이면 params에 값이 2개 들어있어서 이 반복문이 2번 만듬 → idx는 2→3→4로 증가
+	        String likeKeyword = "%" + keyword + "%";
+	        String lowerSearchType = searchType.toLowerCase();
+	        boolean useTitle = lowerSearchType.contains("title");
+	        boolean useComment = lowerSearchType.contains("comment");
+	        boolean useWriter = lowerSearchType.contains("writer");
+
+	        // 검색 조건에 맞는 글의 bbsID parentBbsID 조회 searchList와 동일
+	        StringBuilder matchSQL = new StringBuilder();
+	        matchSQL.append("SELECT bbsID, parentBbsID FROM BBS WHERE bbsAvailable = 1 AND groupName = ? AND isNotice = 0");
+
+	        ArrayList<String> conditions = new ArrayList<String>();
+	        ArrayList<String> params = new ArrayList<String>(); 
+
+	        if (useTitle) { 
+	            conditions.add("bbsTitle LIKE ?");
+	            params.add(likeKeyword);
 	        }
+	        if (useComment) {
+	            conditions.add("EXISTS (SELECT 1 FROM Comment c WHERE c.bbsID = BBS.bbsID "
+	                          + "AND c.commentAvailable = 1 AND c.secretComment = 0 AND c.commentContent LIKE ?)");
+	            params.add(likeKeyword);
+	        }
+	        if (useWriter) {
+	            conditions.add("userID LIKE ?");
+	            params.add(likeKeyword);
+	        }
+	        if (!conditions.isEmpty()) {
+	            matchSQL.append(" AND (");
+	            for (int i = 0; i < conditions.size(); i++) {
+	                matchSQL.append(conditions.get(i));
+	                if (i < conditions.size() - 1) matchSQL.append(" OR ");
+	            }
+	            matchSQL.append(")");
+	        }
+
+	        pstmt1 = conn.prepareStatement(matchSQL.toString());
+	        int idx = 1;
+	        pstmt1.setString(idx++, groupName);
+	        for (String p : params) {
+	            pstmt1.setString(idx++, p);
+	        }
+	        rs1 = pstmt1.executeQuery();
+
+	        java.util.LinkedHashSet<Integer> resultIDs = new java.util.LinkedHashSet<Integer>();
+	        java.util.ArrayList<Integer> parentsToResolve = new java.util.ArrayList<Integer>();
+	        java.util.ArrayList<Integer> childrenToResolve = new java.util.ArrayList<Integer>();
+
+	        while (rs1.next()) {
+	            int bbsID = rs1.getInt("bbsID");
+	            int parentBbsID = rs1.getInt("parentBbsID");
+	            resultIDs.add(bbsID);
+	            if (parentBbsID > 0) {
+	                parentsToResolve.add(parentBbsID);
+	            }
+	            childrenToResolve.add(bbsID);
+	        }
+
+	        // 조상 찾기 searchList랑 동일
+	        String selectParentSQL = "SELECT bbsID, parentBbsID FROM BBS WHERE bbsID = ? AND bbsAvailable = 1";
+	        pstmt2 = conn.prepareStatement(selectParentSQL);
+	        while (!parentsToResolve.isEmpty()) {
+	            int currentParentID = parentsToResolve.remove(0);
+	            if (resultIDs.contains(currentParentID)) {
+	                continue;
+	            }
+	            pstmt2.setInt(1, currentParentID);
+	            rs2 = pstmt2.executeQuery();
+	            if (rs2.next()) {
+	                resultIDs.add(currentParentID);
+	                int grandParentID = rs2.getInt("parentBbsID");
+	                if (grandParentID > 0) {
+	                    parentsToResolve.add(grandParentID);
+	                }
+	            }
+	            rs2.close();
+	        }
+
+	        //  자손 찾기 searchList랑 동일 
+	        String selectChildrenSQL = "SELECT bbsID FROM BBS WHERE parentBbsID = ? AND bbsAvailable = 1";
 	        
-	        rs = pstmt.executeQuery();
-	        if (rs.next()) return rs.getInt(1); // SELECT COUNT(*) 결과 값 반환
+	        pstmt3 = conn.prepareStatement(selectChildrenSQL);
+	        while (!childrenToResolve.isEmpty()) {
+	            int currentID = childrenToResolve.remove(0);
+	            pstmt3.setInt(1, currentID);
+	            rs3 = pstmt3.executeQuery();
+	            while (rs3.next()) {
+	                int childID = rs3.getInt("bbsID");
+	                if (!resultIDs.contains(childID)) {
+	                    resultIDs.add(childID);
+	                    childrenToResolve.add(childID);
+	                }
+	            }
+	            rs3.close();
+	        }
+
+	        // 최종적으로 화면에 나올 전체 개수 조상+자손 포함를 그대로 반환
+	        return resultIDs.size();
+
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    } finally {
-	        close(conn, pstmt, rs);
+	        close(null, pstmt1, rs1);
+	        close(null, pstmt2, null);
+	        close(conn, pstmt3, null);
 	    }
 	    return 0;
 	}
