@@ -73,7 +73,7 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 			String originalFileName, String savedFileName, int isNotice) {
 		
 		Connection conn = null;
-//		PreparedStatement pstmt1 = null;
+		PreparedStatement pstmt1 = null;
 		PreparedStatement pstmt2 = null;
 
 		try {
@@ -81,10 +81,10 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 			String date = getDate();  // 현재 날짜 및 시간 조회
 			conn = getConnection();
 			
-//			String shiftSQL = "UPDATE BBS SET replyOrder = replyOrder + 1 WHERE groupName = ?";
-//			pstmt1 = conn.prepareStatement(shiftSQL);
-//		    pstmt1.setString(1, bbsgroupName);
-//		    pstmt1.executeUpdate();
+			String shiftSQL = "UPDATE BBS SET replyOrder = replyOrder + 1 WHERE groupName = ?";
+			pstmt1 = conn.prepareStatement(shiftSQL);
+		    pstmt1.setString(1, bbsgroupName);
+		    pstmt1.executeUpdate();
 
 			String SQL = "INSERT INTO BBS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; // 게시글 정보를 BBS 테이블에 저장하는 SQL
 			
@@ -113,7 +113,7 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-//			  close(null, pstmt1, null);
+			  close(null, pstmt1, null);
 		      close(conn, pstmt2, null);
 		}
 		return -1;
@@ -125,9 +125,8 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	 */
 
 	public int getTotalCount(String groupName) {
-		String SQL = "SELECT COUNT(*) FROM BBS WHERE bbsAvailable = 1 AND groupName = ? AND isNotice = 0";   // 삭제되지 않은(bbsAvailable = 1)
-																											 // 게시글 중 전달받은 게시판 그룹의 게시글
-																											 // 개수를 조회하는 SQL
+		 String SQL = "SELECT COUNT(*) FROM BBS WHERE bbsAvailable = 1 AND groupName = ? AND isNotice = 0 AND parentBbsID IS NULL"; // 조건 ,원글인 게시글 몇 개인지 
+	
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -151,66 +150,87 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	 * 게시판 그룹별 게시글 목록 조회(페이징)
 	 *  DB에서 조회한 게시글 정보를 Bbs 객체에 저장하고 추천수 10개 이상 또는 공지글이면 제목을 굵게 시하도록 설정한 후 목록(ArrayList)에 추가하는 로직
 	 */
-
 	public ArrayList<Bbs> getList(int pageNumber, String groupName) {
-		String SQL = "SELECT * FROM BBS WHERE bbsAvailable = 1 AND groupName = ? AND isNotice = 0 "// 해당 게시판의 게시글을 최신순으로 20개 조회
-		        + "ORDER BY replyOrder ASC LIMIT 20 OFFSET ?";
-		
-		ArrayList<Bbs> list = new ArrayList<Bbs>();  // 게시글 목록을 저장할 리스트
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		
-		try {
-			conn = getConnection();
-			int offset = (pageNumber - 1) * 20;  // 현재 페이지의 시작 위치 계산
-			pstmt = conn.prepareStatement(SQL);
-			pstmt.setString(1, groupName);		 // 게시판 그룹명 설정
-			pstmt.setInt(2, offset);			 // 시작 위치 설정
-			rs = pstmt.executeQuery();			 // SQL 실행
-			
-			while (rs.next()) {  // 조회된 게시글을 Bbs 객체에 저장
-				Bbs bbs = new Bbs();
-				
-			    // 게시글 정보 저장
-				bbs.setBbsID(rs.getInt("bbsID"));
-				bbs.setBbsTitle(rs.getString("bbsTitle"));
-				bbs.setUserID(rs.getString("userID"));
-				// 작성일 조회
-				String rawDate = rs.getString("bbsDate");
-				// 오늘 날짜
-				String today = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
-				String displayDate;
-				if (rawDate.startsWith(today)) { // 오늘 작성한 글이면 시간만 표시
-					displayDate = rawDate.substring(11, 13) + "시 " + rawDate.substring(14, 16) + "분";
-				} else {  // 오늘 이전 글이면 날짜 표시
-					displayDate = rawDate.substring(0, 10);
-				}
-				
-				bbs.setBbsDate(displayDate);						// 화면에 표시할 작성일 저장
-				bbs.setBbsContent(rs.getString("bbsContent")); 	    // 게시글 내용 저장
-				bbs.setBbsAvailable(rs.getInt("bbsAvailable"));	    // 게시글 사용 여부 저장
-				bbs.setInquiry(rs.getInt("inquiry"));				// 조회수 저장	
-				bbs.setRecommendation(rs.getInt("recommendation")); // 추천수 저장
-				bbs.setComments(rs.getInt("Comments"));				// 댓글 수 저장
-				bbs.setIsPublic(rs.getInt("bbsPublic"));			// 공개 여부 저장
-				bbs.setIsNotice(rs.getInt("isNotice")); 			// 공지글 여부 저장
-				bbs.setParentBbsID(rs.getInt("parentBbsID"));  		// 부모글 ID
-				bbs.setReplyStep(rs.getInt("replyStep"));      		// 들여쓰기 단계
-				bbs.setReplyOrder(rs.getInt("replyOrder"));         // 정렬 순서
-				
-				boolean isBold = (bbs.getRecommendation() >= 10);  // 추천수 10개 이상이면 isBold = ture 아니면 false 
-					
-				bbs.setIsBold(isBold); //  Bbs 객체에 결과 저장 setIsBold 에 isBold = true 값 저장 
-					
-				list.add(bbs); // bbs 객체를 list에 넣음
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			close(conn, pstmt, rs);
-		}
-		return list; // 컨트롤러에서 ArrayList<Bbs> list = bbsDAO.getList(pageNumber, groupName) 이렇게 값 받음
+	    ArrayList<Bbs> list = new ArrayList<Bbs>();
+	    Connection conn = null;
+	    PreparedStatement pstmt1 = null;
+	    PreparedStatement pstmt2 = null;
+	    ResultSet rs1 = null;
+	    ResultSet rs2 = null;
+	    try {
+	        conn = getConnection();
+
+	        
+	        String originalSQL = "SELECT bbsID FROM BBS WHERE bbsAvailable = 1 AND groupName = ? AND isNotice = 0 AND parentBbsID IS NULL ORDER BY bbsID DESC LIMIT 20 OFFSET ?";
+	        pstmt1 = conn.prepareStatement(originalSQL); //삭제되지 않은 일반 게시글 중에서 선택한 게시판의 원글만 최신순으로 20개씩 조회
+	        pstmt1.setString(1, groupName);
+	        pstmt1.setInt(2, (pageNumber - 1) * 20); // OFFSET에 몇 번째부터 가져올지 채우기
+	        rs1 = pstmt1.executeQuery();
+
+	        ArrayList<Integer> originalIDs = new ArrayList<Integer>(); // 조회된 원글들의 bbsID만 담아둘 리스트
+	        while (rs1.next()) { // 결과에서 한 행씩 꺼내서, bbsID 값만 뽑아 리스트에 저장
+	            originalIDs.add(rs1.getInt("bbsID"));
+	        }
+
+	        if (originalIDs.isEmpty()) { // 이 페이지에 원글이 하나도 없다면
+	            return list; // 그 페이지에 원글이 없으면 빈 리스트 반환
+	        }
+
+	        //  그 원글들 + 그 원글들의 답글(자손 포함)을 replyOrder 순으로 조회
+	        // (원글의 replyOrder 값 범위를 이용해서 그 사이에 있는 답글들을 다 가져옴)
+	        StringBuilder finalSQL = new StringBuilder();
+	        finalSQL.append("SELECT * FROM BBS WHERE bbsAvailable = 1 AND groupName = ? AND isNotice = 0 AND (");
+	        for (int i = 0; i < originalIDs.size(); i++) { // originalIDs에 담긴 개수만큼 조건을 반복해서 만듬
+	            finalSQL.append("bbsID = ? OR parentBbsID = ?"); // 이 글 자체 bbsID=원글번호 이거나 이 글의 답글 parentBbsID=원글번호 이면 다 가져옴
+	            if (i < originalIDs.size() - 1) finalSQL.append(" OR "); // 마지막 조건이 아니면 OR 로 이어붙임 조건들 사이 연결
+	        }
+	        finalSQL.append(") ORDER BY replyOrder ASC"); // 다 만든 다음 정렬 순서 replyOrder 화면에 보여줄 순서 오름차순으로 정렬
+
+	        pstmt2 = conn.prepareStatement(finalSQL.toString()); // 만들어진 SQL 문자열로 실행 준비  prepareStatement 는 String 파라미터만 받음
+	        int idx = 1;
+	        pstmt2.setString(idx++, groupName);
+	        for (int j = 0; j < originalIDs.size(); j++) {
+	            int id = originalIDs.get(j);   // j번째 원글 ID 꺼내기
+	            pstmt2.setInt(idx++, id);      // bbsID = ? 자리 채우기
+	            pstmt2.setInt(idx++, id);      // parentBbsID = ? 자리 채우기
+	        }
+	        rs2 = pstmt2.executeQuery();
+
+	        while (rs2.next()) {
+	            Bbs bbs = new Bbs();
+	            bbs.setBbsID(rs2.getInt("bbsID"));
+	            bbs.setBbsTitle(rs2.getString("bbsTitle"));
+	            bbs.setUserID(rs2.getString("userID"));
+	            String rawDate = rs2.getString("bbsDate");
+	            String today = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+	            String displayDate;
+	            if (rawDate.startsWith(today)) {
+	                displayDate = rawDate.substring(11, 13) + "시 " + rawDate.substring(14, 16) + "분";
+	            } else {
+	                displayDate = rawDate.substring(0, 10);
+	            }
+	            bbs.setBbsDate(displayDate);
+	            bbs.setBbsContent(rs2.getString("bbsContent"));
+	            bbs.setBbsAvailable(rs2.getInt("bbsAvailable"));
+	            bbs.setInquiry(rs2.getInt("inquiry"));
+	            bbs.setRecommendation(rs2.getInt("recommendation"));
+	            bbs.setComments(rs2.getInt("Comments"));
+	            bbs.setIsPublic(rs2.getInt("bbsPublic"));
+	            bbs.setIsNotice(rs2.getInt("isNotice"));
+	            bbs.setParentBbsID(rs2.getInt("parentBbsID"));
+	            bbs.setReplyStep(rs2.getInt("replyStep"));
+	            bbs.setReplyOrder(rs2.getInt("replyOrder"));
+	            bbs.setIsBold(bbs.getRecommendation() >= 10);
+	            list.add(bbs);
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(null, pstmt1, rs1);
+	        close(conn, pstmt2, rs2);
+	    }
+	    return list;
 	}
 
 	/**

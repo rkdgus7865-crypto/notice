@@ -36,7 +36,6 @@
 	<%@ include file="navbar.jsp"%>
 	<%@ include file="groupHeader.jsp"%>
 	
-			
 						<!-- 검색 UI -->
 				<div class="container">
 				    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -114,20 +113,24 @@
 			
 			    <%-- 일반 게시글 목록 --%>
 			    <%
+			    int replyNumber = 0; //  원글만 세는 카운터
 			    for (int i = 0; i < list.size(); i++) { // list = 게시글 여러 개가 들어있는 목록 (ArrayList) / 0번째 게시글부터 19번째 게시글까지, 한 번에 하나씩 화면에 보여줌
 			    %>
 					<tr>
 						<td>
 							<%
-							if ("true".equals(noticeOnly)) {
-							%> 공지 <%-- <%
-							} else if (list.get(i).getReplyStep() > 0) {
-							%>  --%>
-								<%-- 답글은 댓글처럼 번호를 따로 안 보여줌 (댓글 목록도 번호가 없음) --%> 
+							if ("true".equals(noticeOnly)) { // 공지글 모드일 땐 번호 대신 "공지" 표시
+							%> 공지 <%
+							} else if (list.get(i).getReplyStep() > 0) { // 답글이면 번호 안보여줌 replystep = 0 = 원글 ,  replystep = 1 = 원글의 답글
+							%>  
+								<%-- 답글은 댓글처럼 번호를 따로 안 보여줌 --%> 
 							 <%
 							 } else {
-							 %> 
-								 <%=startNumber - i%> 
+							 %>   <!-- 원글일 때만 번호 출력 + 카운터 증가 -->
+								<%=startNumber - replyNumber%>  
+					                <%
+					              		  replyNumber++;  // 원글일 때만 증가 
+					                %>
 							 <%
 							 }
 							 %>
@@ -201,7 +204,6 @@
             <% } %>
 
         </div>
-    </div>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <script src="/notice/js/bootstrap.js"></script>
 
@@ -222,7 +224,10 @@
 		            var startNumber = data.startNumber;  // 자유,공지,질문 게시판 목록 각각 번호가 독립
 	
 		            var tbody = "";
-	
+		            var replyNumber = 0;
+		            
+		            
+		            
 		        //  상단 고정 공지글 3개 먼저 출력
 		            for (var i = 0; i < data.noticeList.length; i++) {
 		                var notice = data.noticeList[i];
@@ -243,7 +248,13 @@
 		            for (var i = 0; i < data.list.length; i++) {
 		                var bbs = data.list[i];
 		                tbody += "<tr>";
-		                tbody += "<td>" + (startNumber - i) + "</td>";
+		                
+		                if (bbs.replyStep > 0) {
+		                    tbody += "<td></td>";  // 답글은 빈 칸
+		                } else {
+		                    tbody += "<td>" + (startNumber - replyNumber) + "</td>";
+		                    replyNumber++;
+		                }
 		                
 		                var recommendTag = bbs.isBold ? "<span style='color:black; font-weight:bold;'>[추천]</span> " : "";
 		                var style = bbs.isNotice == 1 ? "font-weight: bold; font-size:16px; color:black;" : "color:black;";

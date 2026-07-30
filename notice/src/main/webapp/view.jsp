@@ -113,6 +113,21 @@
 
 		</div>
 
+	<%-- 	<!-- 첨부파일 -->
+		<%
+		if (bbs.getOriginalFileName() != null) {
+		%>
+		<div style="margin-top: 10px;">
+			<b>첨부파일:</b> <a
+				href="fileDownload?fileName=<%=bbs.getSavedFileName()%>&originalName=<%=java.net.URLEncoder.encode(bbs.getOriginalFileName(), "UTF-8")%>">
+				<!-- 파일명을 클릭하면 FileDownloadController(fileDownload) 호출 --> <%=bbs.getOriginalFileName()%>
+				<!-- 사용자에게 보여줄 원본 파일명 -->
+			</a>
+		</div>
+		<%
+			}
+		%> --%>
+
 	<!-- 게시판 내용 수정/삭제/목록 버튼 -->
 	<div style="text-align: right;">
 			<%
@@ -371,11 +386,8 @@
 			
 		<tr style="background-color: #f9f9f9;">
 		    <td>공지</td>
-		    
 		    <td style="text-align: left; padding-left: 0px;">
-		    
-		        <a href="viewDetail?bbsID=<%=notice.getBbsID()%>&group=<%=groupName%>" 
-		        style="font-weight: bold; color: black;">
+		        <a href="viewDetail?bbsID=<%=notice.getBbsID()%>&group=<%=groupName%>" style="font-weight: bold; color: black;">
 		            <%=notice.getBbsTitle()%>
 		        </a>
 		    </td>
@@ -391,13 +403,27 @@
 %>    
 			    
     <%
-    for (int i = 0; i < bbsList.size(); i++) {
-        Bbs row = bbsList.get(i);
-        boolean isCurrent = (row.getBbsID() == bbs.getBbsID());
+    int bottomReplyNumber = 0; // 하단 목록에서 원글만 세는 카운터
+    for (int i = 0; i < bbsList.size(); i++) {// 하단에 보여줄 게시글 목록 원글 + 그 원글들의 답글이 섞여있음i번째 게시글 하나씩 꺼내서 화면에 그림
+        Bbs row = bbsList.get(i); // i번째 게시글 객체를 row 라는 변수에 담음
+								
+        boolean isCurrent = (row.getBbsID() == bbs.getBbsID());  // 지금 상세보기로 보고 있는 게시글과 이 행이 같은 글인지 비교 같으면 true → 이 행을 강조 표시 배경색하기 위한 값
     %>
     <tr <%if (isCurrent) {%> style="background-color: #fffbe6;" <%}%>>
         <td>
-        	<%=bottomStartNumber - i%>
+        	<%
+            if (row.getReplyStep() > 0) {  // replyStep 이 0보다 크면 = 이 글은 답글
+            %> 
+            <%
+            } else {
+            %>
+               <%=bottomStartNumber - bottomReplyNumber%> 
+          		  <%
+           			 bottomReplyNumber++;  //  원글일 때만 증가
+            	  %>
+            <%
+            }
+            %>
         </td>
         
         <td style="text-align: left; padding-left: <%=(row.getReplyStep() > 0) ? (20 + (row.getReplyStep() - 1) * 20) : 0%>px; word-break: break-all;">
@@ -416,11 +442,11 @@
         <td><%=row.getRecommendation()%></td>
         <td><%=row.getComments()%></td>
         <td><%=row.getIsPublic() == 1 ? "전체공개" : "회원공개"%></td>
-	    </tr>
-	    <%
-	    }
-	    %>
-		</tbody>
+    </tr>
+    <%
+    }
+    %>
+			</tbody>
 		</table>
 		<!-- 게시글 상세 게시글 목록 페이징  -->
 		<div style="text-align: center; margin-top: 10px;">
