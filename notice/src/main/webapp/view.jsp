@@ -411,7 +411,7 @@
     %>
     <tr <%if (isCurrent) {%> style="background-color: #fffbe6;" <%}%>>
         <td>
-        	<%
+        <%-- 	<%
             if (row.getReplyStep() > 0) {  // replyStep 이 0보다 크면 = 이 글은 답글
             %> 
             <%
@@ -423,7 +423,8 @@
             	  %>
             <%
             }
-            %>
+            %> --%>
+            <%=row.getDisplayNumber()%>
         </td>
         
         <td style="text-align: left; padding-left: <%=(row.getReplyStep() > 0) ? (20 + (row.getReplyStep() - 1) * 20) : 0%>px; word-break: break-all;">

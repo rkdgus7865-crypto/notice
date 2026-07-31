@@ -19,7 +19,8 @@ public class Bbs {
 	private int parentBbsID;			// 답글이면 부모글 ID, 원글이면 NULL
 	private int replyStep;				// 들여쓰기 단계 (원글=0, 답글=1, 답글의 답글=2...)
 	private int replyOrder;				// 화면에 보여줄 정렬 순서
-
+	private int displayNumber;		    // 게시판 (자유,질문,게임) 마다 독립적으로 번호를 매겨 원글과 답글의 번호가 이어지게 만듬
+	
 	public int getBbsID() {
 		return bbsID;
 	}
@@ -127,5 +128,11 @@ public class Bbs {
 	}
 	public void setReplyOrder(int replyOrder) {
 		this.replyOrder = replyOrder;
+	}
+	public int getDisplayNumber() {
+	    return displayNumber;
+	}
+	public void setDisplayNumber(int displayNumber) {
+	    this.displayNumber = displayNumber;
 	}
 }

@@ -65,59 +65,107 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	
 	/**
 	 * 
-	 * 게시글(첨부파일, 공지 여부 포함)을 DB에 등록
-	 * 
+	 * 게시글(첨부파일, 공지 여부 포함)을 DB에 등록 
+	 * 수정 - 게시글만 번호 매기고 답글은 번호 X -> 게시글 + 답글도 bbs 테이블에 컬럼 (nextDisplayNumber) 추가하여 원글과 같이 번호를 줌 
 	 */
-
+	
 	public int write(String bbsTitle, String userID, String bbsContent, int bbsPublic, String bbsgroupName,
-			String originalFileName, String savedFileName, int isNotice) {
-		
-		Connection conn = null;
-		PreparedStatement pstmt1 = null;
-		PreparedStatement pstmt2 = null;
+	        String originalFileName, String savedFileName, int isNotice) {
 
-		try {
-			int nextID = getNext();   // 다음 게시글 번호 조회
-			String date = getDate();  // 현재 날짜 및 시간 조회
-			conn = getConnection();
-			
-			String shiftSQL = "UPDATE BBS SET replyOrder = replyOrder + 1 WHERE groupName = ?";
-			pstmt1 = conn.prepareStatement(shiftSQL);
-		    pstmt1.setString(1, bbsgroupName);
-		    pstmt1.executeUpdate();
+	    Connection conn = null;
+	    PreparedStatement pstmt1 = null;
+	    PreparedStatement pstmt2 = null;
+	    
+	    try {
+	        int nextID = getNext(); // 다음 게시글 번호 조회
+	        int nextDisplayNumber = getNextDisplayNumber(bbsgroupName, isNotice);  // 이 게시판groupName에서 다음에 매길 화면 번호 displayNumber를 계산 isNotice 값도 같이 넘겨서 일반글은 일반글끼리 공지글은 공지글끼리 따로 조회
+	        String date = getDate();
+	        conn = getConnection();
 
-			String SQL = "INSERT INTO BBS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; // 게시글 정보를 BBS 테이블에 저장하는 SQL
-			
-			pstmt2 = conn.prepareStatement(SQL); // SQL 실행 준비
-			pstmt2.setInt(1, nextID);
-			pstmt2.setString(2, bbsTitle);
-			pstmt2.setString(3, userID);
-			pstmt2.setString(4, date);
-			pstmt2.setString(5, bbsContent);
-			pstmt2.setInt(6, 1);
-			pstmt2.setInt(7, 0);
-			pstmt2.setInt(8, 0);
-			pstmt2.setInt(9, 0);
-			pstmt2.setInt(10, bbsPublic);
-			pstmt2.setString(11, bbsgroupName);
-			pstmt2.setString(12, originalFileName);
-			pstmt2.setString(13, savedFileName);
-			pstmt2.setInt(14, isNotice);
-			
-	        pstmt2.setNull(15, java.sql.Types.INTEGER);    // parentBbsID: 원글은 부모가 없으니 NULL
-	        pstmt2.setInt(16, 0);                          // replyStep: 원글은 들여쓰기 0단계
-	        pstmt2.setInt(17, 1);                          // replyOrder: 위에서 다 밀어놨으니 맨 위 자리(1)
+	        String shiftSQL = "UPDATE BBS SET replyOrder = replyOrder + 1 WHERE groupName = ?"; // 새 글이 맨 위 replyOrder=1 로 들어갈 예정이니 기존에 있던 글들의 순서 replyOrder를 전부 한 칸씩 뒤로 밀어줌
+	        pstmt1 = conn.prepareStatement(shiftSQL);
+	        pstmt1.setString(1, bbsgroupName);
+	        pstmt1.executeUpdate();
 
-
+	        String SQL = "INSERT INTO BBS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; 
+	        pstmt2 = conn.prepareStatement(SQL);
+	        pstmt2.setInt(1, nextID); 		// bbsID 고유 식별번호,PK 채우기
+	        pstmt2.setString(2, bbsTitle);
+	        pstmt2.setString(3, userID);
+	        pstmt2.setString(4, date);
+	        pstmt2.setString(5, bbsContent);
+	        pstmt2.setInt(6, 1); // bbsAvailable  1 = 삭제 안 된 정상 게시글
+	        pstmt2.setInt(7, 0); // inquiry 조회수 
+	        pstmt2.setInt(8, 0); // recommendation 추천수 
+	        pstmt2.setInt(9, 0); // comments 댓글수 
+	        pstmt2.setInt(10, bbsPublic);
+	        pstmt2.setString(11, bbsgroupName); 
+	        pstmt2.setString(12, originalFileName);
+	        pstmt2.setString(13, savedFileName);
+	        pstmt2.setInt(14, isNotice);
+	        pstmt2.setNull(15, java.sql.Types.INTEGER); // parentBbsID 원글이라 부모글이 없으니 NULL
+	        pstmt2.setInt(16, 0);	// replyStep 원글이니까 들여쓰기 단계 0
+	        pstmt2.setInt(17, 1);	// replyOrder 방금 다른 글들을 다 밀어놨으니 이 글이 맨 위 1번 자리
+	        pstmt2.setInt(18, nextDisplayNumber);   // 화면에 보여줄 번호 방금 계산한 값 채우기
 	        return pstmt2.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			  close(null, pstmt1, null);
-		      close(conn, pstmt2, null);
-		}
-		return -1;
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(null, pstmt1, null);
+	        close(conn, pstmt2, null);
+	    }
+	    return -1;
 	}
+
+//	public int write(String bbsTitle, String userID, String bbsContent, int bbsPublic, String bbsgroupName,
+//			String originalFileName, String savedFileName, int isNotice) {
+//		
+//		Connection conn = null;
+//		PreparedStatement pstmt1 = null;
+//		PreparedStatement pstmt2 = null;
+//
+//		try {
+//			int nextID = getNext();   // 다음 게시글 번호 조회
+//			String date = getDate();  // 현재 날짜 및 시간 조회
+//			conn = getConnection();
+//			
+//			String shiftSQL = "UPDATE BBS SET replyOrder = replyOrder + 1 WHERE groupName = ?";
+//			pstmt1 = conn.prepareStatement(shiftSQL);
+//		    pstmt1.setString(1, bbsgroupName);
+//		    pstmt1.executeUpdate();
+//
+//			String SQL = "INSERT INTO BBS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; // 게시글 정보를 BBS 테이블에 저장하는 SQL
+//			
+//			pstmt2 = conn.prepareStatement(SQL); // SQL 실행 준비
+//			pstmt2.setInt(1, nextID);
+//			pstmt2.setString(2, bbsTitle);
+//			pstmt2.setString(3, userID);
+//			pstmt2.setString(4, date);
+//			pstmt2.setString(5, bbsContent);
+//			pstmt2.setInt(6, 1);
+//			pstmt2.setInt(7, 0);
+//			pstmt2.setInt(8, 0);
+//			pstmt2.setInt(9, 0);
+//			pstmt2.setInt(10, bbsPublic);
+//			pstmt2.setString(11, bbsgroupName);
+//			pstmt2.setString(12, originalFileName);
+//			pstmt2.setString(13, savedFileName);
+//			pstmt2.setInt(14, isNotice);
+//			
+//	        pstmt2.setNull(15, java.sql.Types.INTEGER);    // parentBbsID: 원글은 부모가 없으니 NULL
+//	        pstmt2.setInt(16, 0);                          // replyStep: 원글은 들여쓰기 0단계
+//	        pstmt2.setInt(17, 1);                          // replyOrder: 위에서 다 밀어놨으니 맨 위 자리(1)
+//
+//
+//	        return pstmt2.executeUpdate();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		} finally {
+//			  close(null, pstmt1, null);
+//		      close(conn, pstmt2, null);
+//		}
+//		return -1;
+//	}
 
 	/**
 	 * 게시판 그룹(groupName)에 해당하는 게시글의 전체 개수를 조회하는 메서드
@@ -220,6 +268,7 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	            bbs.setParentBbsID(rs2.getInt("parentBbsID"));
 	            bbs.setReplyStep(rs2.getInt("replyStep"));
 	            bbs.setReplyOrder(rs2.getInt("replyOrder"));
+	            bbs.setDisplayNumber(rs2.getInt("displayNumber"));  // 추가
 	            bbs.setIsBold(bbs.getRecommendation() >= 10);
 	            list.add(bbs);
 	        }
@@ -263,6 +312,7 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 				bbs.setIsPublic(rs.getInt("bbsPublic"));
 				bbs.setOriginalFileName(rs.getString("originalFileName"));
 				bbs.setSavedFileName(rs.getString("savedFileName"));
+				bbs.setDisplayNumber(rs.getInt("displayNumber"));  // 추가
 				return bbs;
 			}
 		} catch (Exception e) {
@@ -473,6 +523,7 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	            bbs.setRecommendation(rs.getInt("recommendation"));
 	            bbs.setComments(rs.getInt("comments"));
 	            bbs.setIsPublic(rs.getInt("bbsPublic"));
+	            bbs.setDisplayNumber(rs.getInt("displayNumber"));  //  추가
 	            bbs.setIsNotice(1);   // 이 메서드는 공지글만 조회하니까 무조건 1
 	            bbs.setIsBold(bbs.getRecommendation() >= 10); 
 
@@ -513,6 +564,7 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	            bbs.setComments(rs.getInt("comments"));
 	            bbs.setIsPublic(rs.getInt("bbsPublic"));
 	            bbs.setIsNotice(1);   // 이 메서드는 공지글만 조회하니까 무조건 1
+	            bbs.setDisplayNumber(rs.getInt("displayNumber"));  // 추가
 	            bbs.setIsBold(bbs.getRecommendation() >= 10);  
 
 	            list.add(bbs);
@@ -689,6 +741,7 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	            bbs.setParentBbsID(rs4.getInt("parentBbsID"));
 	            bbs.setReplyStep(rs4.getInt("replyStep"));
 	            bbs.setReplyOrder(rs4.getInt("replyOrder"));
+	            bbs.setDisplayNumber(rs4.getInt("displayNumber"));  //  추가
 	            bbs.setIsBold(bbs.getRecommendation() >= 10);
 	            list.add(bbs);
 	        }
@@ -829,12 +882,11 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	}
 	
 	/**
-	 * 게시글 답글 작성
+	 * 게시글 답글 작성 
 	 */
 	
 	public int writeReply(String bbsTitle, String userID, String bbsContent, int bbsPublic, String bbsgroupName,
 	        String originalFileName, String savedFileName, int parentBbsID) {
-
 	    Connection conn = null;
 	    PreparedStatement pstmt1 = null;
 	    PreparedStatement pstmt2 = null;
@@ -845,22 +897,22 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	    ResultSet rs2 = null;
 	    try {
 	        int nextID = getNext();
+	        int nextDisplayNumber = getNextDisplayNumber(bbsgroupName, 0);  //  추가
 	        String date = getDate();
 	        conn = getConnection();
 
-	        //  부모 글의 현재 replyOrder(화면에 보여줄 정렬 순서), replyStep(들여쓰기 단계) 조회
+	        // 부모 글의 현재 replyOrder(화면에 보여줄 정렬 순서), replyStep(들여쓰기 단계) 조회
 	        String selectParentSQL = "SELECT replyOrder, replyStep FROM BBS WHERE bbsID = ?"; // 부모 위치 확인 답글 달 대상이 지금 몇 번째 자리에 있고 얼마나 들여써져 있나
 	        pstmt1 = conn.prepareStatement(selectParentSQL);
 	        pstmt1.setInt(1, parentBbsID);
 	        rs1 = pstmt1.executeQuery();
-
 	        int parentOrder = 0;
 	        int parentStep = 0;
 	        if (rs1.next()) {
 	            parentOrder = rs1.getInt("replyOrder");
 	            parentStep = rs1.getInt("replyStep");
 	        }
-
+	        
 	        //  부모의 답글 그룹이 끝나는 위치 찾기
 	        //  부모보다 순서가 뒤이면서, 들여쓰기 단계가 부모와 같거나 얕은 첫 글
 	        //  그 앞자리까지가 부모의 답글들 -> 새 답글은 그 경계에 삽입
@@ -868,10 +920,9 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	                                + "WHERE groupName = ? AND replyOrder > ? AND replyStep <= ?";
 	        pstmt2 = conn.prepareStatement(findBoundarySQL);
 	        pstmt2.setString(1, bbsgroupName);
-	        pstmt2.setInt(2, parentOrder); 
+	        pstmt2.setInt(2, parentOrder);
 	        pstmt2.setInt(3, parentStep);
 	        rs2 = pstmt2.executeQuery();
-
 	        Integer boundary = null;
 	        if (rs2.next()) {
 	            int value = rs2.getInt("boundary");
@@ -884,8 +935,7 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	        if (boundary != null) {
 	            insertOrder = boundary;
 	        } else {
-	            // 경계가 없다 = 부모가 이 게시판에서 맨 마지막 그룹 -> 맨 끝에 추가
-	            String maxOrderSQL = "SELECT IFNULL(MAX(replyOrder), 0) FROM BBS WHERE groupName = ?"; // 경계 없을 때 대비책 부모가 이 게시판 맨 끝 그룹이면 전체 맨 끝이 어디인지
+	            String maxOrderSQL = "SELECT IFNULL(MAX(replyOrder), 0) FROM BBS WHERE groupName = ?";
 	            pstmt3 = conn.prepareStatement(maxOrderSQL);
 	            pstmt3.setString(1, bbsgroupName);
 	            ResultSet rsMax = pstmt3.executeQuery();
@@ -895,20 +945,18 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	            }
 	            insertOrder = maxOrder + 1;
 	        }
-	   
 
 	        // insertOrder 이후 글들을 한 칸씩 뒤로 밀기
-	        String shiftSQL = "UPDATE BBS SET replyOrder = replyOrder + 1 " //자리 비우기 그 자리부터 뒤에 있는 글들을 다 한 칸씩 밀어서 빈자리를 만듬
+	        String shiftSQL = "UPDATE BBS SET replyOrder = replyOrder + 1 "
 	                         + "WHERE groupName = ? AND replyOrder >= ?";
 	        pstmt4 = conn.prepareStatement(shiftSQL);
 	        pstmt4.setString(1, bbsgroupName);
 	        pstmt4.setInt(2, insertOrder);
 	        pstmt4.executeUpdate();
-	        
-	        System.out.println(shiftSQL);
-	        //  새 답글 삽입 
-	        String insertSQL = "INSERT INTO BBS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-	        
+
+	        // 새 답글 삽입
+	        String insertSQL = "INSERT INTO BBS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; 
+
 	        pstmt5 = conn.prepareStatement(insertSQL);
 	        pstmt5.setInt(1, nextID);
 	        pstmt5.setString(2, bbsTitle);
@@ -923,11 +971,11 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	        pstmt5.setString(11, bbsgroupName);
 	        pstmt5.setString(12, originalFileName);
 	        pstmt5.setString(13, savedFileName);
-	        pstmt5.setInt(14, 0);              // isNotice: 답글은 공지 아님
-	        pstmt5.setInt(15, parentBbsID);    // parentBbsID: 부모글 ID
-	        pstmt5.setInt(16, parentStep + 1); // replyStep: 부모보다 한 단계 깊게
-	        pstmt5.setInt(17, insertOrder);    // replyOrder: 비워둔 자리(8)에 삽입
-
+	        pstmt5.setInt(14, 0);               // isNotice: 답글은 공지 아님
+	        pstmt5.setInt(15, parentBbsID);      // parentBbsID: 부모글 ID
+	        pstmt5.setInt(16, parentStep + 1);   // replyStep: 부모보다 한 단계 깊게
+	        pstmt5.setInt(17, insertOrder);      // replyOrder: 비워둔 자리에 삽입
+	        pstmt5.setInt(18, nextDisplayNumber); //  추가 - 게시판별 화면 번호
 	        return pstmt5.executeUpdate();
 	    } catch (Exception e) {
 	        e.printStackTrace();
@@ -939,6 +987,143 @@ public class BbsDAO extends BaseDAO { // BaseDAO 메소드 상속 받음
 	        close(null, pstmt4, null);
 	        close(conn, pstmt5, null);
 	    }
+	}
+	
+//	public int writeReply(String bbsTitle, String userID, String bbsContent, int bbsPublic, String bbsgroupName,
+//	        String originalFileName, String savedFileName, int parentBbsID) {
+//
+//	    Connection conn = null;
+//	    PreparedStatement pstmt1 = null;
+//	    PreparedStatement pstmt2 = null;
+//	    PreparedStatement pstmt3 = null;
+//	    PreparedStatement pstmt4 = null;
+//	    PreparedStatement pstmt5 = null;
+//	    ResultSet rs1 = null;
+//	    ResultSet rs2 = null;
+//	    try {
+//	        int nextID = getNext();
+//	        String date = getDate();
+//	        conn = getConnection();
+//
+//	        //  부모 글의 현재 replyOrder(화면에 보여줄 정렬 순서), replyStep(들여쓰기 단계) 조회
+//	        String selectParentSQL = "SELECT replyOrder, replyStep FROM BBS WHERE bbsID = ?"; // 부모 위치 확인 답글 달 대상이 지금 몇 번째 자리에 있고 얼마나 들여써져 있나
+//	        pstmt1 = conn.prepareStatement(selectParentSQL);
+//	        pstmt1.setInt(1, parentBbsID);
+//	        rs1 = pstmt1.executeQuery();
+//
+//	        int parentOrder = 0;
+//	        int parentStep = 0;
+//	        if (rs1.next()) {
+//	            parentOrder = rs1.getInt("replyOrder");
+//	            parentStep = rs1.getInt("replyStep");
+//	        }
+//
+//	        //  부모의 답글 그룹이 끝나는 위치 찾기
+//	        //  부모보다 순서가 뒤이면서, 들여쓰기 단계가 부모와 같거나 얕은 첫 글
+//	        //  그 앞자리까지가 부모의 답글들 -> 새 답글은 그 경계에 삽입
+//	        String findBoundarySQL = "SELECT MIN(replyOrder) AS boundary FROM BBS " // 끼워넣을 자리 찾기 그 부모의 답글들이 다 끝나는 지점이 어디인지
+//	                                + "WHERE groupName = ? AND replyOrder > ? AND replyStep <= ?";
+//	        pstmt2 = conn.prepareStatement(findBoundarySQL);
+//	        pstmt2.setString(1, bbsgroupName);
+//	        pstmt2.setInt(2, parentOrder); 
+//	        pstmt2.setInt(3, parentStep);
+//	        rs2 = pstmt2.executeQuery();
+//
+//	        Integer boundary = null;
+//	        if (rs2.next()) {
+//	            int value = rs2.getInt("boundary");
+//	            if (!rs2.wasNull()) {
+//	                boundary = value;
+//	            }
+//	        }
+//
+//	        int insertOrder;
+//	        if (boundary != null) {
+//	            insertOrder = boundary;
+//	        } else {
+//	            // 경계가 없다 = 부모가 이 게시판에서 맨 마지막 그룹 -> 맨 끝에 추가
+//	            String maxOrderSQL = "SELECT IFNULL(MAX(replyOrder), 0) FROM BBS WHERE groupName = ?"; // 경계 없을 때 대비책 부모가 이 게시판 맨 끝 그룹이면 전체 맨 끝이 어디인지
+//	            pstmt3 = conn.prepareStatement(maxOrderSQL);
+//	            pstmt3.setString(1, bbsgroupName);
+//	            ResultSet rsMax = pstmt3.executeQuery();
+//	            int maxOrder = 0;
+//	            if (rsMax.next()) {
+//	                maxOrder = rsMax.getInt(1);
+//	            }
+//	            insertOrder = maxOrder + 1;
+//	        }
+//	   
+//
+//	        // insertOrder 이후 글들을 한 칸씩 뒤로 밀기
+//	        String shiftSQL = "UPDATE BBS SET replyOrder = replyOrder + 1 " //자리 비우기 그 자리부터 뒤에 있는 글들을 다 한 칸씩 밀어서 빈자리를 만듬
+//	                         + "WHERE groupName = ? AND replyOrder >= ?";
+//	        pstmt4 = conn.prepareStatement(shiftSQL);
+//	        pstmt4.setString(1, bbsgroupName);
+//	        pstmt4.setInt(2, insertOrder);
+//	        pstmt4.executeUpdate();
+//	        
+//	        System.out.println(shiftSQL);
+//	        //  새 답글 삽입 
+//	        String insertSQL = "INSERT INTO BBS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+//	        
+//	        pstmt5 = conn.prepareStatement(insertSQL);
+//	        pstmt5.setInt(1, nextID);
+//	        pstmt5.setString(2, bbsTitle);
+//	        pstmt5.setString(3, userID);
+//	        pstmt5.setString(4, date);
+//	        pstmt5.setString(5, bbsContent);
+//	        pstmt5.setInt(6, 1);
+//	        pstmt5.setInt(7, 0);
+//	        pstmt5.setInt(8, 0);
+//	        pstmt5.setInt(9, 0);
+//	        pstmt5.setInt(10, bbsPublic);
+//	        pstmt5.setString(11, bbsgroupName);
+//	        pstmt5.setString(12, originalFileName);
+//	        pstmt5.setString(13, savedFileName);
+//	        pstmt5.setInt(14, 0);              // isNotice: 답글은 공지 아님
+//	        pstmt5.setInt(15, parentBbsID);    // parentBbsID: 부모글 ID
+//	        pstmt5.setInt(16, parentStep + 1); // replyStep: 부모보다 한 단계 깊게
+//	        pstmt5.setInt(17, insertOrder);    // replyOrder: 비워둔 자리(8)에 삽입
+//
+//	        return pstmt5.executeUpdate();
+//	    } catch (Exception e) {
+//	        e.printStackTrace();
+//	        return -1;
+//	    } finally {
+//	        close(null, pstmt1, rs1);
+//	        close(null, pstmt2, rs2);
+//	        close(null, pstmt3, null);
+//	        close(null, pstmt4, null);
+//	        close(conn, pstmt5, null);
+//	    }
+//	}
+	
+	/**
+	 * 게시판별(자유,질문,게임) 다음 번호 계산
+	 */
+	
+	public int getNextDisplayNumber(String groupName,int isNotice) {
+		String SQL = "SELECT MAX(displayNumber) FROM BBS WHERE groupName = ? AND isNotice = ?";   // 지금까지 매겨진 displayNumber 중 가장 큰 값을 찾는
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+	    try {
+	        conn = getConnection();
+	        pstmt = conn.prepareStatement(SQL);
+	        pstmt.setString(1, groupName);
+	        pstmt.setInt(2, isNotice);
+	        rs = pstmt.executeQuery();
+	        if (rs.next()) { // MAX displayNumber 결과값을 꺼냄
+	            int max = rs.getInt(1);
+	            
+	            return max + 1; // 이 게시판에서 젤 큰 값에 +을 더해서 다음글이 받아야 할 번호 반환
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(conn, pstmt, rs);
+	    }
+	    return 1; // 이 게시판에 글이 하나도 없으면 1번부터 시작
 	}
 	
 }

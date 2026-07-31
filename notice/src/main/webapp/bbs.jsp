@@ -118,22 +118,32 @@
 			    %>
 					<tr>
 						<td>
-							<%
+							<%-- <%
 							if ("true".equals(noticeOnly)) { // 공지글 모드일 땐 번호 대신 "공지" 표시
 							%> 공지 <%
 							} else if (list.get(i).getReplyStep() > 0) { // 답글이면 번호 안보여줌 replystep = 0 = 원글 ,  replystep = 1 = 원글의 답글
 							%>  
-								<%-- 답글은 댓글처럼 번호를 따로 안 보여줌 --%> 
+								답글이면 번호 출력 코드 자체를 안 씀 
 							 <%
 							 } else {
 							 %>   <!-- 원글일 때만 번호 출력 + 카운터 증가 -->
-								<%=startNumber - replyNumber%>  
+								<%=startNumber - replyNumber%>   <!--  이 페이지의 시작 번호 startNumber 에서 지금까지 이미 출력한 원글 개수 replyNumber만큼 하나씩 깎아 내려가면서 -->
 					                <%
 					              		  replyNumber++;  // 원글일 때만 증가 
 					                %>
 							 <%
 							 }
-							 %>
+							 %> --%>
+							 
+							 <%
+					            if ("true".equals(noticeOnly)) {
+					            %> 공지 <%
+					            } else {
+					            %>
+					                <%=list.get(i).getDisplayNumber()%>  <%--게시글의 화면 번호 displayNumber 값을 가져옴--%>
+					            <%
+					            }
+					            %>
 	
 							 <td style="text-align: left; padding-left: <%=(list.get(i).getReplyStep() > 0) ? (20 + (list.get(i).getReplyStep() - 1) * 20) : 0%>px;">
 						    <%
@@ -224,7 +234,7 @@
 		            var startNumber = data.startNumber;  // 자유,공지,질문 게시판 목록 각각 번호가 독립
 	
 		            var tbody = "";
-		            var replyNumber = 0;
+		            // var replyNumber = 0; 
 		            
 		            
 		            
@@ -249,12 +259,14 @@
 		                var bbs = data.list[i];
 		                tbody += "<tr>";
 		                
-		                if (bbs.replyStep > 0) {
+		                /* if (bbs.replyStep > 0) {
 		                    tbody += "<td></td>";  // 답글은 빈 칸
 		                } else {
 		                    tbody += "<td>" + (startNumber - replyNumber) + "</td>";
 		                    replyNumber++;
-		                }
+		                } */
+		                
+		                tbody += "<td>" + bbs.displayNumber + "</td>";
 		                
 		                var recommendTag = bbs.isBold ? "<span style='color:black; font-weight:bold;'>[추천]</span> " : "";
 		                var style = bbs.isNotice == 1 ? "font-weight: bold; font-size:16px; color:black;" : "color:black;";

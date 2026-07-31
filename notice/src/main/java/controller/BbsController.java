@@ -145,9 +145,8 @@ public class BbsController extends HttpServlet {
 	            json.append("\"isPublic\":" + bbs.getIsPublic() + ",");
 	            json.append("\"isBold\":" + bbs.getIsBold() + ",");
 	            json.append("\"isNotice\":" + bbs.getIsNotice() + ",");
-	            
-	            json.append("\"replyStep\":" + bbs.getReplyStep());
-	       
+	            json.append("\"replyStep\":" + bbs.getReplyStep()+ ",");
+	            json.append("\"displayNumber\":" + bbs.getDisplayNumber()); 
 	            
 	            json.append("}");
 	            
